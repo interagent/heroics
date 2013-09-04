@@ -1,0 +1,2 @@
+adding attr_accessors for each individual attribute would be quite handy
+how to handle ranges (note that this probably implies more complex cache behavior also)

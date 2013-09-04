@@ -1,15 +1,14 @@
 class Heroics
-  class Apps
 
-    attr_accessor :heroics
+  def apps
+    Heroics::Apps.new(self)
+  end
 
-    def initialize(new_heroics)
-      self.heroics = new_heroics
-    end
+  def app(attributes={})
+    Heroics::App.new(self, attributes)
+  end
 
-    def inspect
-      "<#{self.class.name}:0x00#{(self.object_id << 1).to_s(16)}>"
-    end
+  class Apps < Heroics::ResourceProxy
 
     def create(new_attributes={})
       response = self.heroics.request(
@@ -17,7 +16,7 @@ class Heroics
         :method => :post,
         :path   => '/apps'
       )
-      Heroics::App.new(self.heroics, response.body)
+      Heroics::App.new(self, response.body)
     end
 
     def list
@@ -26,7 +25,7 @@ class Heroics
         :path   => '/apps'
       )
       response.body.map {|attributes|
-        Heroics::App.new(self.heroics, attributes)
+        Heroics::App.new(self, attributes)
       }
     end
 
@@ -35,29 +34,19 @@ class Heroics
         :method => :get,
         :path   => "/apps/#{app_id_or_name}"
       )
-      Heroics::App.new(self.heroics, response.body)
+      Heroics::App.new(self, response.body)
     end
 
   end
 
-  class App
-
-    attr_accessor :attributes, :heroics
-
-    def initialize(new_heroics, new_attributes={})
-      self.heroics, self.attributes = new_heroics, new_attributes
-    end
-
-    def inspect
-      "<#{self.class.name}:0x00#{(self.object_id << 1).to_s(16)} #{attributes.inspect}>"
-    end
+  class App < Heroics::Resource
 
     def update(new_attributes)
       response = self.heroics.request(
         :method => :patch,
         :path   => "/apps/#{id_or_name}"
       )
-      Heroics::App.new(self.heroics, response.body)
+      Heroics::App.new(self.resource_proxy, response.body)
     end
 
     def delete
@@ -65,11 +54,7 @@ class Heroics
         :method => :delete,
         :path   => "/apps/#{id_or_name}"
       )
-      Heroics::App.new(self.heroics, response.body)
-    end
-
-    def addons
-      Heroics::Addons.new(self.heroics, id_or_name)
+      Heroics::App.new(self.resource_proxy, response.body)
     end
 
     private

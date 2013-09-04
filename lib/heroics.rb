@@ -3,9 +3,17 @@ require('zlib')
 
 require('excon')
 
-require('heroics/addon')
-require('heroics/app')
-require('heroics/version')
+require('./lib/heroics/cache')
+require('./lib/heroics/resource')
+require('./lib/heroics/resource_proxy')
+require('./lib/heroics/version')
+
+directory = File.expand_path(File.dirname(__FILE__))
+Dir.glob(File.join(directory, 'heroics', 'resources', '**', '*')).each do |path|
+  unless File.directory?(path)
+    require(path)
+  end
+end
 
 class Heroics
 
@@ -18,6 +26,11 @@ class Heroics
 
   def initialize(options={})
     @token = options[:token]
+
+    # should be something with API like https://github.com/minad/moneta
+    # in particular, expects key?, [], []=
+    @cache = options[:cache] || Heroics::Cache.new
+
     @connection = Excon.new(
       'https://api.heroku.com',
       :headers => HEADERS.merge({
@@ -32,31 +45,34 @@ class Heroics
 
   def request(data={})
     @connection.reset
-    response = @connection.request(data)
 
-    if response.headers['Content-Encoding'] == 'gzip'
-      response.body = Zlib::GzipReader.new(StringIO.new(response.body)).read
+    if data[:method] == :get
+      if @cache.key?("etag:#{data[:path]}")
+        data[:headers] ||= {}
+        data[:headers]['If-None-Match'] = @cache["etag:#{data[:path]}"]
+      end
     end
 
-    if response.body && !response.body.empty?
-      response.body = JSON.parse(response.body, :symbolize_names => true)
+    response = @connection.request(data)
+
+    if response.status == 304
+      response = Excon::Response.new(@cache["data:#{data[:path]}"])
+    else
+      if response.headers['Content-Encoding'] == 'gzip'
+        response.body = Zlib::GzipReader.new(StringIO.new(response.body)).read
+      end
+
+      if response.body && !response.body.empty?
+        response.body = JSON.parse(response.body, :symbolize_names => true)
+      end
+
+      if data[:method] == :get
+        @cache["data:#{data[:path]}"] = response.data
+        @cache["etag:#{data[:path]}"] = response.headers['ETag']
+      end
     end
 
     response
-  end
-
-  def addons(app_id_or_name)
-    Heroics::Addons.new(self, app_id_or_name)
-  end
-  def addon(app_id_or_name, attributes={})
-    Heroics::Addon.new(self, app_id_or_name, attributes={})
-  end
-
-  def apps
-    Heroics::Apps.new(self)
-  end
-  def app(attributes={})
-    Heroics::App.new(self, attributes)
   end
 
 end
