@@ -1,11 +1,11 @@
 class Heroics
 
   def addons(app_id_or_name)
-    Heroics::Addons.new(self, app_id_or_name)
+    Heroics::Addons.new(self, :app_id_or_name => app_id_or_name)
   end
 
-  def addon(app_id_or_name, attributes={})
-    Heroics::Addon.new(self, app_id_or_name, attributes={})
+  def addon(app_id_or_name, addon_id_or_name)
+    Heroics::Addon.new(self.addons(:app_id_or_name => app_id_or_name), :id_or_name => addon_id_or_name)
   end
 
   class App < Heroics::Resource
@@ -68,7 +68,7 @@ class Heroics
     private
 
     def id_or_name
-      attributes[:id] || attributes[:name]
+      attributes[:id_or_name] || attributes[:id] || attributes[:name]
     end
 
   end

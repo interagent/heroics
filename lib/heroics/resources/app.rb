@@ -4,8 +4,8 @@ class Heroics
     Heroics::Apps.new(self)
   end
 
-  def app(attributes={})
-    Heroics::App.new(self, attributes)
+  def app(id_or_name)
+    Heroics::App.new(self.apps, :id_or_name => id_or_name)
   end
 
   class Apps < Heroics::ResourceProxy
@@ -60,7 +60,7 @@ class Heroics
     private
 
     def id_or_name
-      attributes[:id] || attributes[:name]
+      attributes[:id_or_name] || attributes[:id] || attributes[:name]
     end
 
   end

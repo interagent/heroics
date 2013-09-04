@@ -15,6 +15,9 @@ app = heroics.apps.info('stringer-geemus')
 puts(app)
 puts
 
+puts(heroics.app('stringer-geemus'))
+puts
+
 addons = app.addons.list
 puts(addons)
 puts
@@ -22,4 +25,7 @@ puts
 addon_id = addons.first.attributes[:id]
 addon = app.addons.info(addon_id)
 puts(addon)
+puts
+
+puts(heroics.addon('stringer-geemus', addon_id))
 puts
