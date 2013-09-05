@@ -1,17 +1,17 @@
 class Heroics
 
-  def addons(app_id_or_name)
-    Heroics::Addons.new(self, :app_id_or_name => app_id_or_name)
+  def addons(app_identity)
+    Heroics::Addons.new(self, :app_identity => app_identity)
   end
 
-  def addon(app_id_or_name, addon_id_or_name)
-    Heroics::Addon.new(self.addons(:app_id_or_name => app_id_or_name), :id_or_name => addon_id_or_name)
+  def addon(app_identity, addon_identity)
+    Heroics::Addon.new(self.addons(:app_identity => app_identity), :identity => addon_identity)
   end
 
   class App < Heroics::Resource
 
     def addons
-      Heroics::Addons.new(self.heroics, :app_id_or_name => id_or_name)
+      Heroics::Addons.new(self.heroics, :app_identity => identity)
     end
 
   end
@@ -22,27 +22,27 @@ class Heroics
       response = self.heroics.request(
         :body   => JSON.generate(new_attributes),
         :method => :post,
-        :path   => "/apps/#{self.attributes[:app_id_or_name]}/addons"
+        :path   => "/apps/#{self.attributes[:app_identity]}/addons"
       )
-      Heroics::Addon.new(self, response.body)
+      Heroics::Addon.new(resource_proxy, response.body)
     end
 
     def list
       response = self.heroics.request(
         :method => :get,
-        :path   => "/apps/#{self.attributes[:app_id_or_name]}/addons"
+        :path   => "/apps/#{self.attributes[:app_identity]}/addons"
       )
       response.body.map {|resource_attributes|
-        Heroics::Addon.new(self, resource_attributes)
+        Heroics::Addon.new(resource_proxy, resource_attributes)
       }
     end
 
-    def info(addon_id_or_name)
+    def info(addon_identity)
       response = self.heroics.request(
         :method => :get,
-        :path   => "/apps/#{self.attributes[:app_id_or_name]}/addons/#{addon_id_or_name}"
+        :path   => "/apps/#{self.attributes[:app_identity]}/addons/#{addon_identity}"
       )
-      Heroics::Addon.new(self, response.body)
+      Heroics::Addon.new(resource_proxy, response.body)
     end
 
   end
@@ -52,23 +52,23 @@ class Heroics
     def update(new_attributes)
       response = self.heroics.request(
         :method => :patch,
-        :path   => "/apps/#{self.resource_proxy.attributes[:app_id_or_name]}/addons/#{id_or_name}"
+        :path   => "/apps/#{resource_proxy.attributes[:app_identity]}/addons/#{identity}"
       )
-      Heroics::Addon.new(self.resource_proxy, response.body)
+      Heroics::Addon.new(resource_proxy, response.body)
     end
 
     def delete
       response = self.heroics.request(
         :method => :delete,
-        :path   => "/apps/#{self.resource_proxy.attributes[:app_id_or_name]}/addons/#{id_or_name}"
+        :path   => "/apps/#{resource_proxy.attributes[:app_identity]}/addons/#{identity}"
       )
-      Heroics::Addon.new(self.resource_proxy, response.body)
+      Heroics::Addon.new(resource_proxy, response.body)
     end
 
     private
 
-    def id_or_name
-      attributes[:id_or_name] || attributes[:id] || attributes[:name]
+    def identity
+      attributes[:identity] || attributes[:id] || attributes[:name]
     end
 
   end

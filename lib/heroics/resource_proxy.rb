@@ -9,6 +9,10 @@ class Heroics
 
     alias :inspect :to_s
 
+    def resource_proxy
+      self
+    end
+
     def to_s
       "<#{self.class.name}:0x00#{(self.object_id << 1).to_s(16)}>"
     end
