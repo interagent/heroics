@@ -1,0 +1,125 @@
+#!/usr/bin/env ruby
+
+require 'erubis'
+require 'json'
+
+RESOURCE_TEMPLATE = <<-RESOURCE_TEMPLATE
+class Heroics
+
+<%- unless parent_resource %>
+  def <%= resource_proxy.downcase %>
+    Heroics::<%= resource_proxy %>.new(self)
+  end
+
+  def <%= resource.downcase %>(identity)
+    Heroics::<%= resource %>.new(self.<%= resource_proxy.downcase %>, identity: identity)
+  end
+<%- else %>
+  <%- parent_identity = "\#{parent_resource.downcase}_identity" %>
+  def <%= resource_proxy.downcase %>(<%= parent_identity %>)
+    Heroics::<%= resource_proxy %>.new(self, <%= parent_identity %>: <%= parent_identity %>)
+  end
+
+  def <%= resource.downcase %>(<%= parent_identity %>, identity)
+    Heroics::<%= resource %>.new(self.<%= resource_proxy.downcase %>(<%= parent_identity %>), identity: identity)
+  end
+
+  class <%= parent_resource %> < Heroics::Resource
+
+    def <%= resource_proxy.downcase %>
+      self.heroics.<%= resource_proxy.downcase %>(identity)
+    end
+
+  end
+<%- end %>
+
+  class <%= resource_proxy %> < Heroics::ResourceProxy
+
+  <%- definition['links'].select do |link| %>
+    <%- ['create', 'instances', 'self'].include?(link['rel']) %>
+  <%- end.each do |link| %>
+<%= Erubis::Eruby.new(LINK_TEMPLATE).result({key: key, link: link, parent_resource: parent_resource, resource: resource}) %>
+  <%- end %>
+  <%- if parent_resource %>
+    def <%= parent_identity %>
+      attributes[:<%= parent_identity %>]
+    end
+
+  <%- end -%>
+  end
+
+  class <%= resource %> < Heroics::Resource
+
+  <%- definition['links'].select do |link| %>
+    <%- ['update', 'destroy'].include?(link['rel']) %>
+  <%- end.each do |link| %>
+<%= Erubis::Eruby.new(LINK_TEMPLATE).result({key: key, link: link, parent_resource: parent_resource, resource: resource}) %>
+  <%- end %>
+    def identity
+      attributes[:identity] || <%= definition['definitions']['identity']['oneOf'].map {|ref| "attributes[:" + ref['$ref'].split('/').last + ']' }.join(' || ') %>
+    end
+
+    <%- definition['properties'].keys.each do |key| %>
+    def <%= key %>
+      attributes[:<%= key %>]
+    end
+    <%- end %>
+  end
+
+end
+RESOURCE_TEMPLATE
+
+LINK_TEMPLATE = <<-LINK_TEMPLATE
+<%- method = link['title'].downcase %>
+  <%- if link['rel'] == 'self' %>
+    def <%= method %>(identity)
+  <%- elsif link.has_key?('schema') %>
+    def <%= method %>(new_attributes={})
+  <%- else %>
+    def <%= method %>
+  <% end %>
+    <%- path = link['href'].gsub("{(%23%2Fdefinitions%2F\#{key}%2Fdefinitions%2Fidentity)}", '\#{identity}') %>
+    <%- if parent_resource %>
+      <%- path = path.gsub("{(%23%2Fdefinitions%2F" + parent_resource.downcase + "%2Fdefinitions%2Fidentity)}", '\#{resource_proxy.' + parent_resource.downcase + '_identity}') %>
+    <%- end %>
+      response = self.heroics.request(
+        <%- if link.has_key?('schema') %>
+        <%= "body:   JSON.generate(new_attributes)," %>
+        <%- end %>
+        method: :<%= link['method'].downcase %>,
+        path:   "<%= path %>"
+      )
+      <%- if link['rel'] == 'instances' %>
+      response.body.map do |attributes|
+        Heroics::<%= resource %>.new(self.resource_proxy, attributes)
+      end
+      <%- else %>
+      Heroics::<%= resource %>.new(self.resource_proxy, response.body)
+      <%- end %>
+    end
+LINK_TEMPLATE
+
+schema_path = File.expand_path('~/heroku/api/docs/v3/schema.json')
+data = JSON.parse(File.read(schema_path))
+
+data['definitions'].each do |key, value|
+  next if value['links'].empty?
+  resource = key[0...1].upcase + key[1..-1]
+  resource_proxy = resource + 's'
+  parent_resource = if value['links'].all? {|link| link['href'].include?('{(%23%2Fdefinitions%2Fapp%2Fdefinitions%2Fidentity)}')}
+    'App'
+  end
+
+  data = Erubis::Eruby.new(RESOURCE_TEMPLATE).result({
+    definition:       value,
+    key:              key,
+    parent_resource:  parent_resource,
+    resource:         resource,
+    resource_proxy:   resource_proxy
+  })
+
+  path = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib', 'heroics', 'resources', "#{key}.rb"))
+  File.open(path, 'w') do |file|
+    file.write(data)
+  end
+end

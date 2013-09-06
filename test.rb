@@ -18,14 +18,24 @@ puts
 puts(heroics.app('stringer-geemus'))
 puts
 
-addons = app.addons.list
-puts(addons)
+collaborators = app.collaborators.list
+puts(collaborators)
 puts
 
-addon_id = addons.first.attributes[:id]
-addon = app.addons.info(addon_id)
-puts(addon)
+collaborator_id = collaborators.first.id
+collaborator = app.collaborators.info(collaborator_id)
+puts(collaborator)
 puts
 
-puts(heroics.addon('stringer-geemus', addon_id))
+puts(heroics.collaborator('stringer-geemus', collaborator_id))
+
+regions = heroics.regions.list
+puts(regions)
+puts
+
+region_id = regions.first.id
+puts(heroics.regions.info(region_id))
+puts
+
+puts(heroics.region(region_id))
 puts

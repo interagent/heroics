@@ -9,6 +9,7 @@ _yardoc
 coverage
 doc/
 lib/bundler/man
+lib/heroics/resources/*
 pkg
 rdoc
 spec/reports
