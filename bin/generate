@@ -84,7 +84,7 @@ LINK_TEMPLATE = <<-LINK_TEMPLATE
     <%- end %>
       response = self.heroics.request(
         <%- if link.has_key?('schema') %>
-        <%= "body:   JSON.generate(new_attributes)," %>
+        <%= "body:   JSON.dump(new_attributes)," %>
         <%- end %>
         method: :<%= link['method'].downcase %>,
         path:   "<%= path %>"
@@ -100,7 +100,7 @@ LINK_TEMPLATE = <<-LINK_TEMPLATE
 LINK_TEMPLATE
 
 schema_path = File.expand_path('~/heroku/api/docs/v3/schema.json')
-data = JSON.parse(File.read(schema_path))
+data = JSON.load(File.read(schema_path))
 
 data['definitions'].each do |key, value|
   next if value['links'].empty?
