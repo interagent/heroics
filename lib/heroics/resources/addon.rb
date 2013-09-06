@@ -5,13 +5,13 @@ class Heroics
   end
 
   def addon(app_identity, addon_identity)
-    Heroics::Addon.new(self.addons(:app_identity => app_identity), :identity => addon_identity)
+    Heroics::Addon.new(self.addons(app_identity), :identity => addon_identity)
   end
 
   class App < Heroics::Resource
 
     def addons
-      Heroics::Addons.new(self.heroics, :app_identity => identity)
+      self.heroics.addons(identity)
     end
 
   end
@@ -22,7 +22,7 @@ class Heroics
       response = self.heroics.request(
         :body   => JSON.generate(new_attributes),
         :method => :post,
-        :path   => "/apps/#{self.attributes[:app_identity]}/addons"
+        :path   => "/apps/#{app_identity}/addons"
       )
       Heroics::Addon.new(resource_proxy, response.body)
     end
@@ -30,7 +30,7 @@ class Heroics
     def list
       response = self.heroics.request(
         :method => :get,
-        :path   => "/apps/#{self.attributes[:app_identity]}/addons"
+        :path   => "/apps/#{app_identity}/addons"
       )
       response.body.map {|resource_attributes|
         Heroics::Addon.new(resource_proxy, resource_attributes)
@@ -40,9 +40,13 @@ class Heroics
     def info(addon_identity)
       response = self.heroics.request(
         :method => :get,
-        :path   => "/apps/#{self.attributes[:app_identity]}/addons/#{addon_identity}"
+        :path   => "/apps/#{app_identity}/addons/#{addon_identity}"
       )
       Heroics::Addon.new(resource_proxy, response.body)
+    end
+
+    def app_identity
+      attributes[:app_identity]
     end
 
   end
@@ -52,7 +56,7 @@ class Heroics
     def update(new_attributes)
       response = self.heroics.request(
         :method => :patch,
-        :path   => "/apps/#{resource_proxy.attributes[:app_identity]}/addons/#{identity}"
+        :path   => "/apps/#{resource_proxy.app_identity}/addons/#{identity}"
       )
       Heroics::Addon.new(resource_proxy, response.body)
     end
@@ -60,7 +64,7 @@ class Heroics
     def delete
       response = self.heroics.request(
         :method => :delete,
-        :path   => "/apps/#{resource_proxy.attributes[:app_identity]}/addons/#{identity}"
+        :path   => "/apps/#{resource_proxy.app_identity}/addons/#{identity}"
       )
       Heroics::Addon.new(resource_proxy, response.body)
     end
