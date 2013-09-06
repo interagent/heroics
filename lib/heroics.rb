@@ -56,7 +56,11 @@ class Heroics
     response = @connection.request(data)
 
     if response.status == 304
-      response = Excon::Response.new(@cache["data:#{data[:path]}"])
+      response_data = {}
+      @cache["data:#{data[:path]}"].each do |key, value|
+        response_data[key.to_sym] = value
+      end
+      response = Excon::Response.new(response_data)
     else
       if response.headers['Content-Encoding'] == 'gzip'
         response.body = Zlib::GzipReader.new(StringIO.new(response.body)).read
