@@ -29,7 +29,7 @@ class Heroics
 
     # should be something with API like https://github.com/minad/moneta
     # in particular, expects key?, [], []=
-    @cache = options[:cache] || Heroics::Cache.new
+    @cache = options[:cache] || Heroics::MemoryCache.new
 
     @connection = Excon.new(
       'https://api.heroku.com',

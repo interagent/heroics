@@ -4,7 +4,10 @@ _, token = Netrc.read['api.heroku.com']
 
 require './lib/heroics'
 
-heroics = Heroics.new(:token => token)
+heroics = Heroics.new(
+  :cache => Heroics::FileCache.new(token),
+  :token => token
+)
 
 heroics.apps.list
 apps = heroics.apps.list # should use cache
