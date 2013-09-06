@@ -1,7 +1,7 @@
-require('json')
 require('zlib')
 
 require('excon')
+require('multi_json')
 
 require('./lib/heroics/cache')
 require('./lib/heroics/resource')
@@ -63,7 +63,7 @@ class Heroics
       end
 
       if response.body && !response.body.empty?
-        response.body = JSON.parse(response.body, :symbolize_names => true)
+        response.body = MultiJson.load(response.body)
       end
 
       if data[:method] == :get
