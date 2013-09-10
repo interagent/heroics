@@ -51,7 +51,7 @@ class Heroics
   class <%= resource %> < Heroics::Resource
 
   <%- definition['links'].select do |link| %>
-    <%- ['update', 'destroy'].include?(link['rel']) %>
+    <%- %w{destroy update}.include?(link['rel']) %>
   <%- end.each do |link| %>
 <%= Erubis::Eruby.new(LINK_TEMPLATE).result({key: key, link: link, parent_resource: parent_resource, resource: resource}) %>
   <%- end %>
