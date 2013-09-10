@@ -1,1 +1,3 @@
 how to handle ranges (note that this probably implies more complex cache behavior also)
+
+how to recognize/handle singular resources (ie account and config-vars)
