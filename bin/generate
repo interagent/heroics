@@ -73,7 +73,7 @@ RESOURCE_TEMPLATE
 
 LINK_TEMPLATE = <<-LINK_TEMPLATE
 <%- method = link['title'].downcase %>
-  <%- if link['rel'] == 'self' %>
+  <%- if link['rel'] == 'self' && link['href'].include?('identity') %>
     def <%= method %>(identity)
   <%- elsif link.has_key?('schema') %>
     def <%= method %>(new_attributes={})

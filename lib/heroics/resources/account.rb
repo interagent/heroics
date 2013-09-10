@@ -12,7 +12,7 @@ class Heroics
 
   class Accounts < Heroics::ResourceProxy
 
-    def info(identity)
+    def info
       response = self.heroics.request(
         method: :get,
         path:   "/account"
