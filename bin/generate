@@ -4,6 +4,8 @@ require 'erubis'
 require 'multi_json'
 
 RESOURCE_TEMPLATE = <<-RESOURCE_TEMPLATE
+# WARNING: generated code from heroku/heroics
+
 class Heroics
 
 <%- unless parent_resource %>

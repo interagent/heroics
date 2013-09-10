@@ -1,3 +1,5 @@
+# WARNING: generated code from heroku/heroics
+
 class Heroics
 
   def app-features(app_identity)
