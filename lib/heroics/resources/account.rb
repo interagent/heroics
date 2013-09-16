@@ -2,12 +2,12 @@
 
 class Heroics
 
-  def accounts
-    Heroics::Accounts.new(self)
-  end
-
-  def account(identity)
-    Heroics::Account.new(self.accounts, 'identity' => identity)
+  def accounts(identity=nil)
+    if identity
+      Heroics::Account.new(self.accounts, 'identity' => identity)
+    else
+      Heroics::Accounts.new(self)
+    end
   end
 
   class Accounts < Heroics::ResourceProxy

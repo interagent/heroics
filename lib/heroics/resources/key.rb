@@ -2,12 +2,12 @@
 
 class Heroics
 
-  def keys
-    Heroics::Keys.new(self)
-  end
-
-  def key(identity)
-    Heroics::Key.new(self.keys, 'identity' => identity)
+  def keys(identity=nil)
+    if identity
+      Heroics::Key.new(self.keys, 'identity' => identity)
+    else
+      Heroics::Keys.new(self)
+    end
   end
 
   class Keys < Heroics::ResourceProxy

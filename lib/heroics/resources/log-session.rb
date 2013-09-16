@@ -2,14 +2,6 @@
 
 class Heroics
 
-  def log-sessions(app_identity)
-    Heroics::Log-sessions.new(self, 'app_identity' => app_identity)
-  end
-
-  def log-session(app_identity, identity)
-    Heroics::Log-session.new(self.log-sessions(app_identity), 'identity' => identity)
-  end
-
   class App < Heroics::Resource
 
     def log-sessions

@@ -2,14 +2,6 @@
 
 class Heroics
 
-  def app-features(app_identity)
-    Heroics::App-features.new(self, 'app_identity' => app_identity)
-  end
-
-  def app-feature(app_identity, identity)
-    Heroics::App-feature.new(self.app-features(app_identity), 'identity' => identity)
-  end
-
   class App < Heroics::Resource
 
     def app-features
@@ -46,7 +38,7 @@ class Heroics
 
   class App-feature < Heroics::Resource
 
-    def updated(new_attributes={})
+    def update(new_attributes={})
       response = self.heroics.request(
         body:   MultiJson.dump(new_attributes),
         method: :patch,

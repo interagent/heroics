@@ -2,12 +2,12 @@
 
 class Heroics
 
-  def app-transfers
-    Heroics::App-transfers.new(self)
-  end
-
-  def app-transfer(identity)
-    Heroics::App-transfer.new(self.app-transfers, 'identity' => identity)
+  def app-transfers(identity=nil)
+    if identity
+      Heroics::App-transfer.new(self.app-transfers, 'identity' => identity)
+    else
+      Heroics::App-transfers.new(self)
+    end
   end
 
   class App-transfers < Heroics::ResourceProxy

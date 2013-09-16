@@ -2,14 +2,6 @@
 
 class Heroics
 
-  def collaborators(app_identity)
-    Heroics::Collaborators.new(self, 'app_identity' => app_identity)
-  end
-
-  def collaborator(app_identity, identity)
-    Heroics::Collaborator.new(self.collaborators(app_identity), 'identity' => identity)
-  end
-
   class App < Heroics::Resource
 
     def collaborators

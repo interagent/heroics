@@ -2,37 +2,37 @@
 
 class Heroics
 
-  def regions(identity=nil)
+  def addon-services(identity=nil)
     if identity
-      Heroics::Region.new(self.regions, 'identity' => identity)
+      Heroics::Addon-service.new(self.addon-services, 'identity' => identity)
     else
-      Heroics::Regions.new(self)
+      Heroics::Addon-services.new(self)
     end
   end
 
-  class Regions < Heroics::ResourceProxy
+  class Addon-services < Heroics::ResourceProxy
 
     def info(identity)
       response = self.heroics.request(
         method: :get,
-        path:   "/regions/#{identity}"
+        path:   "/addon-services/#{identity}"
       )
-      Heroics::Region.new(self.resource_proxy, response.body)
+      Heroics::Addon-service.new(self.resource_proxy, response.body)
     end
 
     def list
       response = self.heroics.request(
         method: :get,
-        path:   "/regions"
+        path:   "/addon-services"
       )
       response.body.map do |attributes|
-        Heroics::Region.new(self.resource_proxy, attributes)
+        Heroics::Addon-service.new(self.resource_proxy, attributes)
       end
     end
 
   end
 
-  class Region < Heroics::Resource
+  class Addon-service < Heroics::Resource
 
     def identity
       attributes['identity'] || attributes['id'] || attributes['name']
@@ -40,9 +40,6 @@ class Heroics
 
     def created_at
       attributes['created_at']
-    end
-    def description
-      attributes['description']
     end
     def id
       attributes['id']

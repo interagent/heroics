@@ -2,14 +2,6 @@
 
 class Heroics
 
-  def dynos(app_identity)
-    Heroics::Dynos.new(self, 'app_identity' => app_identity)
-  end
-
-  def dyno(app_identity, identity)
-    Heroics::Dyno.new(self.dynos(app_identity), 'identity' => identity)
-  end
-
   class App < Heroics::Resource
 
     def dynos

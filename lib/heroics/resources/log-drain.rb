@@ -2,14 +2,6 @@
 
 class Heroics
 
-  def log-drains(app_identity)
-    Heroics::Log-drains.new(self, 'app_identity' => app_identity)
-  end
-
-  def log-drain(app_identity, identity)
-    Heroics::Log-drain.new(self.log-drains(app_identity), 'identity' => identity)
-  end
-
   class App < Heroics::Resource
 
     def log-drains

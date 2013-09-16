@@ -2,12 +2,12 @@
 
 class Heroics
 
-  def apps
-    Heroics::Apps.new(self)
-  end
-
-  def app(identity)
-    Heroics::App.new(self.apps, 'identity' => identity)
+  def apps(identity=nil)
+    if identity
+      Heroics::App.new(self.apps, 'identity' => identity)
+    else
+      Heroics::Apps.new(self)
+    end
   end
 
   class Apps < Heroics::ResourceProxy

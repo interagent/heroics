@@ -2,14 +2,6 @@
 
 class Heroics
 
-  def domains(app_identity)
-    Heroics::Domains.new(self, 'app_identity' => app_identity)
-  end
-
-  def domain(app_identity, identity)
-    Heroics::Domain.new(self.domains(app_identity), 'identity' => identity)
-  end
-
   class App < Heroics::Resource
 
     def domains

@@ -9,23 +9,14 @@ RESOURCE_TEMPLATE = <<-RESOURCE_TEMPLATE
 class Heroics
 
 <%- unless parent_resource %>
-  def <%= resource_proxy.downcase %>
-    Heroics::<%= resource_proxy %>.new(self)
-  end
-
-  def <%= resource.downcase %>(identity)
-    Heroics::<%= resource %>.new(self.<%= resource_proxy.downcase %>, 'identity' => identity)
+  def <%= resource_proxy.downcase %>(identity=nil)
+    if identity
+      Heroics::<%= resource %>.new(self.<%= resource_proxy.downcase %>, 'identity' => identity)
+    else
+      Heroics::<%= resource_proxy %>.new(self)
+    end
   end
 <%- else %>
-  <%- parent_identity = "\#{parent_resource.downcase}_identity" %>
-  def <%= resource_proxy.downcase %>(<%= parent_identity %>)
-    Heroics::<%= resource_proxy %>.new(self, '<%= parent_identity %>' => <%= parent_identity %>)
-  end
-
-  def <%= resource.downcase %>(<%= parent_identity %>, identity)
-    Heroics::<%= resource %>.new(self.<%= resource_proxy.downcase %>(<%= parent_identity %>), 'identity' => identity)
-  end
-
   class <%= parent_resource %> < Heroics::Resource
 
     def <%= resource_proxy.downcase %>
@@ -43,6 +34,7 @@ class Heroics
 <%= Erubis::Eruby.new(LINK_TEMPLATE).result({key: key, link: link, parent_resource: parent_resource, resource: resource}) %>
   <%- end %>
   <%- if parent_resource %>
+    <%- parent_identity = "\#{parent_resource.downcase}_identity" %>
     def <%= parent_identity %>
       attributes['<%= parent_identity %>']
     end

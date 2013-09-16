@@ -18,7 +18,7 @@ app = heroics.apps.info('stringer-geemus')
 puts(app)
 puts
 
-puts(heroics.app('stringer-geemus'))
+puts(heroics.apps('stringer-geemus'))
 puts
 
 collaborators = app.collaborators.list
