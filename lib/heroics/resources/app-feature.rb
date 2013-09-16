@@ -4,20 +4,20 @@ class Heroics
 
   class App < Heroics::Resource
 
-    def app-features
-      self.heroics.app-features(identity)
+    def app_features
+      Heroics::AppFeatures.new(self.heroics, 'app_identity' => identity)
     end
 
   end
 
-  class App-features < Heroics::ResourceProxy
+  class AppFeatures < Heroics::ResourceProxy
 
     def info(identity)
       response = self.heroics.request(
         method: :get,
         path:   "/apps/#{resource_proxy.app_identity}/features/#{identity}"
       )
-      Heroics::App-feature.new(self.resource_proxy, response.body)
+      Heroics::AppFeature.new(self.resource_proxy, response.body)
     end
 
     def list
@@ -26,7 +26,7 @@ class Heroics
         path:   "/apps/#{resource_proxy.app_identity}/features"
       )
       response.body.map do |attributes|
-        Heroics::App-feature.new(self.resource_proxy, attributes)
+        Heroics::AppFeature.new(self.resource_proxy, attributes)
       end
     end
 
@@ -36,7 +36,7 @@ class Heroics
 
   end
 
-  class App-feature < Heroics::Resource
+  class AppFeature < Heroics::Resource
 
     def update(new_attributes={})
       response = self.heroics.request(
@@ -44,7 +44,7 @@ class Heroics
         method: :patch,
         path:   "/apps/#{resource_proxy.app_identity}/features/#{identity}"
       )
-      Heroics::App-feature.new(self.resource_proxy, response.body)
+      Heroics::AppFeature.new(self.resource_proxy, response.body)
     end
 
     def identity

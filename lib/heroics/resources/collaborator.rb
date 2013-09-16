@@ -5,7 +5,7 @@ class Heroics
   class App < Heroics::Resource
 
     def collaborators
-      self.heroics.collaborators(identity)
+      Heroics::Collaborators.new(self.heroics, 'app_identity' => identity)
     end
 
   end

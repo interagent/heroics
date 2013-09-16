@@ -2,15 +2,15 @@
 
 class Heroics
 
-  def app-transfers(identity=nil)
+  def app_transfers(identity=nil)
     if identity
-      Heroics::App-transfer.new(self.app-transfers, 'identity' => identity)
+      Heroics::AppTransfer.new(self.app_transfers, 'identity' => identity)
     else
-      Heroics::App-transfers.new(self)
+      Heroics::AppTransfers.new(self)
     end
   end
 
-  class App-transfers < Heroics::ResourceProxy
+  class AppTransfers < Heroics::ResourceProxy
 
     def create(new_attributes={})
       response = self.heroics.request(
@@ -18,7 +18,7 @@ class Heroics
         method: :post,
         path:   "/account/app-transfers"
       )
-      Heroics::App-transfer.new(self.resource_proxy, response.body)
+      Heroics::AppTransfer.new(self.resource_proxy, response.body)
     end
 
     def info(identity)
@@ -26,7 +26,7 @@ class Heroics
         method: :get,
         path:   "/account/app-transfers/#{identity}"
       )
-      Heroics::App-transfer.new(self.resource_proxy, response.body)
+      Heroics::AppTransfer.new(self.resource_proxy, response.body)
     end
 
     def list
@@ -35,20 +35,20 @@ class Heroics
         path:   "/account/app-transfers"
       )
       response.body.map do |attributes|
-        Heroics::App-transfer.new(self.resource_proxy, attributes)
+        Heroics::AppTransfer.new(self.resource_proxy, attributes)
       end
     end
 
   end
 
-  class App-transfer < Heroics::Resource
+  class AppTransfer < Heroics::Resource
 
     def delete
       response = self.heroics.request(
         method: :delete,
         path:   "/account/app-transfers/#{identity}"
       )
-      Heroics::App-transfer.new(self.resource_proxy, response.body)
+      Heroics::AppTransfer.new(self.resource_proxy, response.body)
     end
 
     def update(new_attributes={})
@@ -57,7 +57,7 @@ class Heroics
         method: :patch,
         path:   "/account/app-transfers/#{identity}"
       )
-      Heroics::App-transfer.new(self.resource_proxy, response.body)
+      Heroics::AppTransfer.new(self.resource_proxy, response.body)
     end
 
     def identity

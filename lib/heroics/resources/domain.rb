@@ -5,7 +5,7 @@ class Heroics
   class App < Heroics::Resource
 
     def domains
-      self.heroics.domains(identity)
+      Heroics::Domains.new(self.heroics, 'app_identity' => identity)
     end
 
   end

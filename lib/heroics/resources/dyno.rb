@@ -5,7 +5,7 @@ class Heroics
   class App < Heroics::Resource
 
     def dynos
-      self.heroics.dynos(identity)
+      Heroics::Dynos.new(self.heroics, 'app_identity' => identity)
     end
 
   end

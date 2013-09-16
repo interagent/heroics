@@ -2,22 +2,22 @@
 
 class Heroics
 
-  def account-features(identity=nil)
+  def account_features(identity=nil)
     if identity
-      Heroics::Account-feature.new(self.account-features, 'identity' => identity)
+      Heroics::AccountFeature.new(self.account_features, 'identity' => identity)
     else
-      Heroics::Account-features.new(self)
+      Heroics::AccountFeatures.new(self)
     end
   end
 
-  class Account-features < Heroics::ResourceProxy
+  class AccountFeatures < Heroics::ResourceProxy
 
     def info(identity)
       response = self.heroics.request(
         method: :get,
         path:   "/account/features/#{identity}"
       )
-      Heroics::Account-feature.new(self.resource_proxy, response.body)
+      Heroics::AccountFeature.new(self.resource_proxy, response.body)
     end
 
     def list
@@ -26,13 +26,13 @@ class Heroics
         path:   "/account/features"
       )
       response.body.map do |attributes|
-        Heroics::Account-feature.new(self.resource_proxy, attributes)
+        Heroics::AccountFeature.new(self.resource_proxy, attributes)
       end
     end
 
   end
 
-  class Account-feature < Heroics::Resource
+  class AccountFeature < Heroics::Resource
 
     def updated(new_attributes={})
       response = self.heroics.request(
@@ -40,7 +40,7 @@ class Heroics
         method: :patch,
         path:   "/account/features/#{identity}"
       )
-      Heroics::Account-feature.new(self.resource_proxy, response.body)
+      Heroics::AccountFeature.new(self.resource_proxy, response.body)
     end
 
     def identity

@@ -8,46 +8,45 @@ RESOURCE_TEMPLATE = <<-RESOURCE_TEMPLATE
 
 class Heroics
 
-<%- unless parent_resource %>
-  def <%= resource_proxy.downcase %>(identity=nil)
+<%- unless parent_resource_class %>
+  def <%= resource_proxy_instance %>(identity=nil)
     if identity
-      Heroics::<%= resource %>.new(self.<%= resource_proxy.downcase %>, 'identity' => identity)
+      Heroics::<%= resource_class %>.new(self.<%= resource_proxy_instance %>, 'identity' => identity)
     else
-      Heroics::<%= resource_proxy %>.new(self)
+      Heroics::<%= resource_proxy_class %>.new(self)
     end
   end
 <%- else %>
-  class <%= parent_resource %> < Heroics::Resource
+  class <%= parent_resource_class %> < Heroics::Resource
 
-    def <%= resource_proxy.downcase %>
-      self.heroics.<%= resource_proxy.downcase %>(identity)
+    def <%= resource_proxy_instance %>
+      Heroics::<%= resource_proxy_class %>.new(self.heroics, '<%= parent_resource_identity %>' => identity)
     end
 
   end
 <%- end %>
 
-  class <%= resource_proxy %> < Heroics::ResourceProxy
+  class <%= resource_proxy_class %> < Heroics::ResourceProxy
 
   <%- definition['links'].select do |link| %>
     <%- ['create', 'instances', 'self'].include?(link['rel']) %>
   <%- end.each do |link| %>
-<%= Erubis::Eruby.new(LINK_TEMPLATE).result({key: key, link: link, parent_resource: parent_resource, resource: resource}) %>
+<%= Erubis::Eruby.new(LINK_TEMPLATE).result({key: key, link: link, parent_resource_instance: parent_resource_instance, resource_class: resource_class}) %>
   <%- end %>
-  <%- if parent_resource %>
-    <%- parent_identity = "\#{parent_resource.downcase}_identity" %>
-    def <%= parent_identity %>
-      attributes['<%= parent_identity %>']
+  <%- if parent_resource_class %>
+    def <%= parent_resource_identity %>
+      attributes['<%= parent_resource_identity %>']
     end
 
   <%- end -%>
   end
 
-  class <%= resource %> < Heroics::Resource
+  class <%= resource_class %> < Heroics::Resource
 
   <%- definition['links'].select do |link| %>
     <%- %w{destroy update}.include?(link['rel']) %>
   <%- end.each do |link| %>
-<%= Erubis::Eruby.new(LINK_TEMPLATE).result({key: key, link: link, parent_resource: parent_resource, resource: resource}) %>
+<%= Erubis::Eruby.new(LINK_TEMPLATE).result({key: key, link: link, parent_resource_instance: parent_resource_instance, resource_class: resource_class}) %>
   <%- end %>
     def identity
       attributes['identity'] || <%= definition['definitions']['identity']['oneOf'].map {|ref| "attributes['" + ref['$ref'].split('/').last + "']" }.join(' || ') %>
@@ -73,8 +72,8 @@ LINK_TEMPLATE = <<-LINK_TEMPLATE
     def <%= method %>
   <% end %>
     <%- path = link['href'].gsub("{(%23%2Fdefinitions%2F\#{key}%2Fdefinitions%2Fidentity)}", '\#{identity}') %>
-    <%- if parent_resource %>
-      <%- path = path.gsub("{(%23%2Fdefinitions%2F" + parent_resource.downcase + "%2Fdefinitions%2Fidentity)}", '\#{resource_proxy.' + parent_resource.downcase + '_identity}') %>
+    <%- if parent_resource_instance %>
+      <%- path = path.gsub("{(%23%2Fdefinitions%2F" + parent_resource_instance + "%2Fdefinitions%2Fidentity)}", '\#{resource_proxy.' + parent_resource_instance + '_identity}') %>
     <%- end %>
       response = self.heroics.request(
         <%- if link.has_key?('schema') %>
@@ -85,10 +84,10 @@ LINK_TEMPLATE = <<-LINK_TEMPLATE
       )
       <%- if link['rel'] == 'instances' %>
       response.body.map do |attributes|
-        Heroics::<%= resource %>.new(self.resource_proxy, attributes)
+        Heroics::<%= resource_class %>.new(self.resource_proxy, attributes)
       end
       <%- else %>
-      Heroics::<%= resource %>.new(self.resource_proxy, response.body)
+      Heroics::<%= resource_class %>.new(self.resource_proxy, response.body)
       <%- end %>
     end
 LINK_TEMPLATE
@@ -98,18 +97,26 @@ data = MultiJson.load(File.read(schema_path))
 
 data['definitions'].each do |key, value|
   next if value['links'].empty?
-  resource = key[0...1].upcase + key[1..-1]
-  resource_proxy = resource + 's'
-  parent_resource = if value['links'].all? {|link| link['href'].include?('{(%23%2Fdefinitions%2Fapp%2Fdefinitions%2Fidentity)}')}
-    'App'
+  resource_class = key.split('-').map {|k| k[0...1].upcase + k[1..-1]}.join
+  resource_instance = key.downcase.split('-').join('_')
+
+  resource_proxy_class = resource_class + 's'
+  resource_proxy_instance = resource_instance + 's'
+
+  parent_resource_class, parent_resource_identity, parent_resource_instance = if value['links'].all? {|link| link['href'].include?('{(%23%2Fdefinitions%2Fapp%2Fdefinitions%2Fidentity)}')}
+    ['App', 'app_identity', 'app']
   end
 
   data = Erubis::Eruby.new(RESOURCE_TEMPLATE).result({
-    definition:       value,
-    key:              key,
-    parent_resource:  parent_resource,
-    resource:         resource,
-    resource_proxy:   resource_proxy
+    definition:               value,
+    key:                      key,
+    parent_resource_class:    parent_resource_class,
+    parent_resource_identity: parent_resource_identity,
+    parent_resource_instance: parent_resource_instance,
+    resource_class:           resource_class,
+    resource_instance:        resource_instance,
+    resource_proxy_class:     resource_proxy_class,
+    resource_proxy_instance:  resource_proxy_instance
   })
 
   path = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib', 'heroics', 'resources', "#{key}.rb"))

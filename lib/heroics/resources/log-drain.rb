@@ -4,13 +4,13 @@ class Heroics
 
   class App < Heroics::Resource
 
-    def log-drains
-      self.heroics.log-drains(identity)
+    def log_drains
+      Heroics::LogDrains.new(self.heroics, 'app_identity' => identity)
     end
 
   end
 
-  class Log-drains < Heroics::ResourceProxy
+  class LogDrains < Heroics::ResourceProxy
 
     def create(new_attributes={})
       response = self.heroics.request(
@@ -18,7 +18,7 @@ class Heroics
         method: :post,
         path:   "/apps/#{resource_proxy.app_identity}/log-drains"
       )
-      Heroics::Log-drain.new(self.resource_proxy, response.body)
+      Heroics::LogDrain.new(self.resource_proxy, response.body)
     end
 
     def info(identity)
@@ -26,7 +26,7 @@ class Heroics
         method: :get,
         path:   "/apps/#{resource_proxy.app_identity}/log-drains/#{identity}"
       )
-      Heroics::Log-drain.new(self.resource_proxy, response.body)
+      Heroics::LogDrain.new(self.resource_proxy, response.body)
     end
 
     def list
@@ -35,7 +35,7 @@ class Heroics
         path:   "/apps/#{resource_proxy.app_identity}/log-drainds/#{identity}"
       )
       response.body.map do |attributes|
-        Heroics::Log-drain.new(self.resource_proxy, attributes)
+        Heroics::LogDrain.new(self.resource_proxy, attributes)
       end
     end
 
@@ -45,14 +45,14 @@ class Heroics
 
   end
 
-  class Log-drain < Heroics::Resource
+  class LogDrain < Heroics::Resource
 
     def delete
       response = self.heroics.request(
         method: :delete,
         path:   "/apps/#{resource_proxy.app_identity}/log-drains/#{identity}"
       )
-      Heroics::Log-drain.new(self.resource_proxy, response.body)
+      Heroics::LogDrain.new(self.resource_proxy, response.body)
     end
 
     def identity

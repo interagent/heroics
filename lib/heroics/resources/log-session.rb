@@ -4,13 +4,13 @@ class Heroics
 
   class App < Heroics::Resource
 
-    def log-sessions
-      self.heroics.log-sessions(identity)
+    def log_sessions
+      Heroics::LogSessions.new(self.heroics, 'app_identity' => identity)
     end
 
   end
 
-  class Log-sessions < Heroics::ResourceProxy
+  class LogSessions < Heroics::ResourceProxy
 
     def create(new_attributes={})
       response = self.heroics.request(
@@ -18,7 +18,7 @@ class Heroics
         method: :post,
         path:   "/apps/#{resource_proxy.app_identity}/log-sessions"
       )
-      Heroics::Log-session.new(self.resource_proxy, response.body)
+      Heroics::LogSession.new(self.resource_proxy, response.body)
     end
 
     def app_identity
@@ -27,7 +27,7 @@ class Heroics
 
   end
 
-  class Log-session < Heroics::Resource
+  class LogSession < Heroics::Resource
 
     def identity
       attributes['identity'] || attributes['id']
