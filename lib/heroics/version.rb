@@ -1,3 +1,3 @@
-class Heroics
+module Heroics
   VERSION = "0.0.1"
 end
