@@ -1,12 +1,31 @@
 require 'minitest/autorun'
+require 'minitest/pride'
 require 'heroics'
+
+module ExconHelper
+  def setup
+    super
+    Excon.stubs.clear
+    Excon.defaults[:mock] = true
+  end
+
+  def teardown
+    # FIXME This is a bit ugly, but Excon doesn't provide a builtin way to
+    # ensure that a request was invoked, so we have to do it ourselves.
+    # Without this, and the Excon.stubs.pop calls in the tests below, tests
+    # will pass if request logic is completely removed from application
+    # code. -jkakar
+    assert(Excon.stubs.empty?, 'Expected HTTP requests were not made.')
+    super
+  end
+end
 
 # A simple JSON schema for testing purposes.
 SAMPLE_SCHEMA = {
   'definitions' => {
-    'sample-resource' => {
+    'resource' => {
       'description' => 'A sample resource to use in tests.',
-      'id'          => 'schema/sample-resource',
+      'id'          => 'schema/resource',
       '$schema'     => 'http://json-schema.org/draft-04/hyper-schema',
       'title'       => 'Sample resource title',
       'type'        => ['object'],
@@ -52,68 +71,68 @@ SAMPLE_SCHEMA = {
 
       'properties' => {
         'date_field' => {
-          '$ref' => '#/definitions/sample-resource/definitions/date_field'},
+          '$ref' => '#/definitions/resource/definitions/date_field'},
         'string_field' => {
-          '$ref' => '#/definitions/sample-resource/definitions/string_field'},
+          '$ref' => '#/definitions/resource/definitions/string_field'},
         'boolean_field' => {
-          '$ref' => '#/definitions/sample-resource/definitions/boolean_field'},
+          '$ref' => '#/definitions/resource/definitions/boolean_field'},
         'uuid_field' => {
-          '$ref' => '#/definitions/sample-resource/definitions/uuid_field'},
+          '$ref' => '#/definitions/resource/definitions/uuid_field'},
         'email_field' => {
-          '$ref' => '#/definitions/sample-resource/definitions/email_field'},
+          '$ref' => '#/definitions/resource/definitions/email_field'},
       },
 
       'links' => [
         {'description' => 'Show all sample resources',
-         'href'        => '/sample-resource',
+         'href'        => '/resource',
          'method'      => 'GET',
          'rel'         => 'instances',
          'title'       => 'List'},
 
         {'description' => 'Show a sample resource',
-         'href'        => '/sample-resource/(%23%2Fdefinitions%2Fsample-resource%2Fdefinitions%2Fuuid_field)}',
+         'href'        => '/resource/(#/definitions/resource/definitions/uuid_field)}',
          'method'      => 'GET',
          'rel'         => 'self',
          'title'       => 'Info'},
 
         {'description' => 'Create sample resource',
-         'href'        => '/sample-resource',
+         'href'        => '/resource',
          'method'      => 'POST',
          'rel'         => 'create',
          'title'       => 'Create',
          'schema'      => {
            'properties' => {
              'date_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/date_field'},
+               '$ref' => '#/definitions/resource/definitions/date_field'},
              'string_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/string_field'},
+               '$ref' => '#/definitions/resource/definitions/string_field'},
              'boolean_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/boolean_field'},
+               '$ref' => '#/definitions/resource/definitions/boolean_field'},
              'uuid_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/uuid_field'},
+               '$ref' => '#/definitions/resource/definitions/uuid_field'},
              'email_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/email_field'}}}},
+               '$ref' => '#/definitions/resource/definitions/email_field'}}}},
 
         {'description' => 'Update sample resource',
-         'href'        => '/sample-resource',
+         'href'        => '/resource',
          'method'      => 'PATCH',
          'rel'         => 'update',
          'title'       => 'Update',
          'schema'      => {
            'properties' => {
              'date_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/date_field'},
+               '$ref' => '#/definitions/resource/definitions/date_field'},
              'string_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/string_field'},
+               '$ref' => '#/definitions/resource/definitions/string_field'},
              'boolean_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/boolean_field'},
+               '$ref' => '#/definitions/resource/definitions/boolean_field'},
              'uuid_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/uuid_field'},
+               '$ref' => '#/definitions/resource/definitions/uuid_field'},
              'email_field' => {
-               '$ref' => '#/definitions/sample-resource/definitions/email_field'}}}},
+               '$ref' => '#/definitions/resource/definitions/email_field'}}}},
 
         {'description' => 'Delete an existing sample resource.',
-         'href'        => '/apps/{(%23%2Fdefinitions%2Fsample-resource%2Fdefinitions%2Fuuid_field)}',
+         'href'        => '/apps/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}',
          'method'      => 'DELETE',
          'rel'         => 'destroy',
          'title'       => 'Delete'}

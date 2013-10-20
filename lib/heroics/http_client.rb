@@ -1,4 +1,6 @@
 module Heroics
+  # A representation of an HTTP API that exposes methods that map to resources
+  # defined in the schema.
   class HTTPClient
     # Instantiate a new HTTP client.
     #
@@ -8,14 +10,14 @@ module Heroics
     #    strings.
     def initialize(url, schema)
       @url = url
-      create_methods(schema)
+      @resources = {}
+      schema['definitions'].each do |name, resource_schema|
+        name = sanitize_name(name)
+        @resources[name] = Resource.new(resource_schema)
+      end
     end
 
-    private
-
-    def create_methods(schema)
-      schema['definitions'].each do |key, value|
-      end
+    def method_missing(method, *args)
     end
   end
 end

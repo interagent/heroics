@@ -6,4 +6,7 @@ require 'zlib'
 module Heroics
 end
 
-require 'heroics/client'
+require 'heroics/naming'
+require 'heroics/link'
+require 'heroics/resource'
+require 'heroics/http_client'
