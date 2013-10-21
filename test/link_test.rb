@@ -29,7 +29,7 @@ class LinkTest < MiniTest::Test
   # Link.run injects parameters into the path in the order they were received.
   def test_run_with_parameters_and_empty_response
     uuid = 'a72139f8-7737-4def-9e0f-19b6291a93d2'
-    path = '/resource/{(#/bool)}/{(#/date)}/{(#/int)}/{(#/string)}/{(#/uuid)}'
+    path = '/resource/{(#/bool)}/{(#/time)}/{(#/int)}/{(#/string)}/{(#/uuid)}'
     link = Heroics::Link.new(@url, path, :get)
     Excon.stub(method: :get) do |request|
       assert_equal("/resource/true/2013-01-01T00:00:00Z/42/hello/#{uuid}",
@@ -43,7 +43,7 @@ class LinkTest < MiniTest::Test
   # Link.run converts Time parameters to UTC before sending them to the
   # server.
   def test_run_converts_time_parameters_to_utc
-    path = '/resource/{(#/date)}'
+    path = '/resource/{(#/time)}'
     link = Heroics::Link.new(@url, path, :get)
     Excon.stub(method: :get) do |request|
       assert_equal("/resource/2013-01-01T08:00:00Z", request[:path])
