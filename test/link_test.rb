@@ -1,4 +1,5 @@
 require 'helper'
+require 'time'
 
 class LinkTest < MiniTest::Test
   include ExconHelper
@@ -37,6 +38,19 @@ class LinkTest < MiniTest::Test
       {status: 200, body: ''}
     end
     assert_equal(nil, link.run(true, Time.utc(2013), 42, 'hello', uuid))
+  end
+
+  # Link.run converts Time parameters to UTC before sending them to the
+  # server.
+  def test_run_converts_time_parameters_to_utc
+    path = '/resource/{(#/date)}'
+    link = Heroics::Link.new(@url, path, :get)
+    Excon.stub(method: :get) do |request|
+      assert_equal("/resource/2013-01-01T08:00:00Z", request[:path])
+      Excon.stubs.pop
+      {status: 200, body: ''}
+    end
+    assert_equal(nil, link.run(Time.parse('2013-01-01 00:00:00-0800')))
   end
 
   # Link.run optionally takes an extra parameter to send in the request body.

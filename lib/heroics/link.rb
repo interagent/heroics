@@ -87,7 +87,7 @@ module Heroics
     # @param time [Time] The time to convert to ISO 8601 format.
     # @return [String] An ISO 8601 date in `YYYY-MM-DDTHH:MM:SSZ` format.
     def iso_format(time)
-      time.strftime('%Y-%m-%dT%H:%M:%SZ')
+      time.getutc.strftime('%Y-%m-%dT%H:%M:%SZ')
     end
   end
 end
