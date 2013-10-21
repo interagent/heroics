@@ -10,7 +10,7 @@ module Heroics
 
     private
 
-    # Make an HTTP request to the endpoint matching the specified link.
+    # Find a link and invoke it.
     #
     # @param name [String] The name of the method to invoke.
     # @param parameters [Array] The arguments to pass to the method.  This

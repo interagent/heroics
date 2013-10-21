@@ -9,7 +9,7 @@ module Heroics
       @resources = resources
     end
 
-    # Find the resource the endpoint matching the specified name.
+    # Find a resource.
     #
     # @param name [String] The name of the resource to find.
     # @raise [NoMethodError] Raised if the name doesn't match a known resource.

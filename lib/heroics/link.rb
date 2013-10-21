@@ -35,7 +35,7 @@ module Heroics
       response = connection.request(method: @method, path: path,
                                     headers: headers, body: body)
       content_type = response.headers['Content-Type']
-      # FIXME Correctly handle non-success HTTP status codes. -jkakar
+      # FIXME Correctly handle unsuccessful HTTP status codes. -jkakar
       if content_type && content_type.include?('application/json')
         MultiJson.load(response.body)
       elsif !response.body.empty?
