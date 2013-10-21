@@ -58,10 +58,6 @@ class LinkTest < MiniTest::Test
     body = {'Hello' => 'world!'}
     link = Heroics::Link.new(@url, '/resource', :post)
     Excon.stub(method: :post) do |request|
-      assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
-                   request[:headers]['Authorization'])
-      assert_equal('example.com', request[:host])
-      assert_equal(443, request[:port])
       assert_equal('/resource', request[:path])
       assert_equal(body, MultiJson.load(request[:body]))
       Excon.stubs.pop
@@ -75,10 +71,6 @@ class LinkTest < MiniTest::Test
   def test_run_with_text_response
     link = Heroics::Link.new(@url, '/resource', :get)
     Excon.stub(method: :get) do |request|
-      assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
-                   request[:headers]['Authorization'])
-      assert_equal('example.com', request[:host])
-      assert_equal(443, request[:port])
       assert_equal('/resource', request[:path])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/text'},
@@ -93,10 +85,6 @@ class LinkTest < MiniTest::Test
     body = {'Hello' => 'World!'}
     link = Heroics::Link.new(@url, '/resource', :get)
     Excon.stub(method: :get) do |request|
-      assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
-                   request[:headers]['Authorization'])
-      assert_equal('example.com', request[:host])
-      assert_equal(443, request[:port])
       assert_equal('/resource', request[:path])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
@@ -111,10 +99,6 @@ class LinkTest < MiniTest::Test
     body = {'Hello' => 'World!'}
     link = Heroics::Link.new(@url, '/resource', :get)
     Excon.stub(method: :get) do |request|
-      assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
-                   request[:headers]['Authorization'])
-      assert_equal('example.com', request[:host])
-      assert_equal(443, request[:port])
       assert_equal('/resource', request[:path])
       Excon.stubs.pop
       {status: 200,
