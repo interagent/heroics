@@ -12,9 +12,9 @@ module ExconHelper
   def teardown
     # FIXME This is a bit ugly, but Excon doesn't provide a builtin way to
     # ensure that a request was invoked, so we have to do it ourselves.
-    # Without this, and the Excon.stubs.pop calls in the tests below, tests
-    # will pass if request logic is completely removed from application
-    # code. -jkakar
+    # Without this, and the Excon.stubs.pop calls in the tests that use this
+    # helper, tests will pass if request logic is completely removed from
+    # application code. -jkakar
     assert(Excon.stubs.empty?, 'Expected HTTP requests were not made.')
     super
   end
