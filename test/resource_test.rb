@@ -3,9 +3,9 @@ require 'helper'
 class ResourceTest < MiniTest::Test
   include ExconHelper
 
-  # Resource.<method> raises a NoMethodError when a method is invoked without
-  # a matching link.
-  def test_invalid_method
+  # Resource.<link> raises a NoMethodError when a method is invoked without a
+  # matching link.
+  def test_invalid_link
     resource = Heroics::Resource.new({})
     error = assert_raises NoMethodError do
       resource.unknown
@@ -15,8 +15,8 @@ class ResourceTest < MiniTest::Test
       error.message)
   end
 
-  # Resource.<method> finds the appropriate link and invokes it.
-  def test_method
+  # Resource.<link> finds the appropriate link and invokes it.
+  def test_link
     link = Heroics::Link.new('https://username:secret@example.com',
                              '/resource', :get)
     resource = Heroics::Resource.new({'link' => link})

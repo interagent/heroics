@@ -2,22 +2,26 @@ module Heroics
   # A representation of an HTTP API that exposes methods that map to resources
   # defined in the schema.
   class HTTPClient
-    # Instantiate a new HTTP client.
+    # Instantiate an HTTP client.
     #
-    # @param url [String] The URL to use when making requests.  Include the
-    #   username and password to use with HTTP basic auth.
-    # @param schema [Hash] The schema to use with the client.  Keys must be
-    #    strings.
-    def initialize(url, schema)
-      @url = url
-      @resources = {}
-      schema['definitions'].each do |name, resource_schema|
-        name = sanitize_name(name)
-        @resources[name] = Resource.new(resource_schema)
-      end
+    # @param resources [Hash<String,Resource>] A hash that maps method names
+    #   to resources.
+    def initialize(resources)
+      @resources = resources
     end
 
-    def method_missing(method, *args)
+    # Find the resource the endpoint matching the specified name.
+    #
+    # @param name [String] The name of the resource to find.
+    # @raise [NoMethodError] Raised if the name doesn't match a known resource.
+    # @return [Resource] The resource matching the name.
+    def method_missing(name)
+      resource = @resources[name.to_s]
+      if resource.nil?
+        address = "<#{self.class.name}:0x00#{(self.object_id << 1).to_s(16)}>"
+        raise NoMethodError.new("undefined method `#{name}' for ##{address}")
+      end
+      resource
     end
   end
 end

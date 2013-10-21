@@ -3,33 +3,33 @@ require 'helper'
 class HTTPClientTest < MiniTest::Test
   include ExconHelper
 
-  def setup
-    super
-    @client = Heroics::HTTPClient.new('https://username:secret@example.com',
-                                      SAMPLE_SCHEMA)
+  # HTTPClient.<resource> raises a NoMethodError when a method is invoked
+  # without a matching resource.
+  def test_invalid_resource
+    client = Heroics::HTTPClient.new({})
+    error = assert_raises NoMethodError do
+      client.unknown
+    end
+    assert_match(
+      /undefined method `unknown' for #<Heroics::HTTPClient:0x[0-9a-f]{14}>/,
+      error.message)
   end
 
-  # # HTTPClient raises a NoMethodError when a method that doesn't match the
-  # # schema is used.
-  # def test_invalid_method
-  #   assert_raises NoMethodError do
-  #     @client.invalid_method
-  #   end
-  # end
-
-  # # HTTPClient.$resource.$link_name for a GET without parameters that receives
-  # # an empty application/json response body from the server returns nil.
-  # def test_get_without_parameters_and_empty_json_response_body
-  #   url = 'https://username:password@example.com'
-  #   client = Heroics::HTTPClient.new(url, SAMPLE_SCHEMA)
-  #   Excon.stub(method: :get) do |request|
-  #     assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
-  #                  request[:headers]['Authorization'])
-  #     assert_equal('example.com', request[:host])
-  #     assert_equal('443', request[:port])
-  #     assert_equal('/resource', request[:path])
-  #     Excon.stubs.pop
-  #   end
-  #   assert_equal({'sample' => 'data'}, @client.resource.list)
-  # end
+  # HTTPClient.<resource>.<link> finds the appropriate link and invokes it.
+  def test_resource
+    link = Heroics::Link.new('https://username:secret@example.com',
+                             '/resource', :get)
+    resource = Heroics::Resource.new({'link' => link})
+    client = Heroics::HTTPClient.new({'resource' => resource})
+    Excon.stub(method: :get) do |request|
+      assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
+                   request[:headers]['Authorization'])
+      assert_equal('example.com', request[:host])
+      assert_equal(443, request[:port])
+      assert_equal('/resource', request[:path])
+      Excon.stubs.pop
+      {status: 200, body: 'Hello, world!'}
+    end
+    assert_equal('Hello, world!', client.resource.link)
+  end
 end
