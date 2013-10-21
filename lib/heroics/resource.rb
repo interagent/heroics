@@ -1,5 +1,5 @@
 module Heroics
-  # A representation of a resource that exposes links as methods.
+  # A resource with methods mapped to API links.
   class Resource
     # Instantiate a resource.
     #

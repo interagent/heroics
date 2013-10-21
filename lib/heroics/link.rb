@@ -1,6 +1,5 @@
 module Heroics
-  # A representation of a link that can be invoked to make a request to a
-  # service and return a response.
+  # A link invokes requests with an HTTP server.
   class Link
     # Instantiate a link.
     #

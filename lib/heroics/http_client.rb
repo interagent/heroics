@@ -1,6 +1,5 @@
 module Heroics
-  # A representation of an HTTP API that exposes methods that map to resources
-  # defined in the schema.
+  # An HTTP client with methods mapped to API resources.
   class HTTPClient
     # Instantiate an HTTP client.
     #
