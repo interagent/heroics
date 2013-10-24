@@ -33,7 +33,8 @@ module Heroics
         body = MultiJson.dump(body)
       end
       response = connection.request(method: @method, path: path,
-                                    headers: headers, body: body)
+                                    headers: headers, body: body,
+                                    expects: [200, 201])
       content_type = response.headers['Content-Type']
       # FIXME Correctly handle unsuccessful HTTP status codes. -jkakar
       if content_type && content_type.include?('application/json')
