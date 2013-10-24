@@ -28,22 +28,35 @@ class LinkTest < MiniTest::Test
 
   # Link.run injects parameters into the path in the order they were received.
   def test_run_with_parameters_and_empty_response
-    uuid = 'a72139f8-7737-4def-9e0f-19b6291a93d2'
-    path = '/resource/{(#/bool)}/{(#/time)}/{(#/int)}/{(#/string)}/{(#/uuid)}'
+    path = '/resource/{(%23%2Fbool)}/{(%23%2Ftime)}/{(%23%2Fint)}/{(%23%2Fstr)}'
     link = Heroics::Link.new(@url, path, :get)
     Excon.stub(method: :get) do |request|
-      assert_equal("/resource/true/2013-01-01T00:00:00Z/42/hello/#{uuid}",
+      assert_equal('/resource/true/2013-01-01T00:00:00Z/42/hello',
                    request[:path])
       Excon.stubs.pop
       {status: 200, body: ''}
     end
-    assert_equal(nil, link.run(true, Time.utc(2013), 42, 'hello', uuid))
+    assert_equal(nil, link.run(true, Time.utc(2013), 42, 'hello'))
+  end
+
+  # Link.run injects parameters into the path in the order they were received.
+  # It correctly identifies parameters with multiple encoded slashes.
+  def test_run_with_parameters_containing_multiple_encoded_slashes
+    uuid = 'a72139f8-7737-4def-9e0f-19b6291a93d2'
+    path = '/resource/{(%23%2Fa%2Flong%2Fparameter%2Fname)}'
+    link = Heroics::Link.new(@url, path, :get)
+    Excon.stub(method: :get) do |request|
+      assert_equal('/resource/42', request[:path])
+      Excon.stubs.pop
+      {status: 200, body: ''}
+    end
+    assert_equal(nil, link.run(42))
   end
 
   # Link.run converts Time parameters to UTC before sending them to the
   # server.
   def test_run_converts_time_parameters_to_utc
-    path = '/resource/{(#/time)}'
+    path = '/resource/{(%23%2Ftime)}'
     link = Heroics::Link.new(@url, path, :get)
     Excon.stub(method: :get) do |request|
       assert_equal("/resource/2013-01-01T08:00:00Z", request[:path])
@@ -110,7 +123,7 @@ class LinkTest < MiniTest::Test
 
   # Link.run raises an ArgumentError if too few parameters are provided.
   def test_run_with_missing_parameters
-    path = '/resource/{(#/parameter)}'
+    path = '/resource/{(%23%2Fparameter)}'
     link = Heroics::Link.new(@url, path, :get)
     error = assert_raises ArgumentError do
       link.run
@@ -120,7 +133,7 @@ class LinkTest < MiniTest::Test
 
   # Link.run raises an ArgumentError if too many parameters are provided.
   def test_run_with_too_many_parameters
-    path = '/resource/{(#/parameter)}'
+    path = '/resource/{(%23%2Fparameter)}'
     link = Heroics::Link.new(@url, path, :get)
     error = assert_raises ArgumentError do
       link.run('too', 'many', 'parameters')
