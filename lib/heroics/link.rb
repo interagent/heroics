@@ -36,7 +36,6 @@ module Heroics
                                     headers: headers, body: body,
                                     expects: [200, 201])
       content_type = response.headers['Content-Type']
-      # FIXME Correctly handle unsuccessful HTTP status codes. -jkakar
       if content_type && content_type.include?('application/json')
         MultiJson.load(response.body)
       elsif !response.body.empty?
