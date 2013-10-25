@@ -69,10 +69,12 @@ class LinkTest < MiniTest::Test
   end
 
   # Link.run optionally takes an extra parameter to send in the request body.
+  # It automatically converts the specified object to JSON and includes a
+  # Content-Type header in the request.
   def test_run_without_parameters_and_with_request_body
     body = {'Hello' => 'world!'}
     Excon.stub(method: :post) do |request|
-      assert_equal('/resource', request[:path])
+      assert_equal('application/json', request[:headers]['Content-Type'])
       assert_equal(body, MultiJson.load(request[:body]))
       Excon.stubs.pop
       {status: 200, body: ''}
@@ -80,6 +82,68 @@ class LinkTest < MiniTest::Test
 
     link = Heroics::Link.new('https://example.com', '/resource', :post)
     assert_equal(nil, link.run(body))
+  end
+
+  # Link.run passes custom headers to the server when they've been provided.
+  def test_run_with_custom_request_headers
+    Excon.stub(method: :post) do |request|
+      assert_equal('application/vnd.heroku+json; version=3',
+                   request[:headers]['Accept'])
+      Excon.stubs.pop
+      {status: 200}
+    end
+
+    link = Heroics::Link.new(
+      'https://example.com', '/resource', :post,
+      {'Accept' => 'application/vnd.heroku+json; version=3'})
+    assert_equal(nil, link.run)
+  end
+
+  # Link.run passes custom headers to the server when they've been provided.
+  # It merges in the Content-Type when a body is included in the request.
+  def test_run_with_custom_request_headers_and_with_request_body
+    body = {'Hello' => 'world!'}
+    Excon.stub(method: :post) do |request|
+      assert_equal('application/json', request[:headers]['Content-Type'])
+      assert_equal('application/vnd.heroku+json; version=3',
+                   request[:headers]['Accept'])
+      assert_equal(body, MultiJson.load(request[:body]))
+      Excon.stubs.pop
+      {status: 200}
+    end
+
+    link = Heroics::Link.new(
+      'https://example.com', '/resource', :post,
+      {'Accept' => 'application/vnd.heroku+json; version=3'})
+    assert_equal(nil, link.run(body))
+  end
+
+  # Link.run doesn't mutate the default headers.
+  def test_run_never_overwrites_default_headers
+    body = {'Hello' => 'world!'}
+    Excon.stub(method: :post) do |request|
+      assert_equal('application/json', request[:headers]['Content-Type'])
+      assert_equal('application/vnd.heroku+json; version=3',
+                   request[:headers]['Accept'])
+      assert_equal(body, MultiJson.load(request[:body]))
+      Excon.stubs.pop
+      {status: 200}
+    end
+    link = Heroics::Link.new(
+      'https://example.com', '/resource', :post,
+      {'Accept' => 'application/vnd.heroku+json; version=3'})
+    assert_equal(nil, link.run(body))
+
+    # The second time we use the link, without providing a request body, the
+    # Content-Type set during the first run is not present, as expected.
+    Excon.stub(method: :post) do |request|
+      assert_equal(nil, request[:headers]['Content-Type'])
+      assert_equal('application/vnd.heroku+json; version=3',
+                   request[:headers]['Accept'])
+      Excon.stubs.pop
+      {status: 200}
+    end
+    assert_equal(nil, link.run)
   end
 
   # Link.run returns text responses sent by the server without processing them
