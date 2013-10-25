@@ -1,6 +1,6 @@
 module Heroics
   # An HTTP client with methods mapped to API resources.
-  class HTTPClient
+  class Client
     # Instantiate an HTTP client.
     #
     # @param resources [Hash<String,Resource>] A hash that maps method names

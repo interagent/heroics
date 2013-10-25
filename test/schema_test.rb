@@ -3,8 +3,7 @@ require 'helper'
 class ClientFromSchemaTest < MiniTest::Test
   include ExconHelper
 
-  # client_from_schema returns an HTTPClient generated from the specified
-  # schema.
+  # client_from_schema returns a Client generated from the specified schema.
   def test_client_from_schema
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
     body = {'Hello' => 'World!'}
@@ -15,6 +14,21 @@ class ClientFromSchemaTest < MiniTest::Test
        body: MultiJson.dump(body)}
     end
     assert_equal(body, client.resource.create)
+  end
+
+  # client_from_schema optionally accepts custom headers to pass with every
+  # request made by the generated client.
+  def test_client_from_schema_with_custom_headers
+    client = Heroics::client_from_schema(
+      SAMPLE_SCHEMA, 'https://example.com',
+      {'Accept' => 'application/vnd.heroku+json; version=3'})
+    Excon.stub(method: :post) do |request|
+      assert_equal('application/vnd.heroku+json; version=3',
+                   request[:headers]['Accept'])
+      Excon.stubs.pop
+      {status: 200}
+    end
+    client.resource.create
   end
 
   # client_from_schema raises a SchemaError exception if definitions are not
@@ -40,8 +54,8 @@ end
 class ClientFromSchemaURLTest < MiniTest::Test
   include ExconHelper
 
-  # client_from_schema_url downloads a schema and returns an HTTPClient
-  # generated from it.
+  # client_from_schema_url downloads a schema and returns a Client generated
+  # from it.
   def test_client_from_schema_url
     Excon.stub(method: :get) do |request|
       assert_equal('example.com', request[:host])
@@ -64,7 +78,8 @@ class ClientFromSchemaURLTest < MiniTest::Test
   end
 
   # client_from_schema_url optionally accepts custom headers to include in the
-  # request to download the schema.
+  # request to download the schema.  The same headers are passed in requests
+  # made by the generated client.
   def test_client_from_schema_url_with_custom_headers
     Excon.stub(method: :get) do |request|
       assert_equal('example.com', request[:host])
@@ -81,8 +96,8 @@ class ClientFromSchemaURLTest < MiniTest::Test
       {'Accept' => 'application/vnd.heroku+json; version=3'})
     body = {'Hello' => 'World!'}
     Excon.stub(method: :post) do |request|
-      assert_equal('example.com', request[:host])
-      assert_equal('/resource', request[:path])
+      assert_equal('application/vnd.heroku+json; version=3',
+                   request[:headers]['Accept'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
        body: MultiJson.dump(body)}

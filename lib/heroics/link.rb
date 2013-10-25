@@ -10,10 +10,13 @@ module Heroics
     #   the link is invoked.
     # @param method [Symbol] A symbol representing the HTTP method to use when
     #   invoking the link.
-    def initialize(url, path, method)
+    # @param default_headers [Hash] A set of headers to include in every
+    #   request made by the client.  Default is no custom headers.
+    def initialize(url, path, method, default_headers={})
       @url = url
       @path = path
       @method = method
+      @default_headers = default_headers
     end
 
     # Make a request to the server.
@@ -28,8 +31,9 @@ module Heroics
     def run(*parameters)
       path, body = format_path(parameters)
       connection = Excon.new(@url)
+      headers = @default_headers
       if body
-        headers = {'Content-Type' => 'application/json'}
+        headers = headers.merge({'Content-Type' => 'application/json'})
         body = MultiJson.dump(body)
       end
       response = connection.request(method: @method, path: path,
