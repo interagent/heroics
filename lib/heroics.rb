@@ -10,5 +10,5 @@ end
 require 'heroics/naming'
 require 'heroics/link'
 require 'heroics/resource'
-require 'heroics/http_client'
+require 'heroics/client'
 require 'heroics/schema'

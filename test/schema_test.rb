@@ -3,8 +3,7 @@ require 'helper'
 class ClientFromSchemaTest < MiniTest::Test
   include ExconHelper
 
-  # client_from_schema returns an HTTPClient generated from the specified
-  # schema.
+  # client_from_schema returns a Client generated from the specified schema.
   def test_client_from_schema
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
     body = {'Hello' => 'World!'}
@@ -40,8 +39,8 @@ end
 class ClientFromSchemaURLTest < MiniTest::Test
   include ExconHelper
 
-  # client_from_schema_url downloads a schema and returns an HTTPClient
-  # generated from it.
+  # client_from_schema_url downloads a schema and returns a Client generated
+  # from it.
   def test_client_from_schema_url
     Excon.stub(method: :get) do |request|
       assert_equal('example.com', request[:host])

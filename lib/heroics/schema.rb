@@ -12,8 +12,7 @@ module Heroics
   #   auth.
   # @raises [SchemaError] Raised if the schema is malformed and can't be
   #   used to generate a client.
-  # @return [HTTPClient] A client with resources and links from the JSON
-  #   schema.
+  # @return [Client] A client with resources and links from the JSON schema.
   def self.client_from_schema(schema, url)
     unless schema.has_key?('definitions')
       raise SchemaError.new("Missing top-level 'definitions' key.")
@@ -34,7 +33,7 @@ module Heroics
       end
       resources[name] = Resource.new(links)
     end
-    HTTPClient.new(resources)
+    Client.new(resources)
   end
 
   # Download a JSON schema and create an HTTP client with it.
