@@ -33,9 +33,9 @@ module Heroics
         body = MultiJson.dump(body)
       end
       response = connection.request(method: @method, path: path,
-                                    headers: headers, body: body)
+                                    headers: headers, body: body,
+                                    expects: [200, 201])
       content_type = response.headers['Content-Type']
-      # FIXME Correctly handle unsuccessful HTTP status codes. -jkakar
       if content_type && content_type.include?('application/json')
         MultiJson.load(response.body)
       elsif !response.body.empty?
@@ -54,7 +54,7 @@ module Heroics
     # @return [String,Object] A path and request body pair.  The body value is
     #   nil if a payload wasn't included in the list of parameters.
     def format_path(parameters)
-      parameter_regex = /\{\(\#[\/a-zA-Z0-9]*\)\}/
+      parameter_regex = /\{\([%\/a-zA-Z0-9]*\)\}/
       parameter_size = @path.scan(parameter_regex).size
       too_few_parameters = parameter_size > parameters.size
       # FIXME We should use the schema to detect when a request body is
@@ -64,8 +64,6 @@ module Heroics
         raise ArgumentError.new("wrong number of arguments " +
                                 "(#{parameters.size} for #{parameter_size})")
       end
-      # FIXME We should use the schema to validate incoming types and
-      # values. -jkakar
       path = @path
       (0..parameter_size).each do |i|
         path = path.sub(parameter_regex, format_parameter(parameters[i]))
