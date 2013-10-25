@@ -20,18 +20,20 @@ class ClientFromSchemaTest < MiniTest::Test
   # client_from_schema raises a SchemaError exception if definitions are not
   # present in the specified schema.
   def test_client_from_schema_without_definitions
-    assert_raises Heroics::SchemaError do
+    error = assert_raises Heroics::SchemaError do
       Heroics::client_from_schema({}, 'https://example.com')
     end
+    assert_equal("Missing top-level 'definitions' key.", error.message)
   end
 
   # client_from_schema raises a SchemaError exception if a resource doesn't
   # have a links key.
   def test_client_from_schema_without_links
-    assert_raises Heroics::SchemaError do
+    error = assert_raises Heroics::SchemaError do
       Heroics::client_from_schema({'definitions' => {'resource' => {}}},
                                   'https://example.com')
     end
+    assert_equal("'resource' resource is missing 'links' key.", error.message)
   end
 end
 

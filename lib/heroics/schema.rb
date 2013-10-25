@@ -22,7 +22,7 @@ module Heroics
     resources = {}
     schema['definitions'].each do |name, resource_schema|
       unless resource_schema.has_key?('links')
-        raise SchemaError.new("#{name}' is missing 'links' key.")
+        raise SchemaError.new("'#{name}' resource is missing 'links' key.")
       end
 
       links = {}
