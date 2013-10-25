@@ -11,7 +11,7 @@ module Heroics
   #   requests.  Include the username and password to use with HTTP basic
   #   auth.
   # @raises [SchemaError] Raised if the schema is malformed and can't be
-  #   parsed correctly.
+  #   used to generate a client.
   # @return [HTTPClient] A client with resources and links from the JSON
   #   schema.
   def self.client_from_schema(schema, url)
