@@ -31,7 +31,8 @@ module Heroics
         path = link_schema['href']
         method = link_schema['method'].downcase.to_sym
         title = sanitize_name(link_schema['title'])
-        links[title] = Link.new(url, path, method, default_headers)
+        links[title] = Link.new(url, path, method,
+                                {default_headers: default_headers})
       end
       resources[name] = Resource.new(links)
     end

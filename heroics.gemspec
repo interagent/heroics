@@ -23,5 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest"
 
   spec.add_dependency "excon"
+  spec.add_dependency "moneta"
   spec.add_dependency "multi_json"
 end

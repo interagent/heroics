@@ -1,4 +1,5 @@
 require 'excon'
+require 'moneta'
 require 'multi_json'
 require 'uri'
 require 'zlib'

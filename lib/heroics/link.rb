@@ -10,13 +10,18 @@ module Heroics
     #   the link is invoked.
     # @param method [Symbol] A symbol representing the HTTP method to use when
     #   invoking the link.
-    # @param default_headers [Hash] A set of headers to include in every
-    #   request made by the client.  Default is no custom headers.
-    def initialize(url, path, method, default_headers={})
+    # @param options [Hash] Configuration for the link.  Possible keys
+    #   include:
+    #   - default_headers: Optionally, a set of headers to include in every
+    #     request made by the client.  Default is no custom headers.
+    #   - cache: Optionally, a moneta-compatible cache to store ETags.
+    #     Default is no caching.
+    def initialize(url, path, method, options={})
       @url = url
       @path = path
       @method = method
-      @default_headers = default_headers
+      @default_headers = options[:default_headers] || {}
+      @cache = options[:cache] || Moneta.new(:Null)
     end
 
     # Make a request to the server.

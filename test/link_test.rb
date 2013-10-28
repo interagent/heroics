@@ -1,5 +1,4 @@
 require 'helper'
-require 'time'
 
 class LinkTest < MiniTest::Test
   include ExconHelper
@@ -95,7 +94,7 @@ class LinkTest < MiniTest::Test
 
     link = Heroics::Link.new(
       'https://example.com', '/resource', :post,
-      {'Accept' => 'application/vnd.heroku+json; version=3'})
+      {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
     assert_equal(nil, link.run)
   end
 
@@ -114,7 +113,7 @@ class LinkTest < MiniTest::Test
 
     link = Heroics::Link.new(
       'https://example.com', '/resource', :post,
-      {'Accept' => 'application/vnd.heroku+json; version=3'})
+      {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
     assert_equal(nil, link.run(body))
   end
 
@@ -131,7 +130,7 @@ class LinkTest < MiniTest::Test
     end
     link = Heroics::Link.new(
       'https://example.com', '/resource', :post,
-      {'Accept' => 'application/vnd.heroku+json; version=3'})
+      {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
     assert_equal(nil, link.run(body))
 
     # The second time we use the link, without providing a request body, the
