@@ -14,7 +14,7 @@ module Heroics
     #   include:
     #   - default_headers: Optionally, a set of headers to include in every
     #     request made by the client.  Default is no custom headers.
-    #   - cache: Optionally, a moneta-compatible cache to store ETags.
+    #   - cache: Optionally, a Moneta-compatible cache to store ETags.
     #     Default is no caching.
     def initialize(url, path, method, options={})
       @url = url
