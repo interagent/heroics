@@ -26,6 +26,9 @@ module Heroics
 
     # Make a request to the server.
     #
+    # JSON content received with an ETag is cached.  When the server returns a
+    # 304 Not Modified content is loaded and returned from the cache.
+    #
     # @param parameters [Array] The list of parameters to inject into the
     #   path.  A request body can be passed as the final parameter and will
     #   always be converted to JSON before being transmitted.
@@ -35,17 +38,29 @@ module Heroics
     #   JSON responses.
     def run(*parameters)
       path, body = format_path(parameters)
-      connection = Excon.new(@url)
       headers = @default_headers
+      if @method == :get
+        etag = @cache["etag:#{path}"]
+        headers = headers.merge({'If-None-Match' => etag}) if etag
+      end
+
+      connection = Excon.new(@url)
       if body
         headers = headers.merge({'Content-Type' => 'application/json'})
         body = MultiJson.dump(body)
       end
       response = connection.request(method: @method, path: path,
                                     headers: headers, body: body,
-                                    expects: [200, 201])
+                                    expects: [200, 201, 304])
       content_type = response.headers['Content-Type']
-      if content_type && content_type.include?('application/json')
+      if response.status == 304
+        MultiJson.load(@cache["data:#{path}"])
+      elsif content_type && content_type.include?('application/json')
+        etag = response.headers['ETag']
+        if etag
+          @cache["etag:#{path}"] = etag
+          @cache["data:#{path}"] = response.body
+        end
         MultiJson.load(response.body)
       elsif !response.body.empty?
         response.body
