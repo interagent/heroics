@@ -50,7 +50,8 @@ class ClientFromSchemaTest < MiniTest::Test
     assert_equal("'resource' resource is missing 'links' key.", error.message)
   end
 
-  # client_from_schema takes an optional :cache parameter.
+  # client_from_schema takes an optional :cache parameter which it uses when
+  # constructing Link instances.
   def test_client_from_schema_with_cache
     body = {'Hello' => 'World!'}
     Excon.stub(method: :get) do |request|

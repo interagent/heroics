@@ -226,20 +226,33 @@ class LinkTest < MiniTest::Test
   end
 
   # Link.run passes ETags from the cache to the server with GET requests.
-  def test_run_passes_cached_etags_to_the_server
-    body = {'Hello' => 'World!'}
+  def test_run_passes_cached_etags_in_get_requests
     Excon.stub(method: :get) do |request|
       assert_equal('etag-contents', request[:headers]['If-None-Match'])
       Excon.stubs.pop
-      {status: 201, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+      {status: 200}
     end
 
     cache = Moneta.new(:Memory)
     cache['etag:/resource'] = 'etag-contents'
     link = Heroics::Link.new('https://example.com', '/resource', :get,
                              cache: cache)
-    assert_equal(body, link.run)
+    link.run
+  end
+
+  # Link.run will not pas ETags from the cache for non-GET requests.
+  def test_run_ignores_etags_for_non_get_requests
+    Excon.stub(method: :post) do |request|
+      assert_equal(nil, request[:headers]['If-None-Match'])
+      Excon.stubs.pop
+      {status: 201}
+    end
+
+    cache = Moneta.new(:Memory)
+    cache['etag:/resource'] = 'etag-contents'
+    link = Heroics::Link.new('https://example.com', '/resource', :post,
+                             cache: cache)
+    link.run
   end
 
   # Link.run returns JSON content loaded from the cache when a GET request
@@ -266,7 +279,7 @@ class LinkTest < MiniTest::Test
     body = {'Hello' => 'World!'}
     Excon.stub(method: :get) do |request|
       Excon.stubs.pop
-      {status: 201, headers: {'Content-Type' => 'application/json',
+      {status: 200, headers: {'Content-Type' => 'application/json',
                               'ETag' => 'etag-contents'},
        body: MultiJson.dump(body)}
     end
