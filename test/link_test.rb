@@ -234,7 +234,7 @@ class LinkTest < MiniTest::Test
     end
 
     cache = Moneta.new(:Memory)
-    cache['etag:/resource'] = 'etag-contents'
+    cache['etag:/resource:0'] = 'etag-contents'
     link = Heroics::Link.new('https://example.com', '/resource', :get,
                              cache: cache)
     link.run
@@ -249,7 +249,7 @@ class LinkTest < MiniTest::Test
     end
 
     cache = Moneta.new(:Memory)
-    cache['etag:/resource'] = 'etag-contents'
+    cache['etag:/resource:0'] = 'etag-contents'
     link = Heroics::Link.new('https://example.com', '/resource', :post,
                              cache: cache)
     link.run
@@ -266,8 +266,8 @@ class LinkTest < MiniTest::Test
     end
 
     cache = Moneta.new(:Memory)
-    cache['etag:/resource'] = 'etag-contents'
-    cache['data:/resource'] = MultiJson.dump(body)
+    cache['etag:/resource:0'] = 'etag-contents'
+    cache['data:/resource:0'] = MultiJson.dump(body)
     link = Heroics::Link.new('https://example.com', '/resource', :get,
                              cache: cache)
     assert_equal(body, link.run)
