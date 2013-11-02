@@ -10,16 +10,27 @@ module Heroics
     #   the link is invoked.
     # @param method [Symbol] A symbol representing the HTTP method to use when
     #   invoking the link.
-    # @param default_headers [Hash] A set of headers to include in every
-    #   request made by the client.  Default is no custom headers.
-    def initialize(url, path, method, default_headers={})
+    # @param options [Hash] Configuration for the link.  Possible keys
+    #   include:
+    #   - default_headers: Optionally, a set of headers to include in every
+    #     request made by the client.  Default is no custom headers.
+    #   - cache: Optionally, a Moneta-compatible cache to store ETags.
+    #     Default is no caching.
+    def initialize(url, path, method, options={})
       @url = url
       @path = path
       @method = method
-      @default_headers = default_headers
+      @default_headers = options[:default_headers] || {}
+      @cache = options[:cache] || Moneta.new(:Null)
     end
 
     # Make a request to the server.
+    #
+    # JSON content received with an ETag is cached.  When the server returns a
+    # 304 Not Modified content is loaded and returned from the cache.  The
+    # cache considers headers, in addition to the URL path, when creating keys
+    # so that requests to the same path, such as for paginated results, don't
+    # cause cache collisions.
     #
     # @param parameters [Array] The list of parameters to inject into the
     #   path.  A request body can be passed as the final parameter and will
@@ -30,17 +41,30 @@ module Heroics
     #   JSON responses.
     def run(*parameters)
       path, body = format_path(parameters)
-      connection = Excon.new(@url)
       headers = @default_headers
       if body
         headers = headers.merge({'Content-Type' => 'application/json'})
         body = MultiJson.dump(body)
       end
+      cache_key = "#{path}:#{headers.hash}"
+      if @method == :get
+        etag = @cache["etag:#{cache_key}"]
+        headers = headers.merge({'If-None-Match' => etag}) if etag
+      end
+
+      connection = Excon.new(@url)
       response = connection.request(method: @method, path: path,
                                     headers: headers, body: body,
-                                    expects: [200, 201])
+                                    expects: [200, 201, 304])
       content_type = response.headers['Content-Type']
-      if content_type && content_type.include?('application/json')
+      if response.status == 304
+        MultiJson.load(@cache["data:#{cache_key}"])
+      elsif content_type && content_type.include?('application/json')
+        etag = response.headers['ETag']
+        if etag
+          @cache["etag:#{cache_key}"] = etag
+          @cache["data:#{cache_key}"] = response.body
+        end
         MultiJson.load(response.body)
       elsif !response.body.empty?
         response.body

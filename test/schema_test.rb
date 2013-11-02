@@ -21,7 +21,7 @@ class ClientFromSchemaTest < MiniTest::Test
   def test_client_from_schema_with_custom_headers
     client = Heroics::client_from_schema(
       SAMPLE_SCHEMA, 'https://example.com',
-      {'Accept' => 'application/vnd.heroku+json; version=3'})
+      default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'})
     Excon.stub(method: :post) do |request|
       assert_equal('application/vnd.heroku+json; version=3',
                    request[:headers]['Accept'])
@@ -48,6 +48,29 @@ class ClientFromSchemaTest < MiniTest::Test
                                   'https://example.com')
     end
     assert_equal("'resource' resource is missing 'links' key.", error.message)
+  end
+
+  # client_from_schema takes an optional :cache parameter which it uses when
+  # constructing Link instances.
+  def test_client_from_schema_with_cache
+    body = {'Hello' => 'World!'}
+    Excon.stub(method: :get) do |request|
+      Excon.stubs.pop
+      {status: 201, headers: {'Content-Type' => 'application/json',
+                              'ETag' => 'etag-contents'},
+       body: MultiJson.dump(body)}
+    end
+
+    client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com',
+                                         cache: Moneta.new(:Memory))
+    assert_equal(body, client.resource.list)
+
+    Excon.stub(method: :get) do |request|
+      assert_equal('etag-contents', request[:headers]['If-None-Match'])
+      Excon.stubs.pop
+      {status: 304, headers: {'Content-Type' => 'application/json'}}
+    end
+    assert_equal(body, client.resource.list)
   end
 end
 
@@ -93,7 +116,7 @@ class ClientFromSchemaURLTest < MiniTest::Test
 
     client = Heroics::client_from_schema_url(
       'https://example.com/schema',
-      {'Accept' => 'application/vnd.heroku+json; version=3'})
+      default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'})
     body = {'Hello' => 'World!'}
     Excon.stub(method: :post) do |request|
       assert_equal('application/vnd.heroku+json; version=3',

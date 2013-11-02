@@ -1,5 +1,4 @@
 require 'helper'
-require 'time'
 
 class LinkTest < MiniTest::Test
   include ExconHelper
@@ -95,7 +94,7 @@ class LinkTest < MiniTest::Test
 
     link = Heroics::Link.new(
       'https://example.com', '/resource', :post,
-      {'Accept' => 'application/vnd.heroku+json; version=3'})
+      {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
     assert_equal(nil, link.run)
   end
 
@@ -114,7 +113,7 @@ class LinkTest < MiniTest::Test
 
     link = Heroics::Link.new(
       'https://example.com', '/resource', :post,
-      {'Accept' => 'application/vnd.heroku+json; version=3'})
+      {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
     assert_equal(nil, link.run(body))
   end
 
@@ -131,7 +130,7 @@ class LinkTest < MiniTest::Test
     end
     link = Heroics::Link.new(
       'https://example.com', '/resource', :post,
-      {'Accept' => 'application/vnd.heroku+json; version=3'})
+      {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
     assert_equal(nil, link.run(body))
 
     # The second time we use the link, without providing a request body, the
@@ -224,5 +223,76 @@ class LinkTest < MiniTest::Test
       link.run('too', 'many', 'parameters')
     end
     assert_equal('wrong number of arguments (3 for 1)', error.message)
+  end
+
+  # Link.run passes ETags from the cache to the server with GET requests.
+  def test_run_passes_cached_etags_in_get_requests
+    Excon.stub(method: :get) do |request|
+      assert_equal('etag-contents', request[:headers]['If-None-Match'])
+      Excon.stubs.pop
+      {status: 200}
+    end
+
+    cache = Moneta.new(:Memory)
+    cache['etag:/resource:0'] = 'etag-contents'
+    link = Heroics::Link.new('https://example.com', '/resource', :get,
+                             cache: cache)
+    link.run
+  end
+
+  # Link.run will not pas ETags from the cache for non-GET requests.
+  def test_run_ignores_etags_for_non_get_requests
+    Excon.stub(method: :post) do |request|
+      assert_equal(nil, request[:headers]['If-None-Match'])
+      Excon.stubs.pop
+      {status: 201}
+    end
+
+    cache = Moneta.new(:Memory)
+    cache['etag:/resource:0'] = 'etag-contents'
+    link = Heroics::Link.new('https://example.com', '/resource', :post,
+                             cache: cache)
+    link.run
+  end
+
+  # Link.run returns JSON content loaded from the cache when a GET request
+  # with an ETag yields a 304 Not Modified response.
+  def test_run_returns_cached_json_content_for_not_modified_response
+    body = {'Hello' => 'World!'}
+    Excon.stub(method: :get) do |request|
+      assert_equal('etag-contents', request[:headers]['If-None-Match'])
+      Excon.stubs.pop
+      {status: 304, headers: {'Content-Type' => 'application/json'}}
+    end
+
+    cache = Moneta.new(:Memory)
+    cache['etag:/resource:0'] = 'etag-contents'
+    cache['data:/resource:0'] = MultiJson.dump(body)
+    link = Heroics::Link.new('https://example.com', '/resource', :get,
+                             cache: cache)
+    assert_equal(body, link.run)
+  end
+
+  # Link.run caches JSON content received from the server when an ETag is
+  # included in the response.
+  def test_run_caches_json_body_when_an_etag_is_received
+    body = {'Hello' => 'World!'}
+    Excon.stub(method: :get) do |request|
+      Excon.stubs.pop
+      {status: 200, headers: {'Content-Type' => 'application/json',
+                              'ETag' => 'etag-contents'},
+       body: MultiJson.dump(body)}
+    end
+
+    link = Heroics::Link.new('https://example.com', '/resource', :get,
+                             cache: Moneta.new(:Memory))
+    assert_equal(body, link.run)
+
+    Excon.stub(method: :get) do |request|
+      assert_equal('etag-contents', request[:headers]['If-None-Match'])
+      Excon.stubs.pop
+      {status: 304, headers: {'Content-Type' => 'application/json'}}
+    end
+    assert_equal(body, link.run)
   end
 end
