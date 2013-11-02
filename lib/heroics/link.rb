@@ -8,8 +8,7 @@ module Heroics
     # @param path [String] The path to use when making requests.  Substrings
     #   that match `{(#/name)}` are replaced with user provided values when
     #   the link is invoked.
-    # @param method [Symbol] A symbol representing the HTTP method to use when
-    #   invoking the link.
+    # @param method [Symbol] The HTTP method to use when invoking the link.
     # @param options [Hash] Configuration for the link.  Possible keys
     #   include:
     #   - default_headers: Optionally, a set of headers to include in every
@@ -55,7 +54,7 @@ module Heroics
       connection = Excon.new(@url)
       response = connection.request(method: @method, path: path,
                                     headers: headers, body: body,
-                                    expects: [200, 201, 304])
+                                    expects: [200, 201, 206, 304])
       content_type = response.headers['Content-Type']
       if response.status == 304
         MultiJson.load(@cache["data:#{cache_key}"])
@@ -65,7 +64,30 @@ module Heroics
           @cache["etag:#{cache_key}"] = etag
           @cache["data:#{cache_key}"] = response.body
         end
-        MultiJson.load(response.body)
+        body = MultiJson.load(response.body)
+        if response.status == 206
+          next_range = response.headers['Next-Range']
+          Enumerator.new do |yielder|
+            while true do
+              # Yield the results we got in the body.
+              body.each do |item|
+                yielder << item
+              end
+
+              # Only make a request to get the next page if we have a valid
+              # next range.
+              break unless next_range
+              headers = headers.merge({'Range' => next_range})
+              response = connection.request(method: @method, path: path,
+                                            headers: headers,
+                                            expects: [200, 201, 206])
+              body = MultiJson.load(response.body)
+              next_range = response.headers['Next-Range']
+            end
+          end
+        else
+          body
+        end
       elsif !response.body.empty?
         response.body
       end
