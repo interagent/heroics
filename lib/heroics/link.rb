@@ -26,18 +26,26 @@ module Heroics
     # Make a request to the server.
     #
     # JSON content received with an ETag is cached.  When the server returns a
-    # 304 Not Modified content is loaded and returned from the cache.  The
-    # cache considers headers, in addition to the URL path, when creating keys
-    # so that requests to the same path, such as for paginated results, don't
-    # cause cache collisions.
+    # *304 Not Modified* status code content is loaded and returned from the
+    # cache.  The cache considers headers, in addition to the URL path, when
+    # creating keys so that requests to the same path, such as for paginated
+    # results, don't cause cache collisions.
+    #
+    # When the server returns a *206 Partial Content* status code the result
+    # is assumed to be an array and an enumerator is returned.  The enumerator
+    # yields results from the response until they've been consumed at which
+    # point, if additional content is available from the server, it blocks and
+    # makes a request to fetch the subsequent page of data.  This behaviour
+    # continues until the client stops iterating the enumerator or the dataset
+    # from the server has been entirely consumed.
     #
     # @param parameters [Array] The list of parameters to inject into the
     #   path.  A request body can be passed as the final parameter and will
     #   always be converted to JSON before being transmitted.
     # @raise [ArgumentError] Raised if either too many or too few parameters
     #   were provided.
-    # @return [String,Object] A string for text responses or an object for
-    #   JSON responses.
+    # @return [String,Object,Enumerator] A string for text responses, an
+    #   object for JSON responses, or an enumerator for list responses.
     def run(*parameters)
       path, body = format_path(parameters)
       headers = @default_headers
