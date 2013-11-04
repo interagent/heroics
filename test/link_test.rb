@@ -38,6 +38,21 @@ class LinkTest < MiniTest::Test
     assert_equal(nil, link.run(true, Time.utc(2013), 42, 'hello'))
   end
 
+  # Link.run injects parameters that include slashes and underscores in
+  # placeholder strings.
+  def test_run_with_slashed_and_underscored_parameters
+    Excon.stub(method: :get) do |request|
+      assert_equal('/resource/hello', request[:path])
+      Excon.stubs.pop
+      {status: 200, body: ''}
+    end
+
+    link = Heroics::Link.new('https://example.com',
+                             '/resource/{(%23%2Fstring%2Fparameter_here)}',
+                             :get)
+    assert_equal(nil, link.run('hello'))
+  end
+
   # Link.run injects parameters into the path in the order they were received.
   # It correctly identifies parameters with multiple encoded slashes.
   def test_run_with_parameters_containing_multiple_encoded_slashes

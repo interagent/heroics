@@ -112,7 +112,7 @@ module Heroics
     # @return [String,Object] A path and request body pair.  The body value is
     #   nil if a payload wasn't included in the list of parameters.
     def format_path(parameters)
-      parameter_regex = /\{\([%\/a-zA-Z0-9]*\)\}/
+      parameter_regex = /\{\([%\/a-zA-Z0-9_]*\)\}/
       parameter_size = @path.scan(parameter_regex).size
       too_few_parameters = parameter_size > parameters.size
       # FIXME We should use the schema to detect when a request body is

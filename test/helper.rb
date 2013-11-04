@@ -92,12 +92,12 @@ SAMPLE_SCHEMA = {
          'title'       => 'List'},
 
         {'description' => 'Show a sample resource',
-         'href'        => '/resource/(#/definitions/resource/definitions/uuid_field)}',
+         'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}',
          'method'      => 'GET',
          'rel'         => 'self',
          'title'       => 'Info'},
 
-        {'description' => 'Create sample resource',
+        {'description' => 'Create a sample resource',
          'href'        => '/resource',
          'method'      => 'POST',
          'rel'         => 'create',
@@ -115,8 +115,8 @@ SAMPLE_SCHEMA = {
              'email_field' => {
                '$ref' => '#/definitions/resource/definitions/email_field'}}}},
 
-        {'description' => 'Update sample resource',
-         'href'        => '/resource',
+        {'description' => 'Update a sample resource',
+         'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}',
          'method'      => 'PATCH',
          'rel'         => 'update',
          'title'       => 'Update',
@@ -133,7 +133,7 @@ SAMPLE_SCHEMA = {
              'email_field' => {
                '$ref' => '#/definitions/resource/definitions/email_field'}}}},
 
-        {'description' => 'Delete an existing sample resource.',
+        {'description' => 'Delete an existing sample resource',
          'href'        => '/apps/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}',
          'method'      => 'DELETE',
          'rel'         => 'destroy',

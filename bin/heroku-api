@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require 'heroics'
+require 'netrc'
+
+netrc = Netrc.read
+username, token = netrc['api.heroku.com']
+url = if username && token
+  username = username.split('@').first
+  "https://#{username}:#{token}@api.heroku.com/schema"
+else
+  'https://api.heroku.com/schema'
+end
+options = {
+  default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
+  cache: Moneta.new(:File, dir: '~/.heroics/heroku')}
+cli = Heroics::cli_from_schema_url('heroku-api', STDOUT, url, options)
+cli.run(*ARGV)

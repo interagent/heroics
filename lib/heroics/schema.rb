@@ -50,10 +50,22 @@ module Heroics
   #     request made by the client.  Default is no custom headers.
   #   - cache: Optionally, a Moneta-compatible cache to store ETags.  Default
   #     is no caching.
+  # @return [Client] A client with resources and links from the JSON schema.
   def self.client_from_schema_url(url, options={})
+    schema = download_schema(url, options)
+    client_from_schema(schema, URI::join(url, '/').to_s, options)
+  end
+
+  # Download a JSON schema from a URL.
+  #
+  # @param url [String] The URL for the schema.
+  # @param options [Hash] Configuration for links.  Possible keys include:
+  #   - default_headers: Optionally, a set of headers to include in every
+  #     request made by the client.  Default is no custom headers.
+  # @return [Hash] A hash representing the downloaded JSON schema.
+  def self.download_schema(url, options={})
     default_headers = options.fetch(:default_headers, {})
     response = Excon.get(url, headers: default_headers, expects: [200, 201])
-    schema = MultiJson.decode(response.body)
-    client_from_schema(schema, URI::join(url, '/').to_s, options)
+    MultiJson.decode(response.body)
   end
 end
