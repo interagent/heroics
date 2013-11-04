@@ -8,8 +8,7 @@ module Heroics
     # @param path [String] The path to use when making requests.  Substrings
     #   that match `{(#/name)}` are replaced with user provided values when
     #   the link is invoked.
-    # @param method [Symbol] A symbol representing the HTTP method to use when
-    #   invoking the link.
+    # @param method [Symbol] The HTTP method to use when invoking the link.
     # @param options [Hash] Configuration for the link.  Possible keys
     #   include:
     #   - default_headers: Optionally, a set of headers to include in every
@@ -27,18 +26,26 @@ module Heroics
     # Make a request to the server.
     #
     # JSON content received with an ETag is cached.  When the server returns a
-    # 304 Not Modified content is loaded and returned from the cache.  The
-    # cache considers headers, in addition to the URL path, when creating keys
-    # so that requests to the same path, such as for paginated results, don't
-    # cause cache collisions.
+    # *304 Not Modified* status code content is loaded and returned from the
+    # cache.  The cache considers headers, in addition to the URL path, when
+    # creating keys so that requests to the same path, such as for paginated
+    # results, don't cause cache collisions.
+    #
+    # When the server returns a *206 Partial Content* status code the result
+    # is assumed to be an array and an enumerator is returned.  The enumerator
+    # yields results from the response until they've been consumed at which
+    # point, if additional content is available from the server, it blocks and
+    # makes a request to fetch the subsequent page of data.  This behaviour
+    # continues until the client stops iterating the enumerator or the dataset
+    # from the server has been entirely consumed.
     #
     # @param parameters [Array] The list of parameters to inject into the
     #   path.  A request body can be passed as the final parameter and will
     #   always be converted to JSON before being transmitted.
     # @raise [ArgumentError] Raised if either too many or too few parameters
     #   were provided.
-    # @return [String,Object] A string for text responses or an object for
-    #   JSON responses.
+    # @return [String,Object,Enumerator] A string for text responses, an
+    #   object for JSON responses, or an enumerator for list responses.
     def run(*parameters)
       path, body = format_path(parameters)
       headers = @default_headers
@@ -55,7 +62,7 @@ module Heroics
       connection = Excon.new(@url)
       response = connection.request(method: @method, path: path,
                                     headers: headers, body: body,
-                                    expects: [200, 201, 304])
+                                    expects: [200, 201, 206, 304])
       content_type = response.headers['Content-Type']
       if response.status == 304
         MultiJson.load(@cache["data:#{cache_key}"])
@@ -65,7 +72,30 @@ module Heroics
           @cache["etag:#{cache_key}"] = etag
           @cache["data:#{cache_key}"] = response.body
         end
-        MultiJson.load(response.body)
+        body = MultiJson.load(response.body)
+        if response.status == 206
+          next_range = response.headers['Next-Range']
+          Enumerator.new do |yielder|
+            while true do
+              # Yield the results we got in the body.
+              body.each do |item|
+                yielder << item
+              end
+
+              # Only make a request to get the next page if we have a valid
+              # next range.
+              break unless next_range
+              headers = headers.merge({'Range' => next_range})
+              response = connection.request(method: @method, path: path,
+                                            headers: headers,
+                                            expects: [200, 201, 206])
+              body = MultiJson.load(response.body)
+              next_range = response.headers['Next-Range']
+            end
+          end
+        else
+          body
+        end
       elsif !response.body.empty?
         response.body
       end

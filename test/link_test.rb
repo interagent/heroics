@@ -295,4 +295,27 @@ class LinkTest < MiniTest::Test
     end
     assert_equal(body, link.run)
   end
+
+  # Link.run returns an enumerator when a 206 Partial Content status code and
+  # Content-Range header is included in a server response.  The enumerator
+  # makes requests to fetch missing pages as its iterated.
+  def test_run_with_range_response
+    Excon.stub(method: :get) do |request|
+      Excon.stubs.shift
+      {status: 206, headers: {'Content-Type' => 'application/json',
+                              'Content-Range' => 'id 1..2; max=200'},
+       body: MultiJson.dump([2])}
+    end
+
+    Excon.stub(method: :get) do |request|
+      Excon.stubs.shift
+      {status: 206, headers: {'Content-Type' => 'application/json',
+                              'Content-Range' => 'id 0..1; max=200',
+                              'Next-Range' => '201'},
+       body: MultiJson.dump([1])}
+    end
+
+    link = Heroics::Link.new('https://example.com', '/resource', :get)
+    assert_equal([1, 2], link.run.to_a)
+  end
 end
