@@ -18,15 +18,28 @@ module Heroics
     #   command.  The first parameters is the name of the command and the
     #   remaining parameters are passed to it.
     def run(*parameters)
-      command = parameters.shift
-      if command.nil? || command == 'help'
+      name = parameters.shift
+      if name.nil? || name == 'help'
         usage
+      else
+        command = @commands[name]
+        if command.nil?
+          @output.write("There is no command called '#{name}'.")
+        else
+          command.run(*parameters)
+        end
       end
     end
 
     private
 
+    # Write usage information to the output stream.
     def usage
+      if @commands.empty?
+        @output.write 'No commands are available.'
+        return
+      end
+
       @output.write <<-USAGE
 Usage: #{@name} <command> [<parameter> [...]] [<body>]
 
@@ -46,21 +59,21 @@ USAGE
   def self.cli_from_schema(name, output, schema, url, options={})
     client = client_from_schema(schema, url, options)
     commands = {}
-    @schema['definitions'].each do |name, resource_schema|
+    schema['definitions'].each do |resource_name, resource_schema|
       resource_schema['links'].each do |link_schema|
         path = link_schema['href']
         title = Heroics::sanitize_name(link_schema['title'])
-        command_name = "#{name}:#{title}"
-        commands[command_name] = Command.new()
-
-        links << {name: link_name, description: link_schema['description']}
+        command_name = "#{resource_name}:#{title}"
+        properties = resource_schema['definitions']
+        commands[command_name] = Command.new(name, resource_name, link_schema,
+                                             properties, client, output)
       end
     end
+    Heroics::CLI.new(name, commands, output)
   end
 
   def self.cli_from_schema_url(name, output, url, options={})
     schema = download_schema(url, options)
-    client = client_from_schema(schema, options)
-    CLI.new(name, schema, client, output)
+    cli_from_schema(name, output, schema, url, options)
   end
 end
