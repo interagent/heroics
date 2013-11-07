@@ -70,12 +70,10 @@ USAGE
                                    'resource:info' => command2}, output)
     cli.run('help', 'resource:info')
     expected = <<-USAGE
-Usage: cli <command> [<parameter> [...]] [<body>]
+Usage: cli resource:info
 
-Help topics, type "cli help <topic>" for more details:
-
-  resource:info    Show a sample resource
-  resource:list    Show all sample resources
+Description:
+  Show a sample resource
 USAGE
     assert_equal(expected, output.string)
   end

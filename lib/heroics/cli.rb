@@ -20,7 +20,12 @@ module Heroics
     def run(*parameters)
       name = parameters.shift
       if name.nil? || name == 'help'
-        usage
+        if command_name = parameters.first
+          command = @commands[command_name]
+          command.usage
+        else
+          usage
+        end
       else
         command = @commands[name]
         if command.nil?

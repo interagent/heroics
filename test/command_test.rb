@@ -184,7 +184,7 @@ class CommandTest < MiniTest::Test
                                    client, output)
     command.usage
     expected = <<-USAGE
-Usage: cli resource:update <uuid_field> <body>
+Usage: cli resource:update
 
 Description:
   Update a sample resource
