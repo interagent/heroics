@@ -6,22 +6,20 @@ class CommandTest < MiniTest::Test
   # the resource name and link title with a colon.
   def test_name
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][0]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
     assert_equal('resource:list', command.name)
   end
 
   # Command.description returns a description for the command.
   def test_description
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][0]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
     assert_equal('Show all sample resources', command.description)
   end
 
@@ -29,11 +27,10 @@ class CommandTest < MiniTest::Test
   # are provided.
   def test_run_without_parameters
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][0]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
 
     body = ['Hello', 'World!']
     Excon.stub(method: :get) do |request|
@@ -51,11 +48,10 @@ class CommandTest < MiniTest::Test
   # parameters when they're provided.
   def test_run_with_parameters
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][1]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('info'), client, output)
 
     uuid = '1ab1c589-df46-40aa-b786-60e83b1efb10'
     body = {'Hello' => 'World!'}
@@ -74,11 +70,10 @@ class CommandTest < MiniTest::Test
   # body to the link when it's provided.
   def test_run_with_request_body_and_text_response
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][2]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('create'), client, output)
 
     body = {'Hello' => 'World!'}
     Excon.stub(method: :post) do |request|
@@ -97,11 +92,10 @@ class CommandTest < MiniTest::Test
   # to an array, if a range response is received, before writing it out.
   def test_run_with_range_response
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][0]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
 
     Excon.stub(method: :get) do |request|
       Excon.stubs.shift
@@ -126,11 +120,10 @@ class CommandTest < MiniTest::Test
   # and a request body to the link when they're provided.
   def test_run_with_request_body_and_parameters
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][3]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('update'), client, output)
 
     uuid = '1ab1c589-df46-40aa-b786-60e83b1efb10'
     body = {'Hello' => 'World!'}
@@ -151,11 +144,10 @@ class CommandTest < MiniTest::Test
   # Command.run raises an ArgumentError if too few parameters are provided.
   def test_run_with_too_few_parameters
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][1]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('info'), client, output)
     assert_raises ArgumentError do
       command.run
     end
@@ -164,11 +156,10 @@ class CommandTest < MiniTest::Test
   # Command.run raises an ArgumentError if too many parameters are provided.
   def test_run_with_too_many_parameters
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][1]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('info'), client, output)
     assert_raises ArgumentError do
       command.run('too', 'many', 'parameters')
     end
@@ -177,11 +168,10 @@ class CommandTest < MiniTest::Test
   # Command.usage displays usage information.
   def test_usage
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][3]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['properties']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('update'), client, output)
     command.usage
     expected = <<-USAGE
 Usage: cli resource:update

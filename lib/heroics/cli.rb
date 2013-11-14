@@ -3,7 +3,7 @@ module Heroics
     # Instantiate a CLI for an API described by a JSON schema.
     #
     # @param name [String] The name of the CLI.
-    # @param schema [Hash] The JSON schema describing the API.
+    # @param schema [Schema] The JSON schema describing the API.
     # @param client [Client] A client generated from the JSON schema.
     # @param output [IO] The stream to write to.
     def initialize(name, commands, output)

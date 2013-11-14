@@ -73,6 +73,6 @@ module Heroics
   # @return [Client] A client with resources and links from the JSON schema.
   def self.client_from_schema_url(url, options={})
     schema = download_schema(url, options)
-    client_from_schema(schema, URI::join(url, '/').to_s, options)
+    client_from_schema(schema.schema, URI::join(url, '/').to_s, options)
   end
 end

@@ -7,14 +7,12 @@ class CLITest < MiniTest::Test
   # CLI.run displays usage information when no arguments are provided.
   def test_run_without_arguments
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    schema1 = SAMPLE_SCHEMA['definitions']['resource']['links'][0]
-    schema2 = SAMPLE_SCHEMA['definitions']['resource']['links'][1]
-    command1 = Heroics::Command.new('cli', 'resource', schema1, properties,
-                                    client, output)
-    command2 = Heroics::Command.new('cli', 'resource', schema2, properties,
-                                    client, output)
+    command1 = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
+    command2 = Heroics::Command.new(
+      'cli', schema.resource('resource').link('info'), client, output)
     cli = Heroics::CLI.new('cli', {'resource:list' => command1,
                                    'resource:info' => command2}, output)
     cli.run
@@ -32,14 +30,12 @@ USAGE
   # CLI.run displays usage information when the help command is specified.
   def test_run_with_help_command
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    schema1 = SAMPLE_SCHEMA['definitions']['resource']['links'][0]
-    schema2 = SAMPLE_SCHEMA['definitions']['resource']['links'][1]
-    command1 = Heroics::Command.new('cli', 'resource', schema1, properties,
-                                    client, output)
-    command2 = Heroics::Command.new('cli', 'resource', schema2, properties,
-                                    client, output)
+    command1 = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
+    command2 = Heroics::Command.new(
+      'cli', schema.resource('resource').link('info'), client, output)
     cli = Heroics::CLI.new('cli', {'resource:list' => command1,
                                    'resource:info' => command2}, output)
     cli.run('help')
@@ -58,14 +54,12 @@ USAGE
   # with the 'help' command.
   def test_run_with_help_command_and_explicit_command_name
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    schema1 = SAMPLE_SCHEMA['definitions']['resource']['links'][0]
-    schema2 = SAMPLE_SCHEMA['definitions']['resource']['links'][1]
-    command1 = Heroics::Command.new('cli', 'resource', schema1, properties,
-                                    client, output)
-    command2 = Heroics::Command.new('cli', 'resource', schema2, properties,
-                                    client, output)
+    command1 = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
+    command2 = Heroics::Command.new(
+      'cli', schema.resource('resource').link('info'), client, output)
     cli = Heroics::CLI.new('cli', {'resource:list' => command1,
                                    'resource:info' => command2}, output)
     cli.run('help', 'resource:info')
@@ -89,11 +83,10 @@ USAGE
   # CLI.run displays an error message when an unknown command name is used.
   def test_run_with_unknown_name
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][0]
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
     cli = Heroics::CLI.new('cli', {'resource:list' => command}, output)
     cli.run('unknown:command')
     assert_equal("There is no command called 'unknown:command'.",
@@ -103,11 +96,10 @@ USAGE
   # CLI.run runs the command matching the specified name.
   def test_run
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][0]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
     cli = Heroics::CLI.new('cli', {'resource:list' => command}, output)
 
     body = ['Hello', 'World!']
@@ -126,11 +118,10 @@ USAGE
   # to it.
   def test_run_with_parameters
     client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    schema = SAMPLE_SCHEMA['definitions']['resource']['links'][3]
-    properties = SAMPLE_SCHEMA['definitions']['resource']['definitions']
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
-    command = Heroics::Command.new('cli', 'resource', schema, properties,
-                                   client, output)
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('update'), client, output)
     cli = Heroics::CLI.new('cli', {'resource:update' => command}, output)
 
     uuid = '1ab1c589-df46-40aa-b786-60e83b1efb10'
