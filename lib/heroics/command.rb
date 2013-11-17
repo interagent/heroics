@@ -26,9 +26,7 @@ module Heroics
 
     # Write usage information to the output stream.
     def usage
-      parameters = @link_schema.parameters.map do |parameter|
-        "<#{parameter}>"
-      end
+      parameters = @link_schema.parameters.map { |parameter| "<#{parameter}>" }
       parameters = parameters.empty? ? '' : " #{parameters.join(' ')}"
       body = @link_schema.body
       body_parameter = body.nil? ? '' : ' <body>'

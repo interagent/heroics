@@ -29,7 +29,7 @@ module Heroics
       else
         command = @commands[name]
         if command.nil?
-          @output.write("There is no command called '#{name}'.")
+          @output.write("There is no command called '#{name}'.\n")
         else
           command.run(*parameters)
         end

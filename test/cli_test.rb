@@ -89,7 +89,7 @@ USAGE
       'cli', schema.resource('resource').link('list'), client, output)
     cli = Heroics::CLI.new('cli', {'resource:list' => command}, output)
     cli.run('unknown:command')
-    assert_equal("There is no command called 'unknown:command'.",
+    assert_equal("There is no command called 'unknown:command'.\n",
                  output.string)
   end
 
