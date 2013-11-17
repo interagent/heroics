@@ -26,7 +26,7 @@ module Heroics
 
   # Create an HTTP client from a JSON schema.
   #
-  # @param schema [Schema] The JSON schema to convert into an HTTP client.
+  # @param schema [Schema] The JSON schema to build an HTTP client for.
   # @param url [String] The URL the generated client should use when making
   #   requests.  Include the username and password to use with HTTP basic
   #   auth.
@@ -37,11 +37,11 @@ module Heroics
   #     is no caching.
   # @return [Client] A client with resources and links from the JSON schema.
   def self.client_from_schema(schema, url, options={})
-    resource = {}
+    resources = {}
     schema.resources.each do |resource_schema|
       links = {}
       resource_schema.links.each do |link_schema|
-        links[title] = Link.new(url, link_schema, options)
+        links[link_schema.name] = Link.new(url, link_schema, options)
       end
       resources[resource_schema.name] = Resource.new(links)
     end
@@ -60,6 +60,6 @@ module Heroics
   # @return [Client] A client with resources and links from the JSON schema.
   def self.client_from_schema_url(url, options={})
     schema = download_schema(url, options)
-    client_from_schema(schema.schema, URI::join(url, '/').to_s, options)
+    client_from_schema(schema, URI::join(url, '/').to_s, options)
   end
 end

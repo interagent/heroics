@@ -64,19 +64,27 @@ USAGE
   def self.cli_from_schema(name, output, schema, url, options={})
     client = client_from_schema(schema, url, options)
     commands = {}
-    schema['definitions'].each do |resource_name, resource_schema|
-      resource_schema['links'].each do |link_schema|
-        path = link_schema['href']
-        title = Heroics::sanitize_name(link_schema['title'])
-        command_name = "#{resource_name}:#{title}"
-        properties = resource_schema['definitions']
-        commands[command_name] = Command.new(name, resource_name, link_schema,
-                                             properties, client, output)
+    schema.resources.each do |resource_schema|
+      resource_schema.links.each do |link_schema|
+        command = Heroics::Command.new(name, link_schema, client, output)
+        commands[command.name] = command
       end
     end
-    Heroics::CLI.new(name, commands, output)
+    CLI.new(name, commands, output)
   end
 
+  # Download a JSON schema and create a CLI with it.
+  #
+  # @param name [String] The name of the CLI.
+  # @param output [IO] The stream to write to.
+  # @param url [String] The URL for the schema.  The URL will be used by the
+  #   generated CLI when it makes requests.
+  # @param options [Hash] Configuration for links.  Possible keys include:
+  #   - default_headers: Optionally, a set of headers to include in every
+  #     request made by the CLI.  Default is no custom headers.
+  #   - cache: Optionally, a Moneta-compatible cache to store ETags.  Default
+  #     is no caching.
+  # @return [CLI] A CLI with commands generated from the JSON schema.
   def self.cli_from_schema_url(name, output, url, options={})
     schema = download_schema(url, options)
     cli_from_schema(name, output, schema, url, options)

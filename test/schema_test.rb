@@ -1,6 +1,6 @@
 require 'helper'
 
-class SchemaTest < MiniTest::Test
+class SchemaTest < MiniTest::Unit::TestCase
   # Schema.resource returns a ResourceSchema for the named resource.
   def test_resource
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -19,12 +19,11 @@ class SchemaTest < MiniTest::Test
   # Schema.resources returns a sequence of ResourceSchema children.
   def test_resources
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
-    puts schema.resources
     assert_equal(['resource'], schema.resources.map(&:name))
   end
 end
 
-class ResourceSchemaTest < MiniTest::Test
+class ResourceSchemaTest < MiniTest::Unit::TestCase
   # ResourceSchema.link returns a LinkSchema for the named link.
   def test_link
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -49,7 +48,7 @@ class ResourceSchemaTest < MiniTest::Test
   end
 end
 
-class LinkSchemaTest < MiniTest::Test
+class LinkSchemaTest < MiniTest::Unit::TestCase
   # LinkSchema.name returns the sanitized link name.
   def test_name
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -157,7 +156,9 @@ class LinkSchemaTest < MiniTest::Test
   end
 end
 
-class DownloadSchemaTest < MiniTest::Test
+class DownloadSchemaTest < MiniTest::Unit::TestCase
+  include ExconHelper
+
   # download_schema makes a request to fetch the schema, decodes the
   # downloaded JSON and returns a Ruby hash.
   def test_download_schema

@@ -1,6 +1,6 @@
 require 'helper'
 
-class LinkTest < MiniTest::Test
+class LinkTest < MiniTest::Unit::TestCase
   include ExconHelper
 
   # Link.run invokes a request against the service identified by the URL.  The

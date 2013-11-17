@@ -1,6 +1,6 @@
 require 'helper'
 
-class ClientTest < MiniTest::Test
+class ClientTest < MiniTest::Unit::TestCase
   include ExconHelper
 
   # Client.<resource> raises a NoMethodError when a method is invoked
@@ -17,8 +17,9 @@ class ClientTest < MiniTest::Test
 
   # Client.<resource>.<link> finds the appropriate link and invokes it.
   def test_resource
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://username:secret@example.com',
-                             '/resource', :get)
+                             schema.resource('resource').link('list'))
     resource = Heroics::Resource.new({'link' => link})
     client = Heroics::Client.new({'resource' => resource})
     Excon.stub(method: :get) do |request|
@@ -34,12 +35,13 @@ class ClientTest < MiniTest::Test
   end
 end
 
-class ClientFromSchemaTest < MiniTest::Test
+class ClientFromSchemaTest < MiniTest::Unit::TestCase
   include ExconHelper
 
   # client_from_schema returns a Client generated from the specified schema.
   def test_client_from_schema
-    client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics::client_from_schema(schema, 'https://example.com')
     body = {'Hello' => 'World!'}
     Excon.stub(method: :post) do |request|
       assert_equal('/resource', request[:path])
@@ -53,8 +55,9 @@ class ClientFromSchemaTest < MiniTest::Test
   # client_from_schema optionally accepts custom headers to pass with every
   # request made by the generated client.
   def test_client_from_schema_with_custom_headers
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     client = Heroics::client_from_schema(
-      SAMPLE_SCHEMA, 'https://example.com',
+      schema, 'https://example.com',
       default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'})
     Excon.stub(method: :post) do |request|
       assert_equal('application/vnd.heroku+json; version=3',
@@ -63,25 +66,6 @@ class ClientFromSchemaTest < MiniTest::Test
       {status: 200}
     end
     client.resource.create
-  end
-
-  # client_from_schema raises a SchemaError exception if definitions are not
-  # present in the specified schema.
-  def test_client_from_schema_without_definitions
-    error = assert_raises Heroics::SchemaError do
-      Heroics::client_from_schema({}, 'https://example.com')
-    end
-    assert_equal("Missing top-level 'definitions' key.", error.message)
-  end
-
-  # client_from_schema raises a SchemaError exception if a resource doesn't
-  # have a links key.
-  def test_client_from_schema_without_links
-    error = assert_raises Heroics::SchemaError do
-      Heroics::client_from_schema({'definitions' => {'resource' => {}}},
-                                  'https://example.com')
-    end
-    assert_equal("'resource' resource is missing 'links' key.", error.message)
   end
 
   # client_from_schema takes an optional :cache parameter which it uses when
@@ -95,7 +79,8 @@ class ClientFromSchemaTest < MiniTest::Test
        body: MultiJson.dump(body)}
     end
 
-    client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com',
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics::client_from_schema(schema, 'https://example.com',
                                          cache: Moneta.new(:Memory))
     assert_equal(body, client.resource.list)
 
@@ -108,7 +93,7 @@ class ClientFromSchemaTest < MiniTest::Test
   end
 end
 
-class ClientFromSchemaURLTest < MiniTest::Test
+class ClientFromSchemaURLTest < MiniTest::Unit::TestCase
   include ExconHelper
 
   # client_from_schema_url downloads a schema and returns a Client generated

@@ -1,6 +1,6 @@
 require 'helper'
 
-class SanitizeNameTest < MiniTest::Test
+class SanitizeNameTest < MiniTest::Unit::TestCase
   # sanitize_name is a no-op when an empty string is provided.
   def test_sanitize_name_with_empty_name
     assert_equal('', Heroics::sanitize_name(''))

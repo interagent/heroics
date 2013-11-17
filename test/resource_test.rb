@@ -1,6 +1,6 @@
 require 'helper'
 
-class ResourceTest < MiniTest::Test
+class ResourceTest < MiniTest::Unit::TestCase
   include ExconHelper
 
   # Resource.<link> raises a NoMethodError when a method is invoked without a
