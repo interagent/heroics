@@ -56,7 +56,7 @@ SAMPLE_SCHEMA = {
 
         'uuid_field' => {
           'description' => 'A sample UUID field',
-          'example'     => '01234567-89ab-cdef-0123-456789abcdef',
+          'example'     => '44724831-bf66-4bc2-865f-e2c4c2b14c78',
           'format'      => 'uuid',
           'readOnly'    => true,
           'type'        => ['string']
@@ -133,8 +133,8 @@ SAMPLE_SCHEMA = {
              'email_field' => {
                '$ref' => '#/definitions/resource/definitions/email_field'}}}},
 
-        {'description' => 'Delete an existing sample resource',
-         'href'        => '/apps/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}',
+        {'description' => 'Delete an existing sample resource at specific time',
+         'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fdate_field)}',
          'method'      => 'DELETE',
          'rel'         => 'destroy',
          'title'       => 'Delete'}

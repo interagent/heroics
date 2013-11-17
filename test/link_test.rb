@@ -17,68 +17,39 @@ class LinkTest < MiniTest::Test
       {status: 200, body: ''}
     end
 
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://username:secret@example.com',
-                             '/resource', :get)
+                             schema.resource('resource').link('list'))
     assert_equal(nil, link.run)
   end
 
   # Link.run injects parameters into the path in the order they were received.
   def test_run_with_parameters_and_empty_response
     Excon.stub(method: :get) do |request|
-      assert_equal('/resource/true/2013-01-01T00:00:00Z/42/hello',
+      assert_equal('/resource/44724831-bf66-4bc2-865f-e2c4c2b14c78',
                    request[:path])
       Excon.stubs.pop
       {status: 200, body: ''}
     end
 
-    link = Heroics::Link.new(
-      'https://example.com',
-      '/resource/{(%23%2Fbool)}/{(%23%2Ftime)}/{(%23%2Fint)}/{(%23%2Fstring)}',
-      :get)
-    assert_equal(nil, link.run(true, Time.utc(2013), 42, 'hello'))
-  end
-
-  # Link.run injects parameters that include slashes and underscores in
-  # placeholder strings.
-  def test_run_with_slashed_and_underscored_parameters
-    Excon.stub(method: :get) do |request|
-      assert_equal('/resource/hello', request[:path])
-      Excon.stubs.pop
-      {status: 200, body: ''}
-    end
-
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
-                             '/resource/{(%23%2Fstring%2Fparameter_here)}',
-                             :get)
-    assert_equal(nil, link.run('hello'))
-  end
-
-  # Link.run injects parameters into the path in the order they were received.
-  # It correctly identifies parameters with multiple encoded slashes.
-  def test_run_with_parameters_containing_multiple_encoded_slashes
-    Excon.stub(method: :get) do |request|
-      assert_equal('/resource/42', request[:path])
-      Excon.stubs.pop
-      {status: 200, body: ''}
-    end
-
-    link = Heroics::Link.new('https://example.com',
-                             '/resource/{(%23%2Fa%2Flong%2Fparameter%2Fname)}',
-                             :get)
-    assert_equal(nil, link.run(42))
+                             schema.resource('resource').link('info'))
+    assert_equal(nil, link.run('44724831-bf66-4bc2-865f-e2c4c2b14c78'))
   end
 
   # Link.run converts Time parameters to UTC before sending them to the
   # server.
   def test_run_converts_time_parameters_to_utc
-    Excon.stub(method: :get) do |request|
+    Excon.stub(method: :delete) do |request|
       assert_equal("/resource/2013-01-01T08:00:00Z", request[:path])
       Excon.stubs.pop
       {status: 200, body: ''}
     end
 
-    link = Heroics::Link.new('https://example.com', '/resource/{(%23%2Ftime)}',
-                             :get)
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('delete'))
     assert_equal(nil, link.run(Time.parse('2013-01-01 00:00:00-0800')))
   end
 
@@ -94,23 +65,26 @@ class LinkTest < MiniTest::Test
       {status: 200, body: ''}
     end
 
-    link = Heroics::Link.new('https://example.com', '/resource', :post)
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('create'))
     assert_equal(nil, link.run(body))
   end
 
   # Link.run passes custom headers to the server when they've been provided.
   def test_run_with_custom_request_headers
-    Excon.stub(method: :post) do |request|
+    Excon.stub(method: :get) do |request|
       assert_equal('application/vnd.heroku+json; version=3',
                    request[:headers]['Accept'])
       Excon.stubs.pop
       {status: 200}
     end
 
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new(
-      'https://example.com', '/resource', :post,
+      'https://example.com', schema.resource('resource').link('list'),
       {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
-    assert_equal(nil, link.run)
+    assert_equal(nil, link.run())
   end
 
   # Link.run passes custom headers to the server when they've been provided.
@@ -126,9 +100,10 @@ class LinkTest < MiniTest::Test
       {status: 200}
     end
 
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new(
-      'https://example.com', '/resource', :post,
-      {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
+      'https://example.com', schema.resource('resource').link('create'),
+      default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'})
     assert_equal(nil, link.run(body))
   end
 
@@ -143,8 +118,10 @@ class LinkTest < MiniTest::Test
       Excon.stubs.pop
       {status: 200}
     end
+
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new(
-      'https://example.com', '/resource', :post,
+      'https://example.com', schema.resource('resource').link('create'),
       {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
     assert_equal(nil, link.run(body))
 
@@ -170,7 +147,9 @@ class LinkTest < MiniTest::Test
        body: "Hello, world!\r\n"}
     end
 
-    link = Heroics::Link.new('https://example.com', '/resource', :get)
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'))
     assert_equal("Hello, world!\r\n", link.run)
   end
 
@@ -185,7 +164,9 @@ class LinkTest < MiniTest::Test
        body: MultiJson.dump(body)}
     end
 
-    link = Heroics::Link.new('https://example.com', '/resource', :post)
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('create'))
     assert_equal(body, link.run)
   end
 
@@ -201,7 +182,9 @@ class LinkTest < MiniTest::Test
        body: MultiJson.dump(body)}
     end
 
-    link = Heroics::Link.new('https://example.com', '/resource', :get)
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'))
     assert_equal(body, link.run)
   end
 
@@ -214,7 +197,9 @@ class LinkTest < MiniTest::Test
       {status: 400}
     end
 
-    link = Heroics::Link.new('https://example.com', '/resource', :get)
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'))
     assert_raises Excon::Errors::BadRequest do
       link.run
     end
@@ -222,8 +207,9 @@ class LinkTest < MiniTest::Test
 
   # Link.run raises an ArgumentError if too few parameters are provided.
   def test_run_with_missing_parameters
-    path = '/resource/{(%23%2Fparameter)}'
-    link = Heroics::Link.new('https://example.com', path, :get)
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('info'))
     error = assert_raises ArgumentError do
       link.run
     end
@@ -232,8 +218,9 @@ class LinkTest < MiniTest::Test
 
   # Link.run raises an ArgumentError if too many parameters are provided.
   def test_run_with_too_many_parameters
-    path = '/resource/{(%23%2Fparameter)}'
-    link = Heroics::Link.new('https://example.com', path, :get)
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('info'))
     error = assert_raises ArgumentError do
       link.run('too', 'many', 'parameters')
     end
@@ -250,7 +237,9 @@ class LinkTest < MiniTest::Test
 
     cache = Moneta.new(:Memory)
     cache['etag:/resource:0'] = 'etag-contents'
-    link = Heroics::Link.new('https://example.com', '/resource', :get,
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'),
                              cache: cache)
     link.run
   end
@@ -265,9 +254,11 @@ class LinkTest < MiniTest::Test
 
     cache = Moneta.new(:Memory)
     cache['etag:/resource:0'] = 'etag-contents'
-    link = Heroics::Link.new('https://example.com', '/resource', :post,
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('create'),
                              cache: cache)
-    link.run
+    link.run({'Hello' => 'World'})
   end
 
   # Link.run returns JSON content loaded from the cache when a GET request
@@ -283,7 +274,9 @@ class LinkTest < MiniTest::Test
     cache = Moneta.new(:Memory)
     cache['etag:/resource:0'] = 'etag-contents'
     cache['data:/resource:0'] = MultiJson.dump(body)
-    link = Heroics::Link.new('https://example.com', '/resource', :get,
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'),
                              cache: cache)
     assert_equal(body, link.run)
   end
@@ -299,7 +292,9 @@ class LinkTest < MiniTest::Test
        body: MultiJson.dump(body)}
     end
 
-    link = Heroics::Link.new('https://example.com', '/resource', :get,
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'),
                              cache: Moneta.new(:Memory))
     assert_equal(body, link.run)
 
@@ -330,7 +325,9 @@ class LinkTest < MiniTest::Test
        body: MultiJson.dump([1])}
     end
 
-    link = Heroics::Link.new('https://example.com', '/resource', :get)
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'))
     assert_equal([1, 2], link.run.to_a)
   end
 end

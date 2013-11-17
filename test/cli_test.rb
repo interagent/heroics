@@ -64,7 +64,7 @@ USAGE
                                    'resource:info' => command2}, output)
     cli.run('help', 'resource:info')
     expected = <<-USAGE
-Usage: cli resource:info
+Usage: cli resource:info <uuid_field>
 
 Description:
   Show a sample resource

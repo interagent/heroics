@@ -17,8 +17,9 @@ class ResourceTest < MiniTest::Test
 
   # Resource.<link> finds the appropriate link and invokes it.
   def test_link
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://username:secret@example.com',
-                             '/resource', :get)
+                             schema.resource('resource').link('list'))
     resource = Heroics::Resource.new({'link' => link})
     Excon.stub(method: :get) do |request|
       assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',

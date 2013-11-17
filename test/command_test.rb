@@ -119,8 +119,8 @@ class CommandTest < MiniTest::Test
   # Command.run calls the correct method on the client and passes parameters
   # and a request body to the link when they're provided.
   def test_run_with_request_body_and_parameters
-    client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics::client_from_schema(schema, 'https://example.com')
     output = StringIO.new
     command = Heroics::Command.new(
       'cli', schema.resource('resource').link('update'), client, output)
@@ -174,10 +174,19 @@ class CommandTest < MiniTest::Test
       'cli', schema.resource('resource').link('update'), client, output)
     command.usage
     expected = <<-USAGE
-Usage: cli resource:update
+Usage: cli resource:update <uuid_field> <body>
 
 Description:
   Update a sample resource
+
+Body example:
+  {
+    "date_field": "2013-10-19 22:10:29Z",
+    "string_field": "Sample text.",
+    "boolean_field": true,
+    "uuid_field": "44724831-bf66-4bc2-865f-e2c4c2b14c78",
+    "email_field": "username@example.com"
+  }
 USAGE
     assert_equal(expected, output.string)
   end
