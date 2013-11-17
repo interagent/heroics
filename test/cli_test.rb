@@ -111,7 +111,7 @@ USAGE
     end
 
     cli.run('resource:list')
-    assert_equal(MultiJson.dump(body), output.string)
+    assert_equal(MultiJson.dump(body, pretty: true) + "\n", output.string)
   end
 
   # CLI.run runs the command matching the specified name and passes parameters
@@ -137,7 +137,7 @@ USAGE
     end
 
     cli.run('resource:update', uuid, body)
-    assert_equal(MultiJson.dump(result), output.string)
+    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
   end
 end
 
@@ -162,7 +162,7 @@ class CLIFromSchemaTest < MiniTest::Unit::TestCase
     output = StringIO.new
     cli = Heroics.cli_from_schema('cli', output, schema, 'https://example.com')
     cli.run('resource:update', uuid, body)
-    assert_equal(MultiJson.dump(result), output.string)
+    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
   end
 
   # cli_from_schema optionally accepts custom headers to pass with every
@@ -185,7 +185,7 @@ class CLIFromSchemaTest < MiniTest::Unit::TestCase
       'cli', output, schema, 'https://example.com',
       default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'})
     cli.run('resource:update', uuid, body)
-    assert_equal(MultiJson.dump(result), output.string)
+    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
   end
 end
 
@@ -220,7 +220,7 @@ class CLIFromSchemaURLTest < MiniTest::Unit::TestCase
     end
 
     cli.run('resource:update', uuid, body)
-    assert_equal(MultiJson.dump(result), output.string)
+    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
   end
 
   # cli_from_schema_url optionally accepts custom headers to include in the
@@ -254,6 +254,6 @@ class CLIFromSchemaURLTest < MiniTest::Unit::TestCase
     end
 
     cli.run('resource:update', uuid, body)
-    assert_equal(MultiJson.dump(result), output.string)
+    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
   end
 end

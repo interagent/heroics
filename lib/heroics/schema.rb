@@ -111,13 +111,30 @@ module Heroics
     end
 
     def resolve_parameters(parameters)
+      # FIXME This is all pretty terrible.  It'd be much better to
+      # automatically resolve $ref's based on the path instead of special
+      # casing things all over the place here. -jkakar
       properties = @schema['definitions'][@resource_name]['properties']
       definitions = Hash[properties.each_pair.map do |key, value|
                            [value['$ref'], key]
                          end]
       parameters.map do |parameter|
         definition_name = URI.unescape(parameter[2..-3])
-        definitions[definition_name]
+        if definitions.has_key?(definition_name)
+          definitions[definition_name]
+        else
+          definition_name = definition_name.split('/')[-1]
+          resource_definitions = @schema['definitions'][@resource_name]['definitions'][definition_name]
+          if resource_definitions.has_key?('anyOf')
+            resource_definitions['anyOf'].map do |property|
+              definitions[property['$ref']]
+            end.join('|')
+          else
+            resource_definitions['oneOf'].map do |property|
+              definitions[property['$ref']]
+            end.join('|')
+          end
+        end
       end
     end
 

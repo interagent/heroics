@@ -67,6 +67,12 @@ SAMPLE_SCHEMA = {
           'format'      => 'email',
           'readOnly'    => true,
           'type'        => ['string']
+        },
+
+        'identity' => {
+          'oneOf' => [
+            {'$ref' => '#/definitions/resource/definitions/uuid_field'},
+            {'$ref' => '#/definitions/resource/definitions/email_field'}]
         }
       },
 
@@ -95,6 +101,12 @@ SAMPLE_SCHEMA = {
          'method'      => 'GET',
          'rel'         => 'self',
          'title'       => 'Info'},
+
+        {'description' => 'Show a sample resource',
+         'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fidentity)}',
+         'method'      => 'GET',
+         'rel'         => 'self',
+         'title'       => 'Identify'},
 
         {'description' => 'Create a sample resource',
          'href'        => '/resource',

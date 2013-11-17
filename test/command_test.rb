@@ -43,7 +43,7 @@ class CommandTest < MiniTest::Unit::TestCase
     end
 
     command.run
-    assert_equal(MultiJson.dump(body), output.string)
+    assert_equal(MultiJson.dump(body, pretty: true) + "\n", output.string)
   end
 
   # Command.run calls the correct method on the client and passes link
@@ -65,7 +65,7 @@ class CommandTest < MiniTest::Unit::TestCase
     end
 
     command.run(uuid)
-    assert_equal(MultiJson.dump(body), output.string)
+    assert_equal(MultiJson.dump(body, pretty: true) + "\n", output.string)
   end
 
   # Command.run calls the correct method on the client and passes a request
@@ -87,7 +87,7 @@ class CommandTest < MiniTest::Unit::TestCase
     end
 
     command.run(body)
-    assert_equal('', output.string)
+    assert_equal("\n", output.string)
   end
 
   # Command.run calls the correct method on the client and converts the result
@@ -115,7 +115,7 @@ class CommandTest < MiniTest::Unit::TestCase
     end
 
     command.run
-    assert_equal(MultiJson.dump([1, 2]), output.string)
+    assert_equal(MultiJson.dump([1, 2], pretty: true) + "\n", output.string)
   end
 
   # Command.run calls the correct method on the client and passes parameters
@@ -140,7 +140,7 @@ class CommandTest < MiniTest::Unit::TestCase
     end
 
     command.run(uuid, body)
-    assert_equal(MultiJson.dump(result), output.string)
+    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
   end
 
   # Command.run raises an ArgumentError if too few parameters are provided.
@@ -189,6 +189,24 @@ Body example:
     "uuid_field": "44724831-bf66-4bc2-865f-e2c4c2b14c78",
     "email_field": "username@example.com"
   }
+USAGE
+    assert_equal(expected, output.string)
+  end
+
+  # Command.usage correctly handles parameters that are described by 'oneOf'
+  # and 'anyOf' sub-parameter lists.
+  def test_usage_with_one_of_field
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics::client_from_schema(schema, 'https://example.com')
+    output = StringIO.new
+    command = Heroics::Command.new(
+      'cli', schema.resource('resource').link('identify'), client, output)
+    command.usage
+    expected = <<-USAGE
+Usage: cli resource:identify <uuid_field|email_field>
+
+Description:
+  Show a sample resource
 USAGE
     assert_equal(expected, output.string)
   end

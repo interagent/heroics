@@ -43,7 +43,7 @@ class ResourceSchemaTest < MiniTest::Unit::TestCase
   # ResourceSchema.links returns a list of LinkSchema children.
   def test_links
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
-    assert_equal(['list', 'info', 'create', 'update', 'delete'],
+    assert_equal(['list', 'info', 'identify', 'create', 'update', 'delete'],
                  schema.resource('resource').links.map { |link| link.name })
   end
 end
@@ -83,6 +83,12 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = schema.resource('resource').link('info')
     assert_equal(['uuid_field'], link.parameters)
+  end
+
+  def test_parameters_with_one_of_field
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('identify')
+    assert_equal(['uuid_field|email_field'], link.parameters)
   end
 
   # LinkSchema.body returns nil if the link doesn't accept a request body.

@@ -57,8 +57,10 @@ USAGE
       name = @link_schema.name
       result = @client.send(resource_name).send(name, *parameters)
       result = result.to_a if result.instance_of?(Enumerator)
-      result = MultiJson.dump(result) if result && !result.instance_of?(String)
-      @output.write(result)
+      if result && !result.instance_of?(String)
+        result = MultiJson.dump(result, pretty: true)
+      end
+      @output.puts(result)
     end
   end
 end
