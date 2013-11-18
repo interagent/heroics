@@ -19,7 +19,8 @@ class SchemaTest < MiniTest::Unit::TestCase
   # Schema.resources returns a sequence of ResourceSchema children.
   def test_resources
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
-    assert_equal(['resource'], schema.resources.map(&:name))
+    assert_equal(['resource', 'another-resource'],
+                 schema.resources.map(&:name))
   end
 end
 
@@ -43,8 +44,9 @@ class ResourceSchemaTest < MiniTest::Unit::TestCase
   # ResourceSchema.links returns a list of LinkSchema children.
   def test_links
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
-    assert_equal(['list', 'info', 'identify', 'create', 'update', 'delete'],
-                 schema.resource('resource').links.map { |link| link.name })
+    assert_equal(
+      ['list', 'info', 'identify_resource', 'create', 'update', 'delete'],
+      schema.resource('resource').links.map { |link| link.name })
   end
 end
 
@@ -87,20 +89,20 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
 
   def test_parameters_with_one_of_field
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
-    link = schema.resource('resource').link('identify')
+    link = schema.resource('resource').link('identify_resource')
     assert_equal(['uuid_field|email_field'], link.parameters)
   end
 
   # LinkSchema.body returns nil if the link doesn't accept a request body.
-  def test_body_without_body
+  def test_example_body_without_body
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = schema.resource('resource').link('info')
-    assert_equal(nil, link.body)
+    assert_equal(nil, link.example_body)
   end
 
   # LinkSchema.body returns a sample body generated from the properties and
   # embedded examples.
-  def test_body
+  def test_example_body
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = schema.resource('resource').link('create')
     assert_equal({'date_field' => '2013-10-19 22:10:29Z',
@@ -108,7 +110,7 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
                   'boolean_field' => true,
                   'uuid_field' => '44724831-bf66-4bc2-865f-e2c4c2b14c78',
                   'email_field' => 'username@example.com'},
-                 link.body)
+                 link.example_body)
   end
 
   # LinkSchema.format_path converts a list of parameters into a path.
@@ -159,6 +161,22 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
       link.format_path(['too', 'many', 'parameters'])
     end
     assert_equal('wrong number of arguments (3 for 1)', error.message)
+  end
+
+  # LinkSchema.pretty_resource_name returns the resource name in a pretty
+  # form, with underscores converted to dashes.
+  def test_pretty_resource_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('another-resource').link('list')
+    assert_equal('another-resource', link.pretty_resource_name)
+  end
+
+  # LinkSchema.pretty_name returns the link name in a pretty form, with
+  # underscores converted to dashes.
+  def test_pretty_resource_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('identify_resource')
+    assert_equal('identify-resource', link.pretty_name)
   end
 end
 

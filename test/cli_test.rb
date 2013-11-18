@@ -94,24 +94,47 @@ USAGE
   end
 
   # CLI.run runs the command matching the specified name.
-  def test_run
+  def test_run_with_dashed_command_name
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     client = Heroics::client_from_schema(schema, 'https://example.com')
     output = StringIO.new
     command = Heroics::Command.new(
-      'cli', schema.resource('resource').link('list'), client, output)
-    cli = Heroics::CLI.new('cli', {'resource:list' => command}, output)
+      'cli', schema.resource('resource').link('identify_resource'), client,
+      output)
+    cli = Heroics::CLI.new('cli', {'resource:identify-resource' => command},
+                           output)
 
-    body = ['Hello', 'World!']
+    uuid = '1ab1c589-df46-40aa-b786-60e83b1efb10'
     Excon.stub(method: :get) do |request|
-      assert_equal('/resource', request[:path])
+      assert_equal("/resource/#{uuid}", request[:path])
       Excon.stubs.pop
-      {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+      {status: 200}
     end
 
-    cli.run('resource:list')
-    assert_equal(MultiJson.dump(body, pretty: true) + "\n", output.string)
+    cli.run('resource:identify-resource', uuid)
+    assert_equal("\n", output.string)
+  end
+
+  # CLI.run runs the resource matching the specified name.
+  def test_run_with_dashed_resource_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics::client_from_schema(schema, 'https://example.com')
+    output = StringIO.new
+    command = Heroics::Command.new(
+      'cli', schema.resource('another-resource').link('list'), client, output)
+    cli = Heroics::CLI.new('cli', {'another-resource:list' => command},
+                           output)
+
+    result = {'Hello' => 'World!'}
+    Excon.stub(method: :get) do |request|
+      assert_equal("/another-resource", request[:path])
+      Excon.stubs.pop
+      {status: 200, headers: {'Content-Type' => 'application/json'},
+       body: MultiJson.dump(result)}
+    end
+
+    cli.run('another-resource:list')
+    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
   end
 
   # CLI.run runs the command matching the specified name and passes parameters

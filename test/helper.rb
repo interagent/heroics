@@ -106,7 +106,7 @@ SAMPLE_SCHEMA = {
          'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fidentity)}',
          'method'      => 'GET',
          'rel'         => 'self',
-         'title'       => 'Identify'},
+         'title'       => 'Identify resource'},
 
         {'description' => 'Create a sample resource',
          'href'        => '/resource',
@@ -150,6 +150,26 @@ SAMPLE_SCHEMA = {
          'rel'         => 'destroy',
          'title'       => 'Delete'}
       ]
-    }
-  }
+    },
+
+    'another-resource' => {
+      'description' => 'Another sample resource to use in tests.',
+      'id'          => 'schema/another-resource',
+      '$schema'     => 'http://json-schema.org/draft-04/hyper-schema',
+      'title'       => 'Another sample resource title',
+      'type'        => ['object'],
+
+      'definitions' => {},
+
+      'properties' => {},
+
+      'links' => [
+        {'description' => 'Show all sample resources',
+         'href'        => '/another-resource',
+         'method'      => 'GET',
+         'rel'         => 'instances',
+         'title'       => 'List'}
+      ]
+    },
+ }
 }

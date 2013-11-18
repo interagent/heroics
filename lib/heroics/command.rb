@@ -16,7 +16,7 @@ module Heroics
 
     # The command name.
     def name
-      "#{@link_schema.resource_name}:#{@link_schema.name}"
+      "#{@link_schema.pretty_resource_name}:#{@link_schema.pretty_name}"
     end
 
     # The command description.
@@ -28,22 +28,23 @@ module Heroics
     def usage
       parameters = @link_schema.parameters.map { |parameter| "<#{parameter}>" }
       parameters = parameters.empty? ? '' : " #{parameters.join(' ')}"
-      body = @link_schema.body
-      body_parameter = body.nil? ? '' : ' <body>'
+      example_body = @link_schema.example_body
+      body_parameter = example_body.nil? ? '' : ' <body>'
       @output.write <<-USAGE
 Usage: #{@cli_name} #{name}#{parameters}#{body_parameter}
 
 Description:
   #{description}
 USAGE
-      if body
-        body = MultiJson.dump(body, pretty: true).lines.map do |line|
+      if example_body
+        example_body = MultiJson.dump(example_body, pretty: true)
+        example_body = example_body.lines.map do |line|
           "  #{line}"
         end.join
         @output.write <<-USAGE
 
 Body example:
-#{body}
+#{example_body}
 USAGE
       end
     end

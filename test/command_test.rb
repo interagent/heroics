@@ -200,10 +200,11 @@ USAGE
     client = Heroics::client_from_schema(schema, 'https://example.com')
     output = StringIO.new
     command = Heroics::Command.new(
-      'cli', schema.resource('resource').link('identify'), client, output)
+      'cli', schema.resource('resource').link('identify_resource'), client,
+      output)
     command.usage
     expected = <<-USAGE
-Usage: cli resource:identify <uuid_field|email_field>
+Usage: cli resource:identify-resource <uuid_field|email_field>
 
 Description:
   Show a sample resource

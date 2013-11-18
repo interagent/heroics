@@ -27,14 +27,23 @@ module Heroics
       end
     end
 
+    # The resource schema children that are part of this schema.
+    #
+    # @return [Array<ResourceSchema>] The resource schema children.
     def resources
       @resources.values
     end
   end
 
+  # A wrapper around a bare resource element in a JSON schema to make it
+  # easier to use.
   class ResourceSchema
     attr_reader :name
 
+    # Instantiate a resource schema.
+    #
+    # @param schema [Hash] The bare JSON schema to wrap.
+    # @param name [String] The name of the resource to identify in the schema.
     def initialize(schema, name)
       @schema = schema
       @name = name
@@ -45,20 +54,35 @@ module Heroics
                     end]
     end
 
+    # Get a schema for a named link.
+    #
+    # @param name [String] The name of the link.
+    # @raise [SchemaError] Raised if an unknown link name is provided.
     def link(name)
       schema = @links[name]
       raise SchemaError.new("Unknown link '#{name}'.") unless schema
       schema
     end
 
+    # The link schema children that are part of this resource schema.
+    #
+    # @return [Array<LinkSchema>] The link schema children.
     def links
       @links.values
     end
   end
 
+  # A wrapper around a bare link element for a resource in a JSON schema to
+  # make it easier to use.
   class LinkSchema
     attr_reader :name, :resource_name, :description
 
+    # Instantiate a link schema.
+    #
+    # @param schema [Hash] The bare JSON schema to wrap.
+    # @param resource_name [String] The name of the resource to identify in
+    #   the schema.
+    # @param link_index [Fixnum] The index of the link in the resource schema.
     def initialize(schema, resource_name, link_index)
       @schema = schema
       @resource_name = resource_name
@@ -67,15 +91,38 @@ module Heroics
       @description = link_schema['description']
     end
 
+    # Get the resource name in pretty form.
+    #
+    # @return [String] The pretty resource name.
+    def pretty_resource_name
+      Heroics.pretty_name(resource_name)
+    end
+
+    # Get the link name in pretty form.
+    #
+    # @return [String] The pretty link name.
+    def pretty_name
+      Heroics.pretty_name(name)
+    end
+
+    # Get the HTTP method for this link.
+    #
+    # @return [Symbol] The HTTP method.
     def method
       link_schema['method'].downcase.to_sym
     end
 
+    # Get the names of the parameters this link expects.
+    #
+    # @return [Array<String>] The parameters.
     def parameters
       resolve_parameters(link_schema['href'].scan(PARAMETER_REGEX))
     end
 
-    def body
+    # Get an example request body.
+    #
+    # @return [Hash] A sample request body.
+    def example_body
       if body_schema = link_schema['schema']
         definitions = @schema['definitions'][@resource_name]['definitions']
         Hash[body_schema['properties'].keys.map do |property|
@@ -113,12 +160,21 @@ module Heroics
 
     private
 
+    # Match parameters in definition strings.
     PARAMETER_REGEX = /\{\([%\/a-zA-Z0-9_]*\)\}/
 
+    # Get the raw link schema.
+    #
+    # @param [Hash] The raw link schema.
     def link_schema
       @schema['definitions'][@resource_name]['links'][@link_index]
     end
 
+    # Get the names of the parameters this link expects.
+    #
+    # @param parameters [Array] The names of the parameter definitions to
+    #   convert to parameter names.
+    # @return [Array<String>] The parameters.
     def resolve_parameters(parameters)
       # FIXME This is all pretty terrible.  It'd be much better to
       # automatically resolve $ref's based on the path instead of special
@@ -133,7 +189,8 @@ module Heroics
           definitions[definition_name]
         else
           definition_name = definition_name.split('/')[-1]
-          resource_definitions = @schema['definitions'][@resource_name]['definitions'][definition_name]
+          resource_definitions = @schema[
+            'definitions'][@resource_name]['definitions'][definition_name]
           if resource_definitions.has_key?('anyOf')
             resource_definitions['anyOf'].map do |property|
               definitions[property['$ref']]
