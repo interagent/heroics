@@ -66,7 +66,7 @@ USAGE
     commands = {}
     schema.resources.each do |resource_schema|
       resource_schema.links.each do |link_schema|
-        command = Heroics::Command.new(name, link_schema, client, output)
+        command = Command.new(name, link_schema, client, output)
         commands[command.name] = command
       end
     end

@@ -1,7 +1,11 @@
 module Heroics
+  # A wrapper around a bare JSON schema to make it easier to use.
   class Schema
     attr_reader :schema
 
+    # Instantiate a schema.
+    #
+    # @param schema [Hash] The bare JSON schema to wrap.
     def initialize(schema)
       @schema = schema
       @resources = {}
@@ -10,7 +14,12 @@ module Heroics
       end
     end
 
+    # Get a schema for a named resource.
+    #
+    # @param name [String] The name of the resource.
+    # @raise [SchemaError] Raised if an unknown resource name is provided.
     def resource(name)
+      resource_schema = @resources[name]
       if @schema['definitions'].has_key?(name)
         ResourceSchema.new(@schema, name)
       else
@@ -31,7 +40,7 @@ module Heroics
       @name = name
       link_schema = schema['definitions'][name]['links']
       @links = Hash[link_schema.each_with_index.map do |link, link_index|
-                      link_name = Heroics::sanitize_name(link['title'])
+                      link_name = Heroics.ruby_name(link['title'])
                       [link_name, LinkSchema.new(schema, name, link_index)]
                     end]
     end
@@ -54,7 +63,7 @@ module Heroics
       @schema = schema
       @resource_name = resource_name
       @link_index = link_index
-      @name = Heroics::sanitize_name(link_schema['title'])
+      @name = Heroics.ruby_name(link_schema['title'])
       @description = link_schema['description']
     end
 
@@ -113,7 +122,7 @@ module Heroics
     def resolve_parameters(parameters)
       # FIXME This is all pretty terrible.  It'd be much better to
       # automatically resolve $ref's based on the path instead of special
-      # casing things all over the place here. -jkakar
+      # casing everything. -jkakar
       properties = @schema['definitions'][@resource_name]['properties']
       definitions = Hash[properties.each_pair.map do |key, value|
                            [value['$ref'], key]
