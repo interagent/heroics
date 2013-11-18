@@ -112,7 +112,7 @@ USAGE
     end
 
     cli.run('resource:identify-resource', uuid)
-    assert_equal("\n", output.string)
+    assert_equal('', output.string)
   end
 
   # CLI.run runs the resource matching the specified name.

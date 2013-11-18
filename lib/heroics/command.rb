@@ -61,7 +61,7 @@ USAGE
       if result && !result.instance_of?(String)
         result = MultiJson.dump(result, pretty: true)
       end
-      @output.puts(result)
+      @output.puts(result) unless result.nil?
     end
   end
 end

@@ -87,7 +87,7 @@ class CommandTest < MiniTest::Unit::TestCase
     end
 
     command.run(body)
-    assert_equal("\n", output.string)
+    assert_equal('', output.string)
   end
 
   # Command.run calls the correct method on the client and converts the result

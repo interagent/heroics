@@ -188,6 +188,22 @@ class LinkTest < MiniTest::Unit::TestCase
     assert_equal(body, link.run)
   end
 
+  # Link.run considers HTTP 202 Accepted responses as successful.
+  def test_run_with_accepted_request
+    body = {'Hello' => 'World!'}
+    Excon.stub(method: :post) do |request|
+      assert_equal('/resource', request[:path])
+      Excon.stubs.pop
+      {status: 202, headers: {'Content-Type' => 'application/json'},
+       body: MultiJson.dump(body)}
+    end
+
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('create'))
+    assert_equal(body, link.run)
+  end
+
   # Link.run raises an Excon error if anything other than a 200 or 201 HTTP
   # status code was returned by the server.
   def test_run_with_failed_request
