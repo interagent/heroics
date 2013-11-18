@@ -87,6 +87,9 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
     assert_equal(['uuid_field'], link.parameters)
   end
 
+  # LinkSchema.parameters returns a parameter name for multiple parameters
+  # when the parameter contains a 'oneOf' element that references more than
+  # one parameter.
   def test_parameters_with_one_of_field
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = schema.resource('resource').link('identify_resource')
