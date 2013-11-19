@@ -1,109 +1,194 @@
 require 'helper'
 
-class ClientFromSchemaTest < MiniTest::Test
-  include ExconHelper
-
-  # client_from_schema returns a Client generated from the specified schema.
-  def test_client_from_schema
-    client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com')
-    body = {'Hello' => 'World!'}
-    Excon.stub(method: :post) do |request|
-      assert_equal('/resource', request[:path])
-      Excon.stubs.pop
-      {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
-    end
-    assert_equal(body, client.resource.create)
+class SchemaTest < MiniTest::Unit::TestCase
+  # Schema.resource returns a ResourceSchema for the named resource.
+  def test_resource
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    assert_equal('resource', schema.resource('resource').name)
   end
 
-  # client_from_schema optionally accepts custom headers to pass with every
-  # request made by the generated client.
-  def test_client_from_schema_with_custom_headers
-    client = Heroics::client_from_schema(
-      SAMPLE_SCHEMA, 'https://example.com',
-      default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'})
-    Excon.stub(method: :post) do |request|
-      assert_equal('application/vnd.heroku+json; version=3',
-                   request[:headers]['Accept'])
-      Excon.stubs.pop
-      {status: 200}
-    end
-    client.resource.create
-  end
-
-  # client_from_schema raises a SchemaError exception if definitions are not
-  # present in the specified schema.
-  def test_client_from_schema_without_definitions
+  # Schema.resource raises a SchemaError is an unknown resource is requested.
+  def test_resource_with_unknown_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     error = assert_raises Heroics::SchemaError do
-      Heroics::client_from_schema({}, 'https://example.com')
+      schema.resource('unknown-resource')
     end
-    assert_equal("Missing top-level 'definitions' key.", error.message)
+    assert_equal("Unknown resource 'unknown-resource'.", error.message)
   end
 
-  # client_from_schema raises a SchemaError exception if a resource doesn't
-  # have a links key.
-  def test_client_from_schema_without_links
-    error = assert_raises Heroics::SchemaError do
-      Heroics::client_from_schema({'definitions' => {'resource' => {}}},
-                                  'https://example.com')
-    end
-    assert_equal("'resource' resource is missing 'links' key.", error.message)
-  end
-
-  # client_from_schema takes an optional :cache parameter which it uses when
-  # constructing Link instances.
-  def test_client_from_schema_with_cache
-    body = {'Hello' => 'World!'}
-    Excon.stub(method: :get) do |request|
-      Excon.stubs.pop
-      {status: 201, headers: {'Content-Type' => 'application/json',
-                              'ETag' => 'etag-contents'},
-       body: MultiJson.dump(body)}
-    end
-
-    client = Heroics::client_from_schema(SAMPLE_SCHEMA, 'https://example.com',
-                                         cache: Moneta.new(:Memory))
-    assert_equal(body, client.resource.list)
-
-    Excon.stub(method: :get) do |request|
-      assert_equal('etag-contents', request[:headers]['If-None-Match'])
-      Excon.stubs.pop
-      {status: 304, headers: {'Content-Type' => 'application/json'}}
-    end
-    assert_equal(body, client.resource.list)
+  # Schema.resources returns a sequence of ResourceSchema children.
+  def test_resources
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    assert_equal(['resource', 'another-resource'],
+                 schema.resources.map(&:name))
   end
 end
 
-class ClientFromSchemaURLTest < MiniTest::Test
+class ResourceSchemaTest < MiniTest::Unit::TestCase
+  # ResourceSchema.link returns a LinkSchema for the named link.
+  def test_link
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('list')
+    assert_equal('list', link.name)
+  end
+
+  # ResourceSchema.link raises a SchemaError is an unknown link is requested.
+  def test_link_with_unknown_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    error = assert_raises Heroics::SchemaError do
+      schema.resource('resource').link('unknown-link')
+    end
+    assert_equal("Unknown link 'unknown-link'.", error.message)
+  end
+
+  # ResourceSchema.links returns a list of LinkSchema children.
+  def test_links
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    assert_equal(
+      ['list', 'info', 'identify_resource', 'create', 'update', 'delete'],
+      schema.resource('resource').links.map { |link| link.name })
+  end
+end
+
+class LinkSchemaTest < MiniTest::Unit::TestCase
+  # LinkSchema.name returns the sanitized link name.
+  def test_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    assert_equal('list', schema.resource('resource').link('list').name)
+  end
+
+  # LinkSchema.resource_name returns the parent resource name.
+  def test_resource_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    assert_equal('resource',
+                 schema.resource('resource').link('list').resource_name)
+  end
+
+  # LinkSchema.description returns the link description.
+  def test_description
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    assert_equal('Show all sample resources',
+                 schema.resource('resource').link('list').description)
+  end
+
+  # LinkSchema.parameters returns an empty list if the link doesn't require
+  # parameters.
+  def test_parameters_without_parameters
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('list')
+    assert_equal([], link.parameters)
+  end
+
+  # LinkSchema.parameters returns a list of named parameter required to invoke
+  # the link correctly.
+  def test_parameters
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('info')
+    assert_equal(['uuid_field'], link.parameters)
+  end
+
+  # LinkSchema.parameters returns a parameter name for multiple parameters
+  # when the parameter contains a 'oneOf' element that references more than
+  # one parameter.
+  def test_parameters_with_one_of_field
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('identify_resource')
+    assert_equal(['uuid_field|email_field'], link.parameters)
+  end
+
+  # LinkSchema.body returns nil if the link doesn't accept a request body.
+  def test_example_body_without_body
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('info')
+    assert_equal(nil, link.example_body)
+  end
+
+  # LinkSchema.body returns a sample body generated from the properties and
+  # embedded examples.
+  def test_example_body
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('create')
+    assert_equal({'date_field' => '2013-10-19 22:10:29Z',
+                  'string_field' => 'Sample text.',
+                  'boolean_field' => true,
+                  'uuid_field' => '44724831-bf66-4bc2-865f-e2c4c2b14c78',
+                  'email_field' => 'username@example.com'},
+                 link.example_body)
+  end
+
+  # LinkSchema.format_path converts a list of parameters into a path.
+  def test_format_path
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('info')
+    assert_equal(['/resource/44724831-bf66-4bc2-865f-e2c4c2b14c78', nil],
+                 link.format_path(['44724831-bf66-4bc2-865f-e2c4c2b14c78']))
+  end
+
+  # LinkSchema.format_path correctly returns a parameter as a body if a path
+  # doesn't have any parameters.
+  def test_format_path_with_body
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('create')
+    assert_equal(['/resource', {'new' => 'resource'}],
+                 link.format_path([{'new' => 'resource'}]))
+  end
+
+  # LinkSchema.format_path correctly returns a parameter as a body if a path
+  # doesn't have any parameters.
+  def test_format_path_with_path_and_body
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('update')
+    assert_equal(['/resource/44724831-bf66-4bc2-865f-e2c4c2b14c78',
+                  {'new' => 'resource'}],
+                 link.format_path(['44724831-bf66-4bc2-865f-e2c4c2b14c78',
+                                   {'new' => 'resource'}]))
+  end
+
+  # LinkSchema.format_path raises an ArgumentError if too few parameters are
+  # provided
+  def test_format_path_with_too_few_parameters
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('info')
+    error = assert_raises ArgumentError do
+      link.format_path([])
+    end
+    assert_equal('wrong number of arguments (0 for 1)', error.message)
+  end
+
+  # LinkSchema.format_path raises an ArgumentError if too many parameters are
+  # provided
+  def test_format_path_with_too_many_parameters
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('info')
+    error = assert_raises ArgumentError do
+      link.format_path(['too', 'many', 'parameters'])
+    end
+    assert_equal('wrong number of arguments (3 for 1)', error.message)
+  end
+
+  # LinkSchema.pretty_resource_name returns the resource name in a pretty
+  # form, with underscores converted to dashes.
+  def test_pretty_resource_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('another-resource').link('list')
+    assert_equal('another-resource', link.pretty_resource_name)
+  end
+
+  # LinkSchema.pretty_name returns the link name in a pretty form, with
+  # underscores converted to dashes.
+  def test_pretty_resource_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('identify_resource')
+    assert_equal('identify-resource', link.pretty_name)
+  end
+end
+
+class DownloadSchemaTest < MiniTest::Unit::TestCase
   include ExconHelper
 
-  # client_from_schema_url downloads a schema and returns a Client generated
-  # from it.
-  def test_client_from_schema_url
-    Excon.stub(method: :get) do |request|
-      assert_equal('example.com', request[:host])
-      assert_equal('/schema', request[:path])
-      Excon.stubs.pop
-      {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(SAMPLE_SCHEMA)}
-    end
-
-    client = Heroics::client_from_schema_url('https://example.com/schema')
-    body = {'Hello' => 'World!'}
-    Excon.stub(method: :post) do |request|
-      assert_equal('example.com', request[:host])
-      assert_equal('/resource', request[:path])
-      Excon.stubs.pop
-      {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
-    end
-    assert_equal(body, client.resource.create)
-  end
-
-  # client_from_schema_url optionally accepts custom headers to include in the
-  # request to download the schema.  The same headers are passed in requests
-  # made by the generated client.
-  def test_client_from_schema_url_with_custom_headers
+  # download_schema makes a request to fetch the schema, decodes the
+  # downloaded JSON and returns a Ruby hash.
+  def test_download_schema
     Excon.stub(method: :get) do |request|
       assert_equal('example.com', request[:host])
       assert_equal('/schema', request[:path])
@@ -114,30 +199,9 @@ class ClientFromSchemaURLTest < MiniTest::Test
        body: MultiJson.dump(SAMPLE_SCHEMA)}
     end
 
-    client = Heroics::client_from_schema_url(
-      'https://example.com/schema',
+    schema = Heroics::download_schema(
+      'https://username:token@example.com/schema',
       default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'})
-    body = {'Hello' => 'World!'}
-    Excon.stub(method: :post) do |request|
-      assert_equal('application/vnd.heroku+json; version=3',
-                   request[:headers]['Accept'])
-      Excon.stubs.pop
-      {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
-    end
-    assert_equal(body, client.resource.create)
-  end
-
-  # client_from_schema_url raises an Excon error when the request to download
-  # the schema fails.
-  def test_client_from_schema_url_with_failed_request
-    Excon.stub(method: :get) do |request|
-      Excon.stubs.pop
-      {status: 404}
-    end
-
-    assert_raises Excon::Errors::NotFound do
-      Heroics::client_from_schema_url('https://example.com/schema')
-    end
+    assert_equal(SAMPLE_SCHEMA, schema.schema)
   end
 end

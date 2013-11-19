@@ -1,5 +1,4 @@
 require 'minitest/autorun'
-require 'minitest/pride'
 require 'time'
 
 require 'heroics'
@@ -56,7 +55,7 @@ SAMPLE_SCHEMA = {
 
         'uuid_field' => {
           'description' => 'A sample UUID field',
-          'example'     => '01234567-89ab-cdef-0123-456789abcdef',
+          'example'     => '44724831-bf66-4bc2-865f-e2c4c2b14c78',
           'format'      => 'uuid',
           'readOnly'    => true,
           'type'        => ['string']
@@ -68,6 +67,12 @@ SAMPLE_SCHEMA = {
           'format'      => 'email',
           'readOnly'    => true,
           'type'        => ['string']
+        },
+
+        'identity' => {
+          'oneOf' => [
+            {'$ref' => '#/definitions/resource/definitions/uuid_field'},
+            {'$ref' => '#/definitions/resource/definitions/email_field'}]
         }
       },
 
@@ -92,12 +97,18 @@ SAMPLE_SCHEMA = {
          'title'       => 'List'},
 
         {'description' => 'Show a sample resource',
-         'href'        => '/resource/(#/definitions/resource/definitions/uuid_field)}',
+         'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}',
          'method'      => 'GET',
          'rel'         => 'self',
          'title'       => 'Info'},
 
-        {'description' => 'Create sample resource',
+        {'description' => 'Show a sample resource',
+         'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fidentity)}',
+         'method'      => 'GET',
+         'rel'         => 'self',
+         'title'       => 'Identify resource'},
+
+        {'description' => 'Create a sample resource',
          'href'        => '/resource',
          'method'      => 'POST',
          'rel'         => 'create',
@@ -115,8 +126,8 @@ SAMPLE_SCHEMA = {
              'email_field' => {
                '$ref' => '#/definitions/resource/definitions/email_field'}}}},
 
-        {'description' => 'Update sample resource',
-         'href'        => '/resource',
+        {'description' => 'Update a sample resource',
+         'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}',
          'method'      => 'PATCH',
          'rel'         => 'update',
          'title'       => 'Update',
@@ -133,12 +144,32 @@ SAMPLE_SCHEMA = {
              'email_field' => {
                '$ref' => '#/definitions/resource/definitions/email_field'}}}},
 
-        {'description' => 'Delete an existing sample resource.',
-         'href'        => '/apps/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}',
+        {'description' => 'Delete an existing sample resource at specific time',
+         'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fdate_field)}',
          'method'      => 'DELETE',
          'rel'         => 'destroy',
          'title'       => 'Delete'}
       ]
-    }
-  }
+    },
+
+    'another-resource' => {
+      'description' => 'Another sample resource to use in tests.',
+      'id'          => 'schema/another-resource',
+      '$schema'     => 'http://json-schema.org/draft-04/hyper-schema',
+      'title'       => 'Another sample resource title',
+      'type'        => ['object'],
+
+      'definitions' => {},
+
+      'properties' => {},
+
+      'links' => [
+        {'description' => 'Show all sample resources',
+         'href'        => '/another-resource',
+         'method'      => 'GET',
+         'rel'         => 'instances',
+         'title'       => 'List'}
+      ]
+    },
+ }
 }
