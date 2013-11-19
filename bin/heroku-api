@@ -14,5 +14,5 @@ end
 options = {
   default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
   cache: Moneta.new(:File, dir: "#{Dir.home}/.heroics/heroku-api")}
-cli = Heroics::cli_from_schema_url('heroku-api', STDOUT, url, options)
+cli = Heroics.cli_from_schema_url('heroku-api', STDOUT, url, options)
 cli.run(*ARGV)

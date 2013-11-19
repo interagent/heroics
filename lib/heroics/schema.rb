@@ -126,7 +126,13 @@ module Heroics
       if body_schema = link_schema['schema']
         definitions = @schema['definitions'][@resource_name]['definitions']
         Hash[body_schema['properties'].keys.map do |property|
-               [property, definitions[property]['example']]
+               # FIXME This is wrong! -jkakar
+               if definitions.has_key?(property)
+                 example = definitions[property]['example']
+               else
+                 example = ''
+               end
+               [property, example]
              end]
       end
     end
