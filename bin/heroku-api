@@ -5,14 +5,16 @@ require 'netrc'
 
 netrc = Netrc.read
 username, token = netrc['api.heroku.com']
-url = if username && token
+if username && token
   username = username.split('@').first
-  "https://#{username}:#{token}@api.heroku.com/schema"
+  url = "https://#{username}:#{token}@api.heroku.com/schema"
+  options = {
+    default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
+    cache: Moneta.new(:File, dir: "#{Dir.home}/.heroics/heroku-api")}
+  cli = Heroics.cli_from_schema_url('heroku-api', STDOUT, url, options)
+  cli.run(*ARGV)
 else
-  'https://api.heroku.com/schema'
+  puts "ERROR Couldn't find credentials for api.heroku.com in ~/.netrc."
+  puts "      Login with the Heroku Toolbelt by running 'heroku login'."
+  1
 end
-options = {
-  default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
-  cache: Moneta.new(:File, dir: "#{Dir.home}/.heroics/heroku-api")}
-cli = Heroics.cli_from_schema_url('heroku-api', STDOUT, url, options)
-cli.run(*ARGV)
