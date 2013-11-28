@@ -72,6 +72,23 @@ USAGE
     assert_equal(expected, output.string)
   end
 
+  # CLI.run displays an error message when help is requested for an unknown
+  # command.
+  def test_run_with_help_command_and_unknown_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics::client_from_schema(schema, 'https://example.com')
+    output = StringIO.new
+    command1 = Heroics::Command.new(
+      'cli', schema.resource('resource').link('list'), client, output)
+    command2 = Heroics::Command.new(
+      'cli', schema.resource('resource').link('info'), client, output)
+    cli = Heroics::CLI.new('cli', {'resource:list' => command1,
+                                   'resource:info' => command2}, output)
+    cli.run('help', 'unknown:command')
+    assert_equal("There is no command called 'unknown:command'.\n",
+                 output.string)
+  end
+
   # CLI.run displays an error message when no commands have been registered.
   def test_run_without_commands
     output = StringIO.new

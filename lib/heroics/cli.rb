@@ -22,7 +22,11 @@ module Heroics
       if name.nil? || name == 'help'
         if command_name = parameters.first
           command = @commands[command_name]
-          command.usage
+          if command.nil?
+            @output.write("There is no command called '#{command_name}'.\n")
+          else
+            command.usage
+          end
         else
           usage
         end
