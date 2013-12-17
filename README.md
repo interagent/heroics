@@ -183,7 +183,7 @@ failures occur.
 
 ```ruby
 begin
-  client.app.create({'name'   => 'example'})
+  client.app.create({'name' => 'example'})
 rescue Excon::Errors::Forbidden => e
   puts e
 end
