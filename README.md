@@ -53,7 +53,7 @@ client = Heroics.client_from_schema(schema, url, options)
 ### Client-side caching
 
 Heroics handles ETags and will cache data on the client if you provide
-a (Moneta)[https://github.com/minad/moneta] cache instance.
+a [Moneta](https://github.com/minad/moneta) cache instance.
 
 ```ruby
 username = 'username'
