@@ -149,7 +149,7 @@ client.app.create({'name'   => 'example',
                    'stack'  => ''})
 ```
 
-### Running a command
+### Command arguments
 
 Commands that take arguments will list them in help output from the
 client.
@@ -167,6 +167,9 @@ This command needs an app's UUID or name:
 ```ruby
 info = client.app.info('sushi')
 ```
+
+Some commands need arguments as well as a body.  In such cases, pass
+the arguments first with the body at the end.
 
 ### Using the Heroku API
 
