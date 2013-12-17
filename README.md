@@ -120,7 +120,7 @@ Help topics, type "heroku-api help <topic>" for more details:
   addon-service:info            Info for existing addon-service.
   addon-service:list            List existing addon-services.
   addon:create                  Create a new add-on.
---- 8< snip 8< ---
+--- 8< --- snip --- 8< ---
 ```
 
 Use the `help` command to learn about commands:
@@ -147,6 +147,25 @@ the basic information you need to use the same command from Ruby:
 client.app.create({'name'   => 'example',
                    'region' => '',
                    'stack'  => ''})
+```
+
+### Running a command
+
+Commands that take arguments will list them in help output from the
+client.
+
+```
+$ bundle exec bin/heroku-api help app:info
+Usage: heroku-api app:info <id|name>
+
+Description:
+  Info for existing app.
+```
+
+This command needs an app's UUID or name:
+
+```ruby
+info = client.app.info('sushi')
 ```
 
 ### Using the Heroku API
