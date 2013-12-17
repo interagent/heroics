@@ -173,8 +173,8 @@ the arguments first with the body at the end.
 
 ### Using the Heroku API
 
-Heroics comes with a builtin `bin/heroku-api` program that serves as
-an example and makes it easy to play with the [Heroku Platform API](https://devcenter.heroku.com/articles/platform-api-reference).
+Heroics comes with a builtin `heroku-api` program that serves as an
+example and makes it easy to play with the [Heroku Platform API](https://devcenter.heroku.com/articles/platform-api-reference).
 
 ### Handling failures
 
