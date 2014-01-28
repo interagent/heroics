@@ -25,9 +25,10 @@ to get started is to provide the URL to the schema you want to base
 the client on:
 
 ```ruby
+require 'cgi'
 require 'heroics'
 
-username = 'username'
+username = CGI.escape('username')
 token = 'token'
 url = "https://#{username}:#{token}@api.heroku.com/schema"
 options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
@@ -42,7 +43,10 @@ requests).
 You can also create a client from an in-memory schema string:
 
 ```ruby
-username = 'username'
+require 'cgi'
+require 'heroics'
+
+username = CGI.escape('username')
 token = 'token'
 url = "https://#{username}:#{token}@api.heroku.com/schema"
 options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
