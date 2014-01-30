@@ -188,6 +188,29 @@ class CLIFromSchemaTest < MiniTest::Unit::TestCase
     assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
   end
 
+  # cli_from_schema returns a CLI that can make requests to APIs mounted under
+  # a prefix, such as http://example.com/api, for example.
+  def test_client_from_schema_with_url_prefix
+    uuid = '1ab1c589-df46-40aa-b786-60e83b1efb10'
+    body = {'Hello' => 'World!'}
+    result = {'Goodbye' => 'Universe!'}
+    Excon.stub(method: :patch) do |request|
+      assert_equal("/api/resource/#{uuid}", request[:path])
+      assert_equal('application/json', request[:headers]['Content-Type'])
+      assert_equal(body, MultiJson.load(request[:body]))
+      Excon.stubs.pop
+      {status: 200, headers: {'Content-Type' => 'application/json'},
+       body: MultiJson.dump(result)}
+    end
+
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    output = StringIO.new
+    cli = Heroics.cli_from_schema('cli', output, schema,
+                                  'https://example.com/api')
+    cli.run('resource:update', uuid, body)
+    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
+  end
+
   # cli_from_schema optionally accepts custom headers to pass with every
   # request made by the generated CLI.
   def test_cli_from_schema_with_custom_headers
