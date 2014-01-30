@@ -13,7 +13,7 @@ module Heroics
     #   - cache: Optionally, a Moneta-compatible cache to store ETags.
     #     Default is no caching.
     def initialize(url, link_schema, options={})
-      @url = url
+      @root_url, @path_prefix = unpack_url(url)
       @link_schema = link_schema
       @default_headers = options[:default_headers] || {}
       @cache = options[:cache] || Moneta.new(:Null)
@@ -44,6 +44,7 @@ module Heroics
     #   object for JSON responses, or an enumerator for list responses.
     def run(*parameters)
       path, body = @link_schema.format_path(parameters)
+      path = "#{@path_prefix}#{path}" unless @path_prefix == '/'
       headers = @default_headers
       if body
         headers = headers.merge({'Content-Type' => 'application/json'})
@@ -55,7 +56,7 @@ module Heroics
         headers = headers.merge({'If-None-Match' => etag}) if etag
       end
 
-      connection = Excon.new(@url)
+      connection = Excon.new(@root_url)
       response = connection.request(method: @link_schema.method, path: path,
                                     headers: headers, body: body,
                                     expects: [200, 201, 202, 206, 304])
@@ -95,6 +96,25 @@ module Heroics
       elsif !response.body.empty?
         response.body
       end
+    end
+
+    private
+
+    # Unpack the URL and split it into a root URL and a path prefix, if one
+    # exists.
+    #
+    # @param url [String] The complete base URL to use when making requests.
+    # @return [String,String] A (root URL, path) prefix pair.
+    def unpack_url(url)
+      root_url = []
+      path_prefix = ''
+      parts = URI.split(url)
+      root_url << "#{parts[0]}://"
+      root_url << "#{parts[1]}@" unless parts[1].nil?
+      root_url << "#{parts[2]}"
+      root_url << ":#{parts[3]}" unless parts[3].nil?
+      path_prefix = parts[5]
+      return root_url.join(''), path_prefix
     end
   end
 end
