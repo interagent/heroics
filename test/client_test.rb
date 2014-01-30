@@ -52,6 +52,21 @@ class ClientFromSchemaTest < MiniTest::Unit::TestCase
     assert_equal(body, client.resource.create)
   end
 
+  # client_from_schema returns a Client that can make requests to APIs mounted
+  # under a prefix, such as http://example.com/api, for example.
+  def test_client_from_schema_with_url_prefix
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics::client_from_schema(schema, 'https://example.com/api')
+    body = {'Hello' => 'World!'}
+    Excon.stub(method: :post) do |request|
+      assert_equal('/api/resource', request[:path])
+      Excon.stubs.pop
+      {status: 200, headers: {'Content-Type' => 'application/json'},
+       body: MultiJson.dump(body)}
+    end
+    assert_equal(body, client.resource.create)
+  end
+
   # client_from_schema optionally accepts custom headers to pass with every
   # request made by the generated client.
   def test_client_from_schema_with_custom_headers

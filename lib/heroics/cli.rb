@@ -61,8 +61,21 @@ USAGE
     end
   end
 
+  # Create a CLI from a JSON schema.
+  #
+  # @param name [String] The name of the CLI.
+  # @param output [IO] The stream to write to.
+  # @param schema [Hash] The JSON schema to use with the CLI.
+  # @param url [String] The URL used by the generated CLI when it makes
+  #   requests.
+  # @param options [Hash] Configuration for links.  Possible keys include:
+  #   - default_headers: Optionally, a set of headers to include in every
+  #     request made by the CLI.  Default is no custom headers.
+  #   - cache: Optionally, a Moneta-compatible cache to store ETags.  Default
+  #     is no caching.
+  # @return [CLI] A CLI with commands generated from the JSON schema.
   def self.cli_from_schema(name, output, schema, url, options={})
-    client = client_from_schema(schema, url, options)
+    client = client_from_schema(schema, URI::join(url, '/').to_s, options)
     commands = {}
     schema.resources.each do |resource_schema|
       resource_schema.links.each do |link_schema|
