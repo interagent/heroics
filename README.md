@@ -40,17 +40,18 @@ the URL.  The default headers will also be included in all requests
 (including the one to download the schema and all subsequent
 requests).
 
-You can also create a client from an in-memory schema string:
+You can also create a client from an in-memory schema object:
 
 ```ruby
 require 'cgi'
+require 'json'
 require 'heroics'
 
 username = CGI.escape('username')
 token = 'token'
 url = "https://#{username}:#{token}@api.heroku.com/schema"
 options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
-schema = File.read('schema.json')
+schema = JSON.parse(File.read('schema.json'))
 client = Heroics.client_from_schema(schema, url, options)
 ```
 
