@@ -8,6 +8,7 @@ require 'zlib'
 module Heroics
 end
 
+require 'heroics/version'
 require 'heroics/errors'
 require 'heroics/naming'
 require 'heroics/link'
