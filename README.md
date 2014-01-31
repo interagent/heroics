@@ -51,7 +51,8 @@ username = CGI.escape('username')
 token = 'token'
 url = "https://#{username}:#{token}@api.heroku.com/schema"
 options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
-schema = JSON.parse(File.read('schema.json'))
+data = JSON.parse(File.read('schema.json'))
+schema = Heroics::Schema.new(data)
 client = Heroics.client_from_schema(schema, url, options)
 ```
 
