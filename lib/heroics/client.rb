@@ -16,7 +16,7 @@ module Heroics
     # @return [Resource] The resource matching the name.
     def method_missing(name)
       name = name.to_s.gsub('_', '-')
-      resource = @resources[name.to_s]
+      resource = @resources[name]
       if resource.nil?
         # TODO(jkakar) Do we care about resource names in the schema specified
         # with underscores?  If so, we should check to make sure the name
