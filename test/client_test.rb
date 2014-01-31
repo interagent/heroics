@@ -33,6 +33,26 @@ class ClientTest < MiniTest::Unit::TestCase
     end
     assert_equal('Hello, world!', client.resource.link)
   end
+
+  # Client converts underscores in resource method names to dashes to match
+  # names specified in the schema.
+  def test_resource_with_dashed_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://username:secret@example.com',
+                             schema.resource('another-resource').link('list'))
+    resource = Heroics::Resource.new({'link' => link})
+    client = Heroics::Client.new({'another-resource' => resource})
+    Excon.stub(method: :get) do |request|
+      assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
+                   request[:headers]['Authorization'])
+      assert_equal('example.com', request[:host])
+      assert_equal(443, request[:port])
+      assert_equal('/another-resource', request[:path])
+      Excon.stubs.pop
+      {status: 200, body: 'Hello, world!'}
+    end
+    assert_equal('Hello, world!', client.another_resource.link)
+  end
 end
 
 class ClientFromSchemaTest < MiniTest::Unit::TestCase
