@@ -15,8 +15,12 @@ module Heroics
     # @raise [NoMethodError] Raised if the name doesn't match a known resource.
     # @return [Resource] The resource matching the name.
     def method_missing(name)
+      name = name.to_s.gsub('_', '-')
       resource = @resources[name.to_s]
       if resource.nil?
+        # TODO(jkakar) Do we care about resource names in the schema specified
+        # with underscores?  If so, we should check to make sure the name
+        # mangling we did above was actually a bad idea.
         address = "<#{self.class.name}:0x00#{(self.object_id << 1).to_s(16)}>"
         raise NoMethodError.new("undefined method `#{name}' for ##{address}")
       end
