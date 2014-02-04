@@ -18,9 +18,9 @@ Or install it yourself as:
 
 ## Usage
 
-### Generate a client from a JSON schema
+### Instantiate a client from a JSON schema
 
-Heroics generates an HTTP client from a JSON schema.  The simplest way
+Heroics instantiates an HTTP client from a JSON schema.  The simplest way
 to get started is to provide the URL to the schema you want to base
 the client on:
 
