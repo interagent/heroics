@@ -7,11 +7,15 @@ netrc = Netrc.read
 username, token = netrc['api.heroku.com']
 if username && token
   username = username.split('@').first
-  url = "https://#{username}:#{token}@api.heroku.com/schema"
   options = {
     default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
     cache: Moneta.new(:File, dir: "#{Dir.home}/.heroics/heroku-api")}
-  cli = Heroics.cli_from_schema_url('heroku-api', STDOUT, url, options)
+
+  schema_url = "https://#{username}:#{token}@api.heroku.com/schema"
+  schema = Heroics.download_schema(schema_url, options)
+
+  url = "https://#{username}:#{token}@heroku-api.heroku.com/prefix"
+  cli = Heroics.cli_from_schema('heroku-api', STDOUT, schema, url, options)
   cli.run(*ARGV)
 else
   puts "ERROR Couldn't find credentials for api.heroku.com in ~/.netrc."
