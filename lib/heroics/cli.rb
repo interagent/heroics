@@ -75,7 +75,7 @@ USAGE
   #     is no caching.
   # @return [CLI] A CLI with commands generated from the JSON schema.
   def self.cli_from_schema(name, output, schema, url, options={})
-    client = client_from_schema(schema, URI::join(url, '/').to_s, options)
+    client = client_from_schema(schema, url, options)
     commands = {}
     schema.resources.each do |resource_schema|
       resource_schema.links.each do |link_schema|
