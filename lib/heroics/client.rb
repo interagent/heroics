@@ -51,19 +51,4 @@ module Heroics
     end
     Client.new(resources)
   end
-
-  # Download a JSON schema and create an HTTP client with it.
-  #
-  # @param url [String] The URL for the schema.  The URL will be used by the
-  #   generated client when it makes requests.
-  # @param options [Hash] Configuration for links.  Possible keys include:
-  #   - default_headers: Optionally, a set of headers to include in every
-  #     request made by the client.  Default is no custom headers.
-  #   - cache: Optionally, a Moneta-compatible cache to store ETags.  Default
-  #     is no caching.
-  # @return [Client] A client with resources and links from the JSON schema.
-  def self.client_from_schema_url(url, options={})
-    schema = download_schema(url, options)
-    client_from_schema(schema, URI::join(url, '/').to_s, options)
-  end
 end
