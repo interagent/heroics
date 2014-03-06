@@ -20,27 +20,10 @@ Or install it yourself as:
 
 ### Instantiate a client from a JSON schema
 
-Heroics instantiates an HTTP client from a JSON schema.  The simplest way
-to get started is to provide the URL to the schema you want to base
-the client on:
-
-```ruby
-require 'cgi'
-require 'heroics'
-
-username = CGI.escape('username')
-token = 'token'
-url = "https://#{username}:#{token}@api.heroku.com/schema"
-options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
-client = Heroics.client_from_schema_url(url, options)
-```
-
-The client will make requests to the API using the credentials from
-the URL.  The default headers will also be included in all requests
-(including the one to download the schema and all subsequent
-requests).
-
-You can also create a client from an in-memory schema object:
+Heroics instantiates an HTTP client from a JSON schema.  The client
+will make requests to the API using the credentials from the URL.  The
+default headers will also be included in all requests (including the
+one to download the schema and all subsequent requests).
 
 ```ruby
 require 'cgi'
@@ -62,12 +45,14 @@ Heroics handles ETags and will cache data on the client if you provide
 a [Moneta](https://github.com/minad/moneta) cache instance.
 
 ```ruby
-username = 'username'
+username = CGI.escape('username')
 token = 'token'
 url = "https://#{username}:#{token}@api.heroku.com/schema"
 options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
            cache: Moneta.new(:File, dir: "#{Dir.home}/.heroics/heroku-api")}
-client = Heroics.client_from_schema_url(url, options)
+data = JSON.parse(File.read('schema.json'))
+schema = Heroics::Schema.new(data)
+client = Heroics.client_from_schema(schema, url, options)
 ```
 
 ### Making requests
@@ -104,7 +89,9 @@ url = "https://#{username}:#{token}@api.heroku.com/schema"
 options = {
   default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
   cache: Moneta.new(:File, dir: "#{Dir.home}/.heroics/heroku-api")}
-cli = Heroics.cli_from_schema_url('heroku-api', STDOUT, url, options)
+data = JSON.parse(File.read('schema.json'))
+schema = Heroics::Schema.new(data)
+cli = Heroics.cli_from_schema('heroku-api', STDOUT, schema, url, options)
 cli.run(*ARGV)
 ```
 
