@@ -5,12 +5,26 @@
 #
 
 module <%= @module_name %>
+  # Get a Client configured to use username and password.
+  def self.connect(username, password)
+    url = '<%= @url %>'.sub('USERNAME', username).sub('PASSWORD', password)
+    Client.new(url)
+  end
+
+  # <%= @description %>
   class Client
     def initialize(url)
-      @client = Heroics.client_from_schema(SCHEMA, url)
+      <% if @accept_header %>
+      default_headers {'Accept' => '<%= @accept_header %>'}
+      <% else %>
+      default_headers = {}
+      <% end %>
+      options = {options: {default_headers: default_headers}}
+      @client = Heroics.client_from_schema(SCHEMA, url, options)
     end
     <% for resource in @resources %>
 
+    # <%= resource.description %>
     def <%= resource.name %>
       @<%= resource.name %>_resource ||= <%= resource.class_name %>.new(@client)
     end
@@ -20,14 +34,22 @@ module <%= @module_name %>
   private
   <% for resource in @resources %>
 
+  # <%= resource.description %>
   class <%= resource.class_name %>
     def initialize(client)
       @client = client
     end
     <% for link in resource.links %>
 
-    def <%= link.name %>(*args)
-      @client.<%= resource.name %>.<%= link.name %>(*args)
+    # <%= link.description %>
+    <% unless link.parameters.empty? %>
+    #
+    <% for info in link.parameters %>
+    # @param <%= info[:name] %>: <%= info[:description] %>
+    <% end %>
+    <% end %>
+    def <%= link.name %>(<%= link.parameter_names %>)
+      @client.<%= resource.name %>.<%= link.name %>(<%= link.parameter_names %>)
     end
     <% end %>
   end

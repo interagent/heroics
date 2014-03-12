@@ -14,6 +14,11 @@ module Heroics
       end
     end
 
+    # A description of the API.
+    def description
+      @schema['description']
+    end
+
     # Get a schema for a named resource.
     #
     # @param name [String] The name of the resource.
@@ -58,6 +63,11 @@ module Heroics
                       link_name = Heroics.ruby_name(link['title'])
                       [link_name, LinkSchema.new(schema, name, link_index)]
                     end]
+    end
+
+    # A description of the resource.
+    def description
+      @schema['definitions'][name]['description']
     end
 
     # Get a schema for a named link.
@@ -122,7 +132,20 @@ module Heroics
     #
     # @return [Array<String>] The parameters.
     def parameters
-      resolve_parameters(link_schema['href'].scan(PARAMETER_REGEX))
+      parameter_names = link_schema['href'].scan(PARAMETER_REGEX)
+      resolve_parameters(parameter_names)
+    end
+
+    # Get the names and descriptions of the parameters this link expects.
+    #
+    # @return [Hash<String, String>] A list of hashes with `name` and
+    #   `description` key/value pairs describing parameters.
+    def parameter_details
+      parameter_names = link_schema['href'].scan(PARAMETER_REGEX)
+      result = resolve_parameter_details(parameter_names)
+      # if body = example_body
+      #   result << {name: 'body', description: 'The request body'}
+      # end
     end
 
     # Get an example request body.
@@ -132,14 +155,14 @@ module Heroics
       if body_schema = link_schema['schema']
         definitions = @schema['definitions'][@resource_name]['definitions']
         Hash[body_schema['properties'].keys.map do |property|
-               # FIXME This is wrong! -jkakar
-               if definitions.has_key?(property)
-                 example = definitions[property]['example']
-               else
-                 example = ''
-               end
-               [property, example]
-             end]
+          # FIXME This is wrong! -jkakar
+          if definitions.has_key?(property)
+            example = definitions[property]['example']
+          else
+            example = ''
+          end
+          [property, example]
+        end]
       end
     end
 
@@ -188,10 +211,8 @@ module Heroics
     #   convert to parameter names.
     # @return [Array<String>] The parameters.
     def resolve_parameters(parameters)
-      # FIXME This is all pretty terrible.  It'd be much better to
-      # automatically resolve $ref's based on the path instead of special
-      # casing everything. -jkakar
       properties = @schema['definitions'][@resource_name]['properties']
+      return [''] if properties.nil?
       definitions = Hash[properties.each_pair.map do |key, value|
                            [value['$ref'], key]
                          end]
@@ -211,6 +232,66 @@ module Heroics
             resource_definitions['oneOf'].map do |property|
               definitions[property['$ref']]
             end.join('|')
+          end
+        end
+      end
+    end
+
+    # Get the names and descriptions of the parameters this link expects.
+    #
+    # @param parameters [Array] The names of the parameter definitions to
+    #   convert to parameter names.
+    # @return [Array<Hash<Symbol, String>>] A list of hashes with `name` and
+    #   `description` symbol keys.
+    def resolve_parameter_details(parameters)
+      properties = @schema['definitions'][@resource_name]['properties']
+      return [] if properties.nil?
+      definitions = Hash[properties.each_pair.map do |key, value|
+                           [value['$ref'], key]
+                         end]
+      schema_definitions = @schema['definitions'][@resource_name]['definitions']
+      i = 0
+      parameters.map do |parameter|
+        definition_name = URI.unescape(parameter[2..-3])
+        if definitions.has_key?(definition_name)
+          name = definitions[definition_name]
+          description = schema_definitions[name]['description']
+          {name: name, description: description}
+        else
+          definition_name = definition_name.split('/')[-1]
+          resource_definitions = schema_definitions[definition_name]
+          if resource_definitions.has_key?('anyOf')
+            name = resource_definitions['anyOf'].map do |property|
+              definition = schema_definitions[property['$ref']]
+              if definition.nil?
+                # FIXME Put this horrible hack in place for now to work around not
+                # correctly looking up definitions for non-local resources.
+                # There are at least two problems:
+                #
+                # 1. app-features, for example, reference app identity but we
+                #    don't correctly look it up.
+                # 2. the 'update' formations link references both app identity
+                #    and formation identity, but we end up rendering the wrong
+                #    thing without the index hack below. -jkakar
+                i = i + 1
+                property['$ref'].gsub('#', '').gsub('/definitions/', '_').sub(/^_/, '') + "_#{i}"
+              else
+                definition['name']
+              end
+            end.join('_or_')
+            description = resource_definitions['anyOf'].map do |property|
+              definition = schema_definitions[property['$ref']]
+              definition.nil? ? 'id' : definition['description']
+            end.join(' or ')
+            {name: name, description: description}
+          else
+            name = resource_definitions['oneOf'].map do |property|
+              definitions[property['$ref']]
+            end.join('_or_')
+            description = resource_definitions['oneOf'].map do |property|
+              schema_definitions[definitions[property['$ref']]]['description']
+            end.join(' or ')
+            {name: name, description: description}
           end
         end
       end
