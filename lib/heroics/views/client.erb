@@ -7,8 +7,7 @@
 module <%= @module_name %>
   # Get a Client configured to use username and password.
   def self.connect(username, password)
-    url = '<%= @url %>'.sub('USERNAME', username).sub('PASSWORD', password)
-    Client.new(url)
+    Client.new("<%= @url %>")
   end
 
   # <%= @description %>

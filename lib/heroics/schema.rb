@@ -274,7 +274,7 @@ module Heroics
                 #    and formation identity, but we end up rendering the wrong
                 #    thing without the index hack below. -jkakar
                 i = i + 1
-                property['$ref'].gsub('#', '').gsub('/definitions/', '_').sub(/^_/, '') + "_#{i}"
+                property['$ref'].gsub('#', '').gsub('/definitions/', '_').sub(/^_/, '').gsub('-', '_') + "_#{i}"
               else
                 definition['name']
               end
