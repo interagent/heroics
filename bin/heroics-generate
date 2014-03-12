@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'heroics'
+
+options = {}
+option_parser = OptionParser.new do |opts|
+  opts.banner = 'Usage: heroics-generate module_name schema_filename'
+  opts.on( '-h', '--help', 'Display this screen' ) do
+    puts opts
+    exit
+  end
+end
+
+option_parser.parse!
+module_name, schema_filename = ARGV
+schema = Heroics::Schema.new(MultiJson.decode(File.read(schema_filename)))
+puts Heroics.generate_client(module_name, schema)
