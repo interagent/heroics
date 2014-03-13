@@ -26,6 +26,12 @@ module Heroics
       end
       resource
     end
+
+    def inspect
+      "#<Heroics::Client>"
+    end
+
+    alias to_s inspect
   end
 
   # Create an HTTP client from a JSON schema.
