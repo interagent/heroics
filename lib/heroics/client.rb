@@ -20,11 +20,7 @@ module Heroics
       name = name.to_s.gsub('_', '-')
       resource = @resources[name]
       if resource.nil?
-        # TODO(jkakar) Do we care about resource names in the schema specified
-        # with underscores?  If so, we should check to make sure the name
-        # mangling we did above was actually a bad idea.
-        address = "<#{self.class.name}:0x00#{(self.object_id << 1).to_s(16)}>"
-        raise NoMethodError.new("undefined method `#{name}' for ##{address}")
+        raise NoMethodError.new("undefined method `#{name}' for #{to_s}")
       end
       resource
     end

@@ -18,9 +18,9 @@ class ClientTest < MiniTest::Unit::TestCase
     error = assert_raises NoMethodError do
       client.unknown
     end
-    assert_match(
-      /undefined method `unknown' for #<Heroics::Client:0x[0-9a-f]{14}>/,
-      error.message)
+    assert_equal("undefined method `unknown' for " +
+                 '#<Heroics::Client url="http://example.com">',
+                 error.message)
   end
 
   # Client.<resource>.<link> finds the appropriate link and invokes it.
