@@ -5,8 +5,10 @@ module Heroics
     #
     # @param resources [Hash<String,Resource>] A hash that maps method names
     #   to resources.
-    def initialize(resources)
+    # @param url [String] The URL used by this client.
+    def initialize(resources, url)
       @resources = resources
+      @url = url
     end
 
     # Find a resource.
@@ -27,10 +29,10 @@ module Heroics
       resource
     end
 
+    # Get a simple human-readable representation of this client instance.
     def inspect
-      "#<Heroics::Client>"
+      "#<Heroics::Client url=\"#{@url}\">"
     end
-
     alias to_s inspect
   end
 
@@ -55,6 +57,6 @@ module Heroics
       end
       resources[resource_schema.name] = Resource.new(links)
     end
-    Client.new(resources)
+    Client.new(resources, url)
   end
 end

@@ -3,10 +3,18 @@ require 'helper'
 class ClientTest < MiniTest::Unit::TestCase
   include ExconHelper
 
+  # Client.to_s returns a simple human-readable description of the client
+  # instance with the URL embedded in it.
+  def test_to_s
+    client = Heroics::Client.new({}, 'http://foo:bar@example.com')
+    assert_equal('#<Heroics::Client url="http://foo:bar@example.com">',
+                 client.to_s)
+  end
+
   # Client.<resource> raises a NoMethodError when a method is invoked
   # without a matching resource.
   def test_invalid_resource
-    client = Heroics::Client.new({})
+    client = Heroics::Client.new({}, 'http://example.com')
     error = assert_raises NoMethodError do
       client.unknown
     end
@@ -21,7 +29,8 @@ class ClientTest < MiniTest::Unit::TestCase
     link = Heroics::Link.new('https://username:secret@example.com',
                              schema.resource('resource').link('list'))
     resource = Heroics::Resource.new({'link' => link})
-    client = Heroics::Client.new({'resource' => resource})
+    client = Heroics::Client.new({'resource' => resource},
+                                 'http://example.com')
     Excon.stub(method: :get) do |request|
       assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
                    request[:headers]['Authorization'])
@@ -41,7 +50,8 @@ class ClientTest < MiniTest::Unit::TestCase
     link = Heroics::Link.new('https://username:secret@example.com',
                              schema.resource('another-resource').link('list'))
     resource = Heroics::Resource.new({'link' => link})
-    client = Heroics::Client.new({'another-resource' => resource})
+    client = Heroics::Client.new({'another-resource' => resource},
+                                 'http://example.com')
     Excon.stub(method: :get) do |request|
       assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
                    request[:headers]['Authorization'])
