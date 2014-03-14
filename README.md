@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/heroku/heroics.png?branch=master)](https://travis-ci.org/heroku/heroics)
+
 # Heroics
 
 Ruby HTTP client for APIs represented with JSON schema.
