@@ -5,8 +5,10 @@ module Heroics
     #
     # @param resources [Hash<String,Resource>] A hash that maps method names
     #   to resources.
-    def initialize(resources)
+    # @param url [String] The URL used by this client.
+    def initialize(resources, url)
       @resources = resources
+      @url = url
     end
 
     # Find a resource.
@@ -18,14 +20,16 @@ module Heroics
       name = name.to_s.gsub('_', '-')
       resource = @resources[name]
       if resource.nil?
-        # TODO(jkakar) Do we care about resource names in the schema specified
-        # with underscores?  If so, we should check to make sure the name
-        # mangling we did above was actually a bad idea.
-        address = "<#{self.class.name}:0x00#{(self.object_id << 1).to_s(16)}>"
-        raise NoMethodError.new("undefined method `#{name}' for ##{address}")
+        raise NoMethodError.new("undefined method `#{name}' for #{to_s}")
       end
       resource
     end
+
+    # Get a simple human-readable representation of this client instance.
+    def inspect
+      "#<Heroics::Client url=\"#{@url}\">"
+    end
+    alias to_s inspect
   end
 
   # Create an HTTP client from a JSON schema.
@@ -49,6 +53,6 @@ module Heroics
       end
       resources[resource_schema.name] = Resource.new(links)
     end
-    Client.new(resources)
+    Client.new(resources, url)
   end
 end

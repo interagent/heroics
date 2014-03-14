@@ -11,7 +11,7 @@ class ResourceTest < MiniTest::Unit::TestCase
       resource.unknown
     end
     assert_match(
-      /undefined method `unknown' for #<Heroics::Resource:0x[0-9a-f]{14}>/,
+      /undefined method `unknown' for #<Heroics::Resource:0x.*>/,
       error.message)
   end
 
