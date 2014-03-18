@@ -1,3 +1,4 @@
+require 'base64'
 require 'excon'
 require 'moneta'
 require 'multi_json'

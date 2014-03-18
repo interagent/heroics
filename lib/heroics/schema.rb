@@ -33,6 +33,12 @@ module Heroics
     def resources
       @resources.values
     end
+
+    # Get a simple human-readable representation of this client instance.
+    def inspect
+      "#<Heroics::Schema description=\"#{@schema['description']}\">"
+    end
+    alias to_s inspect
   end
 
   # A wrapper around a bare resource element in a JSON schema to make it

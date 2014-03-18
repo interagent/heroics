@@ -19,12 +19,11 @@ Or install it yourself as:
 
 ## Usage
 
-### Instantiate a client from a JSON schema
+### Instantiate a client from a JSON schema with basic credentials
 
 Heroics instantiates an HTTP client from a JSON schema.  The client
 will make requests to the API using the credentials from the URL.  The
-default headers will also be included in all requests (including the
-one to download the schema and all subsequent requests).
+default headers will also be included in all requests.
 
 ```ruby
 require 'cgi'
@@ -33,11 +32,25 @@ require 'heroics'
 
 username = CGI.escape('username')
 token = 'token'
-url = "https://#{username}:#{token}@api.heroku.com/schema"
+url = "https://#{username}:#{token}@api.heroku.com"
 options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
 data = JSON.parse(File.read('schema.json'))
 schema = Heroics::Schema.new(data)
 client = Heroics.client_from_schema(schema, url, options)
+```
+
+### Instantiate a client from a JSON schema with an OAuth token
+
+The client will make requests to the API using an OAuth token when one is
+provided.
+
+```ruby
+oauth_token = 'token'
+url = "https://api.heroku.com"
+options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
+data = JSON.parse(File.read('schema.json'))
+schema = Heroics::Schema.new(data)
+client = Heroics.oauth_client_from_schema(oauth_token, schema, url, options)
 ```
 
 ### Client-side caching
