@@ -32,7 +32,7 @@ require 'heroics'
 
 username = CGI.escape('username')
 token = 'token'
-url = "https://#{username}:#{token}@api.heroku.com/schema"
+url = "https://#{username}:#{token}@api.heroku.com"
 options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
 data = JSON.parse(File.read('schema.json'))
 schema = Heroics::Schema.new(data)
@@ -46,7 +46,7 @@ provided.
 
 ```ruby
 oauth_token = 'token'
-url = "https://api.heroku.com/schema"
+url = "https://api.heroku.com"
 options = {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
 data = JSON.parse(File.read('schema.json'))
 schema = Heroics::Schema.new(data)

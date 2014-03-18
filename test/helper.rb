@@ -23,6 +23,7 @@ end
 
 # A simple JSON schema for testing purposes.
 SAMPLE_SCHEMA = {
+  'description' => 'Sample schema for use in tests.',
   'definitions' => {
     'resource' => {
       'description' => 'A sample resource to use in tests.',

@@ -1,6 +1,15 @@
 require 'helper'
 
 class SchemaTest < MiniTest::Unit::TestCase
+  # Schema.to_s returns a simple human-readable description of the schema
+  # instance with the description embedded in it.
+  def test_to_s
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    assert_equal(
+      '#<Heroics::Schema description="Sample schema for use in tests.">',
+      schema.to_s)
+  end
+
   # Schema.resource returns a ResourceSchema for the named resource.
   def test_resource
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
