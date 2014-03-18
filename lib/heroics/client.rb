@@ -55,4 +55,28 @@ module Heroics
     end
     Client.new(resources, url)
   end
+
+  # Create an HTTP client with OAuth credentials from a JSON schema.
+  #
+  # @param oauth_token [String] The OAuth token to pass using the `Bearer`
+  #   authorization mechanism.
+  # @param schema [Schema] The JSON schema to build an HTTP client for.
+  # @param url [String] The URL the generated client should use when making
+  #   requests.
+  # @param options [Hash] Configuration for links.  Possible keys include:
+  #   - default_headers: Optionally, a set of headers to include in every
+  #     request made by the client.  Default is no custom headers.
+  #   - cache: Optionally, a Moneta-compatible cache to store ETags.  Default
+  #     is no caching.
+  # @return [Client] A client with resources and links from the JSON schema.
+  def self.oauth_client_from_schema(oauth_token, schema, url, options={})
+    authorization = Base64.strict_encode64(":#{oauth_token}")
+    # Don't mutate user-supplied data.
+    options = Marshal.load(Marshal.dump(options))
+    if !options.has_key?(:default_headers)
+      options[:default_headers] = {}
+    end
+    options[:default_headers].merge!({"Authorization" => authorization})
+    client_from_schema(schema, url, options)
+  end
 end

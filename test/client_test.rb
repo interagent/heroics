@@ -137,3 +137,49 @@ class ClientFromSchemaTest < MiniTest::Unit::TestCase
     assert_equal(body, client.resource.list)
   end
 end
+
+class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
+  include ExconHelper
+
+  # oauth_client_from_schema injects an Authorization header, built from the
+  # specified OAuth token, into the default header options.
+  def test_oauth_client_from_schema
+    body = {'Hello' => 'World!'}
+    Excon.stub(method: :get) do |request|
+      assert_equal('OmM1NWVmMGQ4LTQwYjYtNDc1OS1iMWJmLTRhNmY5NDE5MGE2Ng==',
+                   request[:headers]['Authorization'])
+      Excon.stubs.pop
+      {status: 200, headers: {'Content-Type' => 'application/json'},
+       body: MultiJson.dump(body)}
+    end
+
+    oauth_token = 'c55ef0d8-40b6-4759-b1bf-4a6f94190a66'
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics.oauth_client_from_schema(oauth_token, schema,
+                                              'https://example.com')
+    assert_equal(body, client.resource.list)
+  end
+
+  # oauth_client_from_schema doesn't mutate the options object, and in
+  # particular, it doesn't mutate the :default_headers Hash in that object.
+  def test_oauth_client_from_schema_with_options
+    body = {'Hello' => 'World!'}
+    Excon.stub(method: :get) do |request|
+      assert_equal('application/vnd.heroku+json; version=3',
+                   request[:headers]['Accept'])
+      assert_equal('OmM1NWVmMGQ4LTQwYjYtNDc1OS1iMWJmLTRhNmY5NDE5MGE2Ng==',
+                   request[:headers]['Authorization'])
+      Excon.stubs.pop
+      {status: 200, headers: {'Content-Type' => 'application/json'},
+       body: MultiJson.dump(body)}
+    end
+
+    oauth_token = 'c55ef0d8-40b6-4759-b1bf-4a6f94190a66'
+    options = {
+      default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics.oauth_client_from_schema(oauth_token, schema,
+                                              'https://example.com', options)
+    assert_equal(body, client.resource.list)
+  end
+end
