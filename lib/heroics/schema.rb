@@ -9,8 +9,9 @@ module Heroics
     def initialize(schema)
       @schema = schema
       @resources = {}
-      @schema['definitions'].each_key do |name|
-        @resources[name] = ResourceSchema.new(@schema, name)
+      @schema['properties'].each do |name, definition|
+        next unless definition.has_key?('$ref')
+        @resources[name] = ResourceSchema.new(@schema, definition['$ref'].split('/').last)
       end
     end
 
