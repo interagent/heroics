@@ -147,7 +147,7 @@ class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
     body = {'Hello' => 'World!'}
     Excon.stub(method: :get) do |request|
       assert_equal(
-        'Bearer OmM1NWVmMGQ4LTQwYjYtNDc1OS1iMWJmLTRhNmY5NDE5MGE2Ng==',
+        'Basic OmM1NWVmMGQ4LTQwYjYtNDc1OS1iMWJmLTRhNmY5NDE5MGE2Ng==',
         request[:headers]['Authorization'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
@@ -169,7 +169,7 @@ class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
       assert_equal('application/vnd.heroku+json; version=3',
                    request[:headers]['Accept'])
       assert_equal(
-        'Bearer OmM1NWVmMGQ4LTQwYjYtNDc1OS1iMWJmLTRhNmY5NDE5MGE2Ng==',
+        'Basic OmM1NWVmMGQ4LTQwYjYtNDc1OS1iMWJmLTRhNmY5NDE5MGE2Ng==',
         request[:headers]['Authorization'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},

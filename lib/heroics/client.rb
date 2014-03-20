@@ -71,7 +71,7 @@ module Heroics
   # @return [Client] A client with resources and links from the JSON schema.
   def self.oauth_client_from_schema(oauth_token, schema, url, options={})
     encoded_token = Base64.strict_encode64(":#{oauth_token}")
-    authorization = "Bearer #{encoded_token}"
+    authorization = "Basic #{encoded_token}"
     # Don't mutate user-supplied data.
     options = Marshal.load(Marshal.dump(options))
     if !options.has_key?(:default_headers)
