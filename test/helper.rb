@@ -172,5 +172,9 @@ SAMPLE_SCHEMA = {
          'title'       => 'List'}
       ]
     },
- }
+  },
+  'properties' => {
+    'resource'          => { '$ref' => '#/definitions/resource' },
+    'another-resource'  => { '$ref' => '#/definitions/another-resource' }
+  }
 }
