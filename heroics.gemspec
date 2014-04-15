@@ -28,5 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'excon'
   spec.add_dependency 'netrc'
   spec.add_dependency 'moneta'
-  spec.add_dependency 'multi_json'
+  spec.add_dependency 'multi_json', '>= 1.3.2'
 end

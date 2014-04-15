@@ -243,6 +243,6 @@ module Heroics
   def self.download_schema(url, options={})
     default_headers = options.fetch(:default_headers, {})
     response = Excon.get(url, headers: default_headers, expects: [200, 201])
-    Schema.new(MultiJson.decode(response.body))
+    Schema.new(MultiJson.load(response.body))
   end
 end
