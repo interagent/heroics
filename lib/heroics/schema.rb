@@ -141,16 +141,8 @@ module Heroics
     # @return [Hash<String, String>] A list of hashes with `name` and
     #   `description` key/value pairs describing parameters.
     def parameter_details
-      # puts "HREF: #{link_schema['href']}"
       parameter_names = link_schema['href'].scan(PARAMETER_REGEX)
-      # puts "NAMES: #{parameter_names}"
-      result = resolve_parameter_details(parameter_names)
-      # puts result.map { |r| r.name }
-      # puts result.map { |r| r.description }
-      result
-      # if body = example_body
-      #   result << {name: 'body', description: 'The request body'}
-      # end
+      resolve_parameter_details(parameter_names)
     end
 
     def needs_request_body?
