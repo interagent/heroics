@@ -113,27 +113,30 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
     assert_equal([], link.parameter_details)
   end
 
-  # LinkSchema.parameter_details returns an array of hashes with information
+  # LinkSchema.parameter_details returns an array of Parameter with information
   # about the parameters accepted by the link.
   def test_parameter_details
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = schema.resource('resource').link('info')
-    assert_equal([{name: 'uuid_field',
-                   description: 'A sample UUID field'}],
-                 link.parameter_details)
+    parameters = link.parameter_details
+    assert_equal(1, parameters.length)
+    parameter = parameters[0]
+    assert_equal('resource_uuid_field', parameter.name)
+    assert_equal('A sample UUID field', parameter.description)
   end
 
-  # LinkSchema.parameter_details returns an array of hashes with information
-  # about the parameters accepted by the link.  If the parameter is part of a
-  # 'oneOf' set of parameters the names are concatenated with '_or_' and the
-  # descriptions are bundled together.
+  # LinkSchema.parameter_details returns an array of ParameterChoices, when
+  # more than one value may be used with a property, with information about
+  # the parameters accepted by the link.
   def test_parameter_details_with_one_of_field
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = schema.resource('resource').link('identify_resource')
-    assert_equal(
-      [{name: 'uuid_field_or_email_field',
-        description: 'A sample UUID field or A sample email address field'}],
-      link.parameter_details)
+    parameters = link.parameter_details
+    assert_equal(1, parameters.length)
+    parameter = parameters[0]
+    assert_equal('resource_uuid_field_or_resource_email_field', parameter.name)
+    assert_equal('A sample UUID field or A sample email address field',
+                 parameter.description)
   end
 
   # LinkSchema.body returns nil if the link doesn't accept a request body.
