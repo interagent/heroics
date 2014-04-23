@@ -1,6 +1,16 @@
 module Heroics
   # Generate a static client that uses Heroics under the hood.  This is a good
   # option if you want to ship a gem or generate API documentation using Yard.
+  #
+  # @param module_name [String] The name of the module, as rendered in a Ruby
+  #   source file, to use for the generated client.
+  # @param schema [Schema] The schema instance to generate the client from.
+  # @param url [String] The URL for the API service.
+  # @param options [Hash] Configuration for links.  Possible keys include:
+  #   - default_headers: Optionally, a set of headers to include in every
+  #     request made by the client.  Default is no custom headers.
+  #   - cache: Optionally, a Moneta-compatible cache to store ETags.  Default
+  #     is no caching.
   def self.generate_client(module_name, schema, url, options)
     filename = File.dirname(__FILE__) + '/views/client.erb'
     eruby = Erubis::Eruby.new(File.read(filename))
@@ -10,19 +20,17 @@ module Heroics
 
   private
 
+  # Process the schema to build up the context needed to render the source
+  # template.
   def self.build_context(module_name, schema, url, options)
     resources = []
     schema.resources.each do |resource_schema|
       links = []
-      # puts
-      # puts
-      # puts "RESOURCE: #{resource_schema.name.gsub('-', '_')}"
       resource_schema.links.each do |link_schema|
         links << GeneratorLink.new(link_schema.name.gsub('-', '_'),
                                    link_schema.description,
                                    link_schema.parameter_details,
                                    link_schema.needs_request_body?)
-        # puts link_schema.parameter_details
       end
       resources << GeneratorResource.new(resource_schema.name.gsub('-', '_'),
                                          resource_schema.description,
@@ -38,6 +46,8 @@ module Heroics
                resources: resources}
   end
 
+  # A representation of a resource for use when generating source code in the
+  # template.
   class GeneratorResource
     attr_reader :name, :description, :links
 
@@ -47,11 +57,14 @@ module Heroics
       @links = links
     end
 
+    # The name of the resource class in generated code.
     def class_name
       Heroics.camel_case(name)
     end
   end
 
+  # A representation of a link for use when generating source code in the
+  # template.
   class GeneratorLink
     attr_reader :name, :description, :parameters, :takes_body
 
@@ -64,11 +77,14 @@ module Heroics
       end
     end
 
+    # The list of parameters to render in generated source code for the method
+    # signature for the link.
     def parameter_names
       @parameters.map { |info| info.name }.join(', ')
     end
   end
 
+  # Convert a lower_case_name to CamelCase.
   def self.camel_case(text)
     return text if text !~ /_/ && text =~ /[A-Z]+.*/
     text = text.split('_').map{ |element| element.capitalize }.join
@@ -78,6 +94,7 @@ module Heroics
     text
   end
 
+  # A representation of a body parameter.
   class BodyParameter
     attr_reader :name, :description
 
