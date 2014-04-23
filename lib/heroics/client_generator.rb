@@ -42,7 +42,7 @@ module Heroics
                default_headers: options.fetch(:default_headers, {}),
                cache: options.fetch(:cache, {}),
                description: schema.description,
-               schema: MultiJson.dump(schema.schema),
+               schema: MultiJson.dump(schema.schema, pretty: true),
                resources: resources}
   end
 
