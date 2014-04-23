@@ -5,7 +5,7 @@
 #
 
 module <%= @module_name %>
-  # Get a Client configured to use username and password.
+  # Get a Client configured to use HTTP Basic authentication.
   def self.connect(username, password)
     Client.new("<%= @url %>")
   end
@@ -43,8 +43,8 @@ module <%= @module_name %>
     # <%= link.description %>
     <% unless link.parameters.empty? %>
     #
-    <% for info in link.parameters %>
-    # @param <%= info[:name] %>: <%= info[:description] %>
+    <% for parameter in link.parameters %>
+    # @param <%= parameter.name %>: <%= parameter.description %>
     <% end %>
     <% end %>
     def <%= link.name %>(<%= link.parameter_names %>)

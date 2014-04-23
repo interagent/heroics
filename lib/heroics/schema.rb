@@ -141,11 +141,20 @@ module Heroics
     # @return [Hash<String, String>] A list of hashes with `name` and
     #   `description` key/value pairs describing parameters.
     def parameter_details
+      # puts "HREF: #{link_schema['href']}"
       parameter_names = link_schema['href'].scan(PARAMETER_REGEX)
+      # puts "NAMES: #{parameter_names}"
       result = resolve_parameter_details(parameter_names)
+      # puts result.map { |r| r.name }
+      # puts result.map { |r| r.description }
+      result
       # if body = example_body
       #   result << {name: 'body', description: 'The request body'}
       # end
+    end
+
+    def needs_request_body?
+      return link_schema.has_key?('schema')
     end
 
     # Get an example request body.
@@ -196,7 +205,7 @@ module Heroics
     private
 
     # Match parameters in definition strings.
-    PARAMETER_REGEX = /\{\([%\/a-zA-Z0-9_]*\)\}/
+    PARAMETER_REGEX = /\{\([%\/a-zA-Z0-9_-]*\)\}/
 
     # Get the raw link schema.
     #
@@ -237,63 +246,56 @@ module Heroics
       end
     end
 
-    # Get the names and descriptions of the parameters this link expects.
+    # Get the parameters this link expects.
     #
     # @param parameters [Array] The names of the parameter definitions to
     #   convert to parameter names.
-    # @return [Array<Hash<Symbol, String>>] A list of hashes with `name` and
-    #   `description` symbol keys.
+    # @return [Array<Parameter|ParameterChoice>] A list of parameter instances
+    #   that represent parameters to be injected into the link URL.
     def resolve_parameter_details(parameters)
       properties = @schema['definitions'][@resource_name]['properties']
       return [] if properties.nil?
-      definitions = Hash[properties.each_pair.map do |key, value|
-                           [value['$ref'], key]
-                         end]
-      schema_definitions = @schema['definitions'][@resource_name]['definitions']
-      i = 0
+
+      # URI decode parameters and strip the leading '{(' and trailing ')}'.
+      parameters = parameters.map { |parameter| URI.unescape(parameter[2..-3]) }
       parameters.map do |parameter|
-        definition_name = URI.unescape(parameter[2..-3])
-        if definitions.has_key?(definition_name)
-          name = definitions[definition_name]
-          description = schema_definitions[name]['description']
-          {name: name, description: description}
+        # Split the path into components and discard the leading '#' that
+        # represents the root of the schema.
+        path = parameter.split('/')[1..-1]
+        info = lookup_parameter(path, @schema)
+        # The reference can be one of several values.
+        resource_name = path[1].gsub('-', '_')
+        if info.has_key?('anyOf')
+          ParameterChoice.new(resource_name,
+                              unpack_multiple_parameters(info['anyOf']))
+        elsif info.has_key?('oneOf')
+          ParameterChoice.new(resource_name,
+                              unpack_multiple_parameters(info['oneOf']))
         else
-          definition_name = definition_name.split('/')[-1]
-          resource_definitions = schema_definitions[definition_name]
-          if resource_definitions.has_key?('anyOf')
-            name = resource_definitions['anyOf'].map do |property|
-              definition = schema_definitions[property['$ref']]
-              if definition.nil?
-                # FIXME Put this horrible hack in place for now to work around not
-                # correctly looking up definitions for non-local resources.
-                # There are at least two problems:
-                #
-                # 1. app-features, for example, reference app identity but we
-                #    don't correctly look it up.
-                # 2. the 'update' formations link references both app identity
-                #    and formation identity, but we end up rendering the wrong
-                #    thing without the index hack below. -jkakar
-                i = i + 1
-                property['$ref'].gsub('#', '').gsub('/definitions/', '_').sub(/^_/, '').gsub('-', '_') + "_#{i}"
-              else
-                definition['name']
-              end
-            end.join('_or_')
-            description = resource_definitions['anyOf'].map do |property|
-              definition = schema_definitions[property['$ref']]
-              definition.nil? ? 'id' : definition['description']
-            end.join(' or ')
-            {name: name, description: description}
-          else
-            name = resource_definitions['oneOf'].map do |property|
-              definitions[property['$ref']]
-            end.join('_or_')
-            description = resource_definitions['oneOf'].map do |property|
-              schema_definitions[definitions[property['$ref']]]['description']
-            end.join(' or ')
-            {name: name, description: description}
-          end
+          name = path[-1]
+          Parameter.new(resource_name, name, info['description'])
         end
+      end
+    end
+
+    def unpack_multiple_parameters(parameters)
+      parameters.map do |info|
+        parameter = info['$ref']
+        path = parameter.split('/')[1..-1]
+        info = lookup_parameter(path, @schema)
+        resource_name = path[1].gsub('-', '_')
+        name = path[-1]
+        Parameter.new(resource_name, name, info['description'])
+      end
+    end
+
+    def lookup_parameter(path, schema)
+      key = path[0]
+      remaining = path[1..-1]
+      if remaining.empty?
+        return schema[key]
+      else
+        lookup_parameter(remaining, schema[key])
       end
     end
 
@@ -325,5 +327,44 @@ module Heroics
     default_headers = options.fetch(:default_headers, {})
     response = Excon.get(url, headers: default_headers, expects: [200, 201])
     Schema.new(MultiJson.load(response.body))
+  end
+
+  class Parameter
+    attr_reader :resource_name, :description
+
+    def initialize(resource_name, name, description)
+      @resource_name = resource_name
+      @name = name
+      @description = description
+    end
+
+    def name
+      "#{@resource_name}_#{@name}"
+    end
+
+    def inspect
+      "Parameter(name=#{@name}, description=#{@description})"
+    end
+  end
+
+  class ParameterChoice
+    attr_reader :resource_name, :parameters
+
+    def initialize(resource_name, parameters)
+      @resource_name = resource_name
+      @parameters = parameters
+    end
+
+    def name
+      @parameters.map { |parameter| parameter.name }.join('_or_')
+    end
+
+    def description
+      @parameters.map { |parameter| parameter.description }.join(' or ')
+    end
+
+    def to_s
+      "ParameterChoice(parameters=#{@parameters})"
+    end
   end
 end

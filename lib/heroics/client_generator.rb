@@ -14,10 +14,15 @@ module Heroics
     resources = []
     schema.resources.each do |resource_schema|
       links = []
+      # puts
+      # puts
+      # puts "RESOURCE: #{resource_schema.name.gsub('-', '_')}"
       resource_schema.links.each do |link_schema|
         links << GeneratorLink.new(link_schema.name.gsub('-', '_'),
                                    link_schema.description,
-                                   link_schema.parameter_details)
+                                   link_schema.parameter_details,
+                                   link_schema.needs_request_body?)
+        # puts link_schema.parameter_details
       end
       resources << GeneratorResource.new(resource_schema.name.gsub('-', '_'),
                                          resource_schema.description,
@@ -47,18 +52,19 @@ module Heroics
   end
 
   class GeneratorLink
-    attr_reader :name, :description, :parameters
+    attr_reader :name, :description, :parameters, :takes_body
 
-    def initialize(name, description, parameters)
+    def initialize(name, description, parameters, takes_body)
       @name = name
       @description = description
       @parameters = parameters
+      if takes_body
+        parameters << BodyParameter.new
+      end
     end
 
     def parameter_names
-      @parameters.map do |info|
-        info[:name]
-      end.join(', ')
+      @parameters.map { |info| info.name }.join(', ')
     end
   end
 
@@ -69,5 +75,14 @@ module Heroics
       text.sub!(replace) { |match| match.upcase }
     end
     text
+  end
+
+  class BodyParameter
+    attr_reader :name, :description
+
+    def initialize
+      @name = 'body'
+      @description = 'the object to pass as the request payload'
+    end
   end
 end
