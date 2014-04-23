@@ -278,6 +278,12 @@ module Heroics
       end
     end
 
+    # Unpack an 'anyOf' or 'oneOf' multi-parameter blob.
+    #
+    # @param parameters [Array<Hash>] An array of hashes containing '$ref'
+    #   keys and definition values.
+    # @return [Array<Parameter>] An array of parameters extracted from the
+    #   blob.
     def unpack_multiple_parameters(parameters)
       parameters.map do |info|
         parameter = info['$ref']
@@ -289,6 +295,13 @@ module Heroics
       end
     end
 
+    # Recursively walk the object hierarchy in the schema to resolve a given
+    # path.  This is used to find property information related to definitions
+    # in link hrefs.
+    #
+    # @param path [Array<String>] An array of paths to walk, such as
+    #   ['definitions', 'resource', 'definitions', 'property'].
+    # @param schema [Hash] The schema to walk.
     def lookup_parameter(path, schema)
       key = path[0]
       remaining = path[1..-1]
@@ -329,6 +342,7 @@ module Heroics
     Schema.new(MultiJson.load(response.body))
   end
 
+  # A representation of a parameter.
   class Parameter
     attr_reader :resource_name, :description
 
@@ -338,15 +352,19 @@ module Heroics
       @description = description
     end
 
+    # The name of the parameter, with the resource included, suitable for use
+    # in a function signature.
     def name
       "#{@resource_name}_#{@name}"
     end
 
+    # A pretty representation of this instance.
     def inspect
       "Parameter(name=#{@name}, description=#{@description})"
     end
   end
 
+  # A representation of a set of parameters.
   class ParameterChoice
     attr_reader :resource_name, :parameters
 
@@ -355,15 +373,19 @@ module Heroics
       @parameters = parameters
     end
 
+    # A name created by merging individual parameter descriptions, suitable
+    # for use in a function signature.
     def name
       @parameters.map { |parameter| parameter.name }.join('_or_')
     end
 
+    # A description created by merging individual parameter descriptions.
     def description
       @parameters.map { |parameter| parameter.description }.join(' or ')
     end
 
-    def to_s
+    # A pretty representation of this instance.
+    def inspect
       "ParameterChoice(parameters=#{@parameters})"
     end
   end
