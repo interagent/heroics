@@ -15,11 +15,8 @@ end
 option_parser.parse!
 module_name, schema_filename, url = ARGV
 schema = Heroics::Schema.new(MultiJson.decode(File.read(schema_filename)))
-accept_header = 'application/vnd.heroku+json; version=3'
-
-  # options = {
-  #   default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
-  #   cache: Moneta.new(:File, dir: "#{Dir.home}/.heroics/heroku-api")}
-
-
-puts Heroics.generate_client(module_name, schema, url, accept_header)
+options = {
+  default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
+  cache: 'Moneta.new(:File, dir: "#{Dir.home}/.heroics/platform-api")'
+}
+puts Heroics.generate_client(module_name, schema, url, options)

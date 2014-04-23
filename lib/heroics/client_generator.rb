@@ -1,16 +1,16 @@
 module Heroics
   # Generate a static client that uses Heroics under the hood.  This is a good
   # option if you want to ship a gem or generate API documentation using Yard.
-  def self.generate_client(module_name, schema, url, accept_header=nil)
+  def self.generate_client(module_name, schema, url, options)
     filename = File.dirname(__FILE__) + '/views/client.erb'
     eruby = Erubis::Eruby.new(File.read(filename))
-    context = build_context(module_name, schema, url, accept_header)
+    context = build_context(module_name, schema, url, options)
     eruby.evaluate(context)
   end
 
   private
 
-  def self.build_context(module_name, schema, url, accept_header)
+  def self.build_context(module_name, schema, url, options)
     resources = []
     schema.resources.each do |resource_schema|
       links = []
@@ -29,12 +29,13 @@ module Heroics
                                          links)
     end
 
-    {module_name: module_name,
-     url: url,
-     accept_header: accept_header,
-     description: schema.description,
-     schema: MultiJson.encode(schema.schema),
-     resources: resources}
+    context = {module_name: module_name,
+               url: url,
+               default_headers: options.fetch(:default_headers, {}),
+               cache: options.fetch(:cache, {}),
+               description: schema.description,
+               schema: MultiJson.encode(schema.schema),
+               resources: resources}
   end
 
   class GeneratorResource

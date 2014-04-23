@@ -19,15 +19,15 @@ module <%= @module_name %>
     url = URI.parse("<%= @url %>")
     url.user = username
     url.password = password
-    <% if @accept_header %>
-    default_headers = {'Accept' => '<%= @accept_header %>'}
-    <% else %>
-    default_headers = {}
-    <% end %>
+    default_headers = <%= @default_headers %>
     unless headers.nil?
       default_headers.merge!(headers)
     end
-    options = {options: {default_headers: default_headers}}
+    cache = <%= @cache %>
+    options = {
+      options: {default_headers: default_headers,
+                cache: cache}
+    }
     client = Heroics.client_from_schema(SCHEMA, url.to_s, options)
     Client.new(client)
   end
@@ -41,15 +41,15 @@ module <%= @module_name %>
   #   authentication.
   def self.connect_oauth(oauth_token, headers=nil)
     url = "<%= @url %>"
-    <% if @accept_header %>
-    default_headers = {'Accept' => '<%= @accept_header %>'}
-    <% else %>
-    default_headers = {}
-    <% end %>
+    default_headers = <%= @default_headers %>
     unless headers.nil?
       default_headers.merge!(headers)
     end
-    options = {options: {default_headers: default_headers}}
+    cache = <%= @cache %>
+    options = {
+      options: {default_headers: default_headers,
+                cache: cache}
+    }
     client = Heroics.client_from_schema(oauth_token, SCHEMA, url, options)
     Client.new(client)
   end
