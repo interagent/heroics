@@ -96,7 +96,7 @@ module <%= @module_name %>
   end
   <% end %>
 
-  SCHEMA = Heroics::Schema.new(MultiJson.load(<<-HEROICS_SCHEMA))
+  SCHEMA = Heroics::Schema.new(MultiJson.load(<<-'HEROICS_SCHEMA'))
 <%= @schema %>
 HEROICS_SCHEMA
 end
