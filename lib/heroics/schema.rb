@@ -14,6 +14,11 @@ module Heroics
       end
     end
 
+    # A description of the API.
+    def description
+      @schema['description']
+    end
+
     # Get a schema for a named resource.
     #
     # @param name [String] The name of the resource.
@@ -58,6 +63,11 @@ module Heroics
                       link_name = Heroics.ruby_name(link['title'])
                       [link_name, LinkSchema.new(schema, name, link_index)]
                     end]
+    end
+
+    # A description of the resource.
+    def description
+      @schema['definitions'][name]['description']
     end
 
     # Get a schema for a named link.
@@ -122,7 +132,21 @@ module Heroics
     #
     # @return [Array<String>] The parameters.
     def parameters
-      resolve_parameters(link_schema['href'].scan(PARAMETER_REGEX))
+      parameter_names = link_schema['href'].scan(PARAMETER_REGEX)
+      resolve_parameters(parameter_names)
+    end
+
+    # Get the names and descriptions of the parameters this link expects.
+    #
+    # @return [Hash<String, String>] A list of hashes with `name` and
+    #   `description` key/value pairs describing parameters.
+    def parameter_details
+      parameter_names = link_schema['href'].scan(PARAMETER_REGEX)
+      resolve_parameter_details(parameter_names)
+    end
+
+    def needs_request_body?
+      return link_schema.has_key?('schema')
     end
 
     # Get an example request body.
@@ -132,14 +156,14 @@ module Heroics
       if body_schema = link_schema['schema']
         definitions = @schema['definitions'][@resource_name]['definitions']
         Hash[body_schema['properties'].keys.map do |property|
-               # FIXME This is wrong! -jkakar
-               if definitions.has_key?(property)
-                 example = definitions[property]['example']
-               else
-                 example = ''
-               end
-               [property, example]
-             end]
+          # FIXME This is wrong! -jkakar
+          if definitions.has_key?(property)
+            example = definitions[property]['example']
+          else
+            example = ''
+          end
+          [property, example]
+        end]
       end
     end
 
@@ -173,7 +197,7 @@ module Heroics
     private
 
     # Match parameters in definition strings.
-    PARAMETER_REGEX = /\{\([%\/a-zA-Z0-9_]*\)\}/
+    PARAMETER_REGEX = /\{\([%\/a-zA-Z0-9_-]*\)\}/
 
     # Get the raw link schema.
     #
@@ -188,10 +212,8 @@ module Heroics
     #   convert to parameter names.
     # @return [Array<String>] The parameters.
     def resolve_parameters(parameters)
-      # FIXME This is all pretty terrible.  It'd be much better to
-      # automatically resolve $ref's based on the path instead of special
-      # casing everything. -jkakar
       properties = @schema['definitions'][@resource_name]['properties']
+      return [''] if properties.nil?
       definitions = Hash[properties.each_pair.map do |key, value|
                            [value['$ref'], key]
                          end]
@@ -213,6 +235,72 @@ module Heroics
             end.join('|')
           end
         end
+      end
+    end
+
+    # Get the parameters this link expects.
+    #
+    # @param parameters [Array] The names of the parameter definitions to
+    #   convert to parameter names.
+    # @return [Array<Parameter|ParameterChoice>] A list of parameter instances
+    #   that represent parameters to be injected into the link URL.
+    def resolve_parameter_details(parameters)
+      properties = @schema['definitions'][@resource_name]['properties']
+      return [] if properties.nil?
+
+      # URI decode parameters and strip the leading '{(' and trailing ')}'.
+      parameters = parameters.map { |parameter| URI.unescape(parameter[2..-3]) }
+      parameters.map do |parameter|
+        # Split the path into components and discard the leading '#' that
+        # represents the root of the schema.
+        path = parameter.split('/')[1..-1]
+        info = lookup_parameter(path, @schema)
+        # The reference can be one of several values.
+        resource_name = path[1].gsub('-', '_')
+        if info.has_key?('anyOf')
+          ParameterChoice.new(resource_name,
+                              unpack_multiple_parameters(info['anyOf']))
+        elsif info.has_key?('oneOf')
+          ParameterChoice.new(resource_name,
+                              unpack_multiple_parameters(info['oneOf']))
+        else
+          name = path[-1]
+          Parameter.new(resource_name, name, info['description'])
+        end
+      end
+    end
+
+    # Unpack an 'anyOf' or 'oneOf' multi-parameter blob.
+    #
+    # @param parameters [Array<Hash>] An array of hashes containing '$ref'
+    #   keys and definition values.
+    # @return [Array<Parameter>] An array of parameters extracted from the
+    #   blob.
+    def unpack_multiple_parameters(parameters)
+      parameters.map do |info|
+        parameter = info['$ref']
+        path = parameter.split('/')[1..-1]
+        info = lookup_parameter(path, @schema)
+        resource_name = path[1].gsub('-', '_')
+        name = path[-1]
+        Parameter.new(resource_name, name, info['description'])
+      end
+    end
+
+    # Recursively walk the object hierarchy in the schema to resolve a given
+    # path.  This is used to find property information related to definitions
+    # in link hrefs.
+    #
+    # @param path [Array<String>] An array of paths to walk, such as
+    #   ['definitions', 'resource', 'definitions', 'property'].
+    # @param schema [Hash] The schema to walk.
+    def lookup_parameter(path, schema)
+      key = path[0]
+      remaining = path[1..-1]
+      if remaining.empty?
+        return schema[key]
+      else
+        lookup_parameter(remaining, schema[key])
       end
     end
 
@@ -244,5 +332,53 @@ module Heroics
     default_headers = options.fetch(:default_headers, {})
     response = Excon.get(url, headers: default_headers, expects: [200, 201])
     Schema.new(MultiJson.load(response.body))
+  end
+
+  # A representation of a parameter.
+  class Parameter
+    attr_reader :resource_name, :description
+
+    def initialize(resource_name, name, description)
+      @resource_name = resource_name
+      @name = name
+      @description = description
+    end
+
+    # The name of the parameter, with the resource included, suitable for use
+    # in a function signature.
+    def name
+      "#{@resource_name}_#{@name}"
+    end
+
+    # A pretty representation of this instance.
+    def inspect
+      "Parameter(name=#{@name}, description=#{@description})"
+    end
+  end
+
+  # A representation of a set of parameters.
+  class ParameterChoice
+    attr_reader :resource_name, :parameters
+
+    def initialize(resource_name, parameters)
+      @resource_name = resource_name
+      @parameters = parameters
+    end
+
+    # A name created by merging individual parameter descriptions, suitable
+    # for use in a function signature.
+    def name
+      @parameters.map { |parameter| parameter.name }.join('_or_')
+    end
+
+    # A description created by merging individual parameter descriptions.
+    def description
+      @parameters.map { |parameter| parameter.description }.join(' or ')
+    end
+
+    # A pretty representation of this instance.
+    def inspect
+      "ParameterChoice(parameters=#{@parameters})"
+    end
   end
 end
