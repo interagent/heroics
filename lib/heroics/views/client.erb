@@ -52,7 +52,29 @@ module <%= @module_name %>
       default_headers: default_headers,
                 cache: cache
     }
-    client = Heroics.client_from_schema(oauth_token, SCHEMA, url, options)
+    client = Heroics.oauth_client_from_schema(oauth_token, SCHEMA, url, options)
+    Client.new(client)
+  end
+
+  # Get a Client configured to use Token authentication.
+  #
+  # @param token [String] The token to use with the API.
+  # @param headers [Hash<String,String>] Optionally, custom to headers to
+  #   include with every response.
+  # @return [Client] A client configured to use the API with OAuth
+  #   authentication.
+  def self.connect_token(token, headers=nil)
+    url = "<%= @url %>"
+    default_headers = <%= @default_headers %>
+    unless headers.nil?
+      default_headers.merge!(headers)
+    end
+    cache = <%= @cache %>
+    options = {
+      default_headers: default_headers,
+                cache: cache
+    }
+    client = Heroics.token_client_from_schema(token, SCHEMA, url, options)
     Client.new(client)
   end
 
