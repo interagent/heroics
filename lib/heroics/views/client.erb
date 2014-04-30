@@ -27,8 +27,8 @@ module <%= @module_name %>
     end
     cache = <%= @cache %>
     options = {
-      options: {default_headers: default_headers,
-                cache: cache}
+      default_headers: default_headers,
+                cache: cache
     }
     client = Heroics.client_from_schema(SCHEMA, url.to_s, options)
     Client.new(client)
@@ -49,8 +49,8 @@ module <%= @module_name %>
     end
     cache = <%= @cache %>
     options = {
-      options: {default_headers: default_headers,
-                cache: cache}
+      default_headers: default_headers,
+                cache: cache
     }
     client = Heroics.client_from_schema(oauth_token, SCHEMA, url, options)
     Client.new(client)
