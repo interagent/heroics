@@ -185,3 +185,51 @@ class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
     assert_equal(body, client.resource.list)
   end
 end
+
+class TokenClientFromSchemaTest < MiniTest::Unit::TestCase
+  include ExconHelper
+
+  # token_client_from_schema injects an Authorization header, built from the
+  # specified token, into the default header options.
+  def test_token_client_from_schema
+    body = {'Hello' => 'World!'}
+    Excon.stub(method: :get) do |request|
+      assert_equal(
+        'Token token=c55ef0d8-40b6-4759-b1bf-4a6f94190a66',
+        request[:headers]['Authorization'])
+      Excon.stubs.pop
+      {status: 200, headers: {'Content-Type' => 'application/json'},
+       body: MultiJson.dump(body)}
+    end
+
+    token = 'c55ef0d8-40b6-4759-b1bf-4a6f94190a66'
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics.token_client_from_schema(token, schema,
+                                              'https://example.com')
+    assert_equal(body, client.resource.list)
+  end
+
+  # token_client_from_schema doesn't mutate the options object, and in
+  # particular, it doesn't mutate the :default_headers Hash in that object.
+  def test_token_client_from_schema_with_options
+    body = {'Hello' => 'World!'}
+    Excon.stub(method: :get) do |request|
+      assert_equal('application/vnd.heroku+json; version=3',
+                   request[:headers]['Accept'])
+      assert_equal(
+        'Token token=c55ef0d8-40b6-4759-b1bf-4a6f94190a66',
+        request[:headers]['Authorization'])
+      Excon.stubs.pop
+      {status: 200, headers: {'Content-Type' => 'application/json'},
+       body: MultiJson.dump(body)}
+    end
+
+    token = 'c55ef0d8-40b6-4759-b1bf-4a6f94190a66'
+    options = {
+      default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    client = Heroics.token_client_from_schema(token, schema,
+                                              'https://example.com', options)
+    assert_equal(body, client.resource.list)
+  end
+end
