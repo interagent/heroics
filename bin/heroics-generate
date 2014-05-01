@@ -3,20 +3,37 @@
 require 'optparse'
 require 'heroics'
 
-options = {}
+options = {headers: {}, cache_path: nil}
 option_parser = OptionParser.new do |opts|
   opts.banner = 'Usage: heroics-generate module_name schema_filename url'
-  opts.on( '-h', '--help', 'Display this screen' ) do
+
+  opts.on('-h', '--help', 'Display this screen') do
     puts opts
     exit
+  end
+
+  opts.on('-H', '--header [HEADER]',
+          'Include header with all requests') do |header|
+    parts = header.split(':', 0)
+    options[:headers][parts[0]] = parts[1].strip
+  end
+
+  opts.on('-c', '--cache-dir [PATH]',
+          'Content cache directory (~ is automatically expanded)') do |path|
+    options[:cache_path] = path.sub('~', '#{Dir.home}')
   end
 end
 
 option_parser.parse!
-module_name, schema_filename, url = ARGV
-schema = Heroics::Schema.new(MultiJson.decode(File.read(schema_filename)))
-options = {
-  default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
-  cache: 'Moneta.new(:File, dir: "#{Dir.home}/.heroics/platform-api")'
-}
-puts Heroics.generate_client(module_name, schema, url, options)
+if ARGV.length != 3
+  puts option_parser
+else
+  module_name, schema_filename, url = ARGV
+  schema = Heroics::Schema.new(MultiJson.decode(File.read(schema_filename)))
+  cache = 'Moneta.new(:Memory)'
+  if options[:cache_path]
+    cache = "Moneta.new(:File, dir: \"#{options[:cache_path]}\")"
+  end
+  options = {default_headers: options[:headers], cache: cache}
+  puts Heroics.generate_client(module_name, schema, url, options)
+end

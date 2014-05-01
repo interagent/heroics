@@ -10,9 +10,9 @@ Gem::Specification.new do |spec|
   spec.version       = Heroics::VERSION
   spec.authors       = ['geemus', 'jkakar']
   spec.email         = ['geemus@gmail.com', 'jkakar@kakar.ca']
-  spec.description   = 'A Ruby client for HTTP APIs described using a JSON schema'
-  spec.summary       = 'A Ruby client for HTTP APIs described using a JSON schema'
-  spec.homepage      = ''
+  spec.description   = 'A Ruby client generator for HTTP APIs described with a JSON schema'
+  spec.summary       = 'A Ruby client generator for HTTP APIs described with a JSON schema'
+  spec.homepage      = 'https://github.com/interagent/heroics'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files`.split($/)
