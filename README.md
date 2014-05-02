@@ -73,13 +73,9 @@ yard doc -m markdown client.rb
 ```
 
 This will generate HTML in the `docs` directory.  Note that Yard creates an
-`_index.html` page that doesn't appear to be compatible with GitHub Pages.  If
-you're hosting your content there you can change the links:
-
-```
-cd docs
-sed -e 's/_index\.html/index\.html/g' -i `grep _index.html * -rl`
-```
+`_index.html` page won't be served by Jekyll on GitHub Pages.  Add a
+`.nojekyll` file to your project to prevent GitHub from passing the content
+through Jekyll.
 
 ### Handling failures
 
