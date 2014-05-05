@@ -27,7 +27,7 @@ JSON schema.  When you have a JSON schema prepared you can generate a client
 for your API:
 
 ```
-bin/heroics-generator MyApp schema.json https://api.myapp.com > client.rb
+bin/heroics-generate MyApp schema.json https://api.myapp.com > client.rb
 ```
 
 ### Passing custom headers
@@ -36,7 +36,7 @@ If your client needs to pass custom headers with each request these can be
 specified using `-H`:
 
 ```
-bin/heroics-generator \
+heroics-generate \
   -H "Accept: application/vnd.myapp+json; version=3" \
   MyApp \
   schema.json \
@@ -52,7 +52,7 @@ default, this data is cached in memory and is only used during the lifetime of
 a single instance.  You can specify a directory for cache data:
 
 ```
-bin/heroics-generator \
+heroics-generate \
   -c "~/.heroics/myapp" \
   MyApp \
   schema.json \
