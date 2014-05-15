@@ -4,10 +4,11 @@ class ClientTest < MiniTest::Unit::TestCase
   include ExconHelper
 
   # Client.to_s returns a simple human-readable description of the client
-  # instance with the URL embedded in it.
+  # instance with the URL embedded in it.  A password, if present in the URL,
+  # is redacted to avoid leaking credentials.
   def test_to_s
     client = Heroics::Client.new({}, 'http://foo:bar@example.com')
-    assert_equal('#<Heroics::Client url="http://foo:bar@example.com">',
+    assert_equal('#<Heroics::Client url="http://foo:REDACTED@example.com">',
                  client.to_s)
   end
 
