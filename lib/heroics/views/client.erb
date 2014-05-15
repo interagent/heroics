@@ -11,47 +11,30 @@ require 'uri'
 module <%= @module_name %>
   # Get a Client configured to use HTTP Basic authentication.
   #
-  # @param username [String] The username to use with the API.
-  # @param password [String] The password to use with the API.
-  # @param headers [Hash<String,String>] Optionally, custom to headers to
-  #   include with every response.
+  # @param api_key [String] The API key to use when connecting.
+  # @param options [Hash<Symbol,String>] Optionally, custom settings
+  #   to use with the client.  Allowed options are `default_headers`,
+  #   `cache` and `host`.
   # @return [Client] A client configured to use the API with HTTP Basic
   #   authentication.
-  def self.connect(username, password, headers=nil)
-    url = URI.parse("<%= @url %>")
-    url.user = username
-    url.password = password
-    default_headers = <%= @default_headers %>
-    unless headers.nil?
-      default_headers.merge!(headers)
-    end
-    cache = <%= @cache %>
-    options = {
-      default_headers: default_headers,
-                cache: cache
-    }
-    client = Heroics.client_from_schema(SCHEMA, url.to_s, options)
+  def self.connect(api_key, options=nil)
+    options = custom_options(options)
+    url = "https://:#{api_key}@#{options[:host]}"
+    client = Heroics.client_from_schema(SCHEMA, url, options)
     Client.new(client)
   end
 
   # Get a Client configured to use OAuth authentication.
   #
   # @param oauth_token [String] The OAuth token to use with the API.
-  # @param headers [Hash<String,String>] Optionally, custom to headers to
-  #   include with every response.
+  # @param options [Hash<Symbol,String>] Optionally, custom settings
+  #   to use with the client.  Allowed options are `default_headers`,
+  #   `cache` and `host`.
   # @return [Client] A client configured to use the API with OAuth
   #   authentication.
-  def self.connect_oauth(oauth_token, headers=nil)
+  def self.connect_oauth(oauth_token, options=nil)
+    options = custom_options(options)
     url = "<%= @url %>"
-    default_headers = <%= @default_headers %>
-    unless headers.nil?
-      default_headers.merge!(headers)
-    end
-    cache = <%= @cache %>
-    options = {
-      default_headers: default_headers,
-                cache: cache
-    }
     client = Heroics.oauth_client_from_schema(oauth_token, SCHEMA, url, options)
     Client.new(client)
   end
@@ -59,24 +42,44 @@ module <%= @module_name %>
   # Get a Client configured to use Token authentication.
   #
   # @param token [String] The token to use with the API.
-  # @param headers [Hash<String,String>] Optionally, custom to headers to
-  #   include with every response.
+  # @param options [Hash<Symbol,String>] Optionally, custom settings
+  #   to use with the client.  Allowed options are `default_headers`,
+  #   `cache` and `host`.
   # @return [Client] A client configured to use the API with OAuth
   #   authentication.
-  def self.connect_token(token, headers=nil)
+  def self.connect_token(token, options=nil)
+    options = custom_options(options)
     url = "<%= @url %>"
-    default_headers = <%= @default_headers %>
-    unless headers.nil?
-      default_headers.merge!(headers)
-    end
-    cache = <%= @cache %>
-    options = {
-      default_headers: default_headers,
-                cache: cache
-    }
     client = Heroics.token_client_from_schema(token, SCHEMA, url, options)
     Client.new(client)
   end
+
+  # Get customized options.
+  def self.custom_options(options)
+    return default_options if options.nil?
+
+    final_options = default_options
+    if options[:default_headers]
+      final_options[:default_headers].merge!(options[:default_headers])
+    end
+    final_options[:cache] = options[:cache] if options[:cache]
+    final_options[:host] = options[:host] if options[:host]
+    final_options
+  end
+
+  # Get the default options.
+  def self.default_options
+    default_headers = <%= @default_headers %>
+    cache = <%= @cache %>
+    uri = URI.parse("<%= @url %>")
+    {
+      default_headers: default_headers,
+      cache:           cache,
+      host:            uri.host
+    }
+  end
+
+  private_class_method :default_options, :custom_options
 
   # <%= @description %>
   class Client
