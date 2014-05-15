@@ -27,7 +27,11 @@ module Heroics
 
     # Get a simple human-readable representation of this client instance.
     def inspect
-      "#<Heroics::Client url=\"#{@url}\">"
+      url = URI.parse(@url)
+      unless url.password.nil?
+        url.password = 'REDACTED'
+      end
+      "#<Heroics::Client url=\"#{url.to_s}\">"
     end
     alias to_s inspect
   end
