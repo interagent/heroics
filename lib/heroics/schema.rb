@@ -246,7 +246,6 @@ module Heroics
     #   that represent parameters to be injected into the link URL.
     def resolve_parameter_details(parameters)
       properties = @schema['definitions'][@resource_name]['properties']
-      return [] if properties.nil?
 
       # URI decode parameters and strip the leading '{(' and trailing ')}'.
       parameters = parameters.map { |parameter| URI.unescape(parameter[2..-3]) }
