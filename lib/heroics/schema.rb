@@ -245,11 +245,10 @@ module Heroics
     # @return [Array<Parameter|ParameterChoice>] A list of parameter instances
     #   that represent parameters to be injected into the link URL.
     def resolve_parameter_details(parameters)
-      properties = @schema['definitions'][@resource_name]['properties']
-
-      # URI decode parameters and strip the leading '{(' and trailing ')}'.
-      parameters = parameters.map { |parameter| URI.unescape(parameter[2..-3]) }
       parameters.map do |parameter|
+        # URI decode parameters and strip the leading '{(' and trailing ')}'.
+        parameter = URI.unescape(parameter[2..-3])
+
         # Split the path into components and discard the leading '#' that
         # represents the root of the schema.
         path = parameter.split('/')[1..-1]
@@ -282,6 +281,7 @@ module Heroics
         info = lookup_parameter(path, @schema)
         resource_name = path[1].gsub('-', '_')
         name = path[-1]
+
         Parameter.new(resource_name, name, info['description'])
       end
     end
