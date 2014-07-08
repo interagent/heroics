@@ -279,9 +279,8 @@ module Heroics
         parameter = info['$ref']
         path = parameter.split('/')[1..-1]
         info = lookup_parameter(path, @schema)
-        resource_name = path[1].gsub('-', '_')
+        resource_name = path.size > 2 ? path[1].gsub('-', '_') : nil
         name = path[-1]
-
         Parameter.new(resource_name, name, info['description'])
       end
     end
@@ -346,7 +345,7 @@ module Heroics
     # The name of the parameter, with the resource included, suitable for use
     # in a function signature.
     def name
-      "#{@resource_name}_#{@name}"
+      [@resource_name, @name].compact.join("_")
     end
 
     # A pretty representation of this instance.
@@ -367,7 +366,9 @@ module Heroics
     # A name created by merging individual parameter descriptions, suitable
     # for use in a function signature.
     def name
-      @parameters.map { |parameter| parameter.name }.join('_or_')
+      @parameters.map do |parameter|
+        "#{@resource_name}_#{parameter.name}"
+      end.join('_or_')
     end
 
     # A description created by merging individual parameter descriptions.
