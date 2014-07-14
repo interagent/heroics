@@ -367,7 +367,11 @@ module Heroics
     # for use in a function signature.
     def name
       @parameters.map do |parameter|
-        "#{@resource_name}_#{parameter.name}"
+        if parameter.resource_name
+          parameter.name
+        else
+          "#{@resource_name}_#{parameter.name}"
+        end
       end.join('_or_')
     end
 
