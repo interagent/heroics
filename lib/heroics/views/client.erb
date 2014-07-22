@@ -15,13 +15,13 @@ module <%= @module_name %>
   # @param api_key [String] The API key to use when connecting.
   # @param options [Hash<Symbol,String>] Optionally, custom settings
   #   to use with the client.  Allowed options are `default_headers`,
-  #   `cache` and `url`.
+  #   `cache`, `user` and `url`.
   # @return [Client] A client configured to use the API with HTTP Basic
   #   authentication.
   def self.connect(api_key, options=nil)
     options = custom_options(options)
     uri = URI.parse(options[:url])
-    uri.user = 'user'
+    uri.user = options.fetch(:user, 'user').gsub('@', '%40')
     uri.password = api_key
     client = Heroics.client_from_schema(SCHEMA, uri.to_s, options)
     Client.new(client)
@@ -67,6 +67,7 @@ module <%= @module_name %>
     end
     final_options[:cache] = options[:cache] if options[:cache]
     final_options[:url] = options[:url] if options[:url]
+    final_options[:user] = options[:user] if options[:user]
     final_options
   end
 
