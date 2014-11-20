@@ -2,10 +2,11 @@
 
 require 'optparse'
 require 'heroics'
+require 'open-uri'
 
 options = {headers: {}, cache_path: nil}
 option_parser = OptionParser.new do |opts|
-  opts.banner = 'Usage: heroics-generate module_name schema_filename url'
+  opts.banner = 'Usage: heroics-generate module_name schema_filepath url'
 
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
@@ -28,8 +29,8 @@ option_parser.parse!
 if ARGV.length != 3
   puts option_parser
 else
-  module_name, schema_filename, url = ARGV
-  schema = Heroics::Schema.new(MultiJson.decode(File.read(schema_filename)))
+  module_name, schema_filepath, url = ARGV
+  schema = Heroics::Schema.new(MultiJson.decode(open(schema_filepath).read))
   cache = 'Moneta.new(:Memory)'
   if options[:cache_path]
     cache = "Moneta.new(:File, dir: \"#{options[:cache_path]}\")"
