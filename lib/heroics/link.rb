@@ -47,8 +47,8 @@ module Heroics
       path = "#{@path_prefix}#{path}" unless @path_prefix == '/'
       headers = @default_headers
       if body
-        headers = headers.merge({'Content-Type' => 'application/json'})
-        body = MultiJson.dump(body)
+        headers = headers.merge({'Content-Type' => @link_schema.content_type})
+        body = @link_schema.encode(body)
       end
       cache_key = "#{path}:#{headers.hash}"
       if @link_schema.method == :get

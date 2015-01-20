@@ -127,6 +127,25 @@ SAMPLE_SCHEMA = {
              'email_field' => {
                '$ref' => '#/definitions/resource/definitions/email_field'}}}},
 
+        {'description' => 'Submit a sample resource as form data',
+         'encType'     => 'application/x-www-form-urlencoded',
+         'href'        => '/resource',
+         'method'      => 'POST',
+         'rel'         => 'submit',
+         'title'       => 'Submit',
+         'schema'      => {
+           'properties' => {
+             'date_field' => {
+               '$ref' => '#/definitions/resource/definitions/date_field'},
+             'string_field' => {
+               '$ref' => '#/definitions/resource/definitions/string_field'},
+             'boolean_field' => {
+               '$ref' => '#/definitions/resource/definitions/boolean_field'},
+             'uuid_field' => {
+               '$ref' => '#/definitions/resource/definitions/uuid_field'},
+             'email_field' => {
+               '$ref' => '#/definitions/resource/definitions/email_field'}}}},
+
         {'description' => 'Update a sample resource',
          'href'        => '/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}',
          'method'      => 'PATCH',
