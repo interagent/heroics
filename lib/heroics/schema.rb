@@ -58,7 +58,8 @@ module Heroics
     def initialize(schema, name)
       @schema = schema
       @name = name
-      link_schema = schema['definitions'][name]['links']
+      link_schema = schema['definitions'][name]['links'] || []
+
       @links = Hash[link_schema.each_with_index.map do |link, link_index|
                       link_name = Heroics.ruby_name(link['title'])
                       [link_name, LinkSchema.new(schema, name, link_index)]
