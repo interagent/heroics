@@ -24,7 +24,6 @@ module Heroics
     # @param name [String] The name of the resource.
     # @raise [SchemaError] Raised if an unknown resource name is provided.
     def resource(name)
-      resource_schema = @resources[name]
       if @schema['definitions'].has_key?(name)
         ResourceSchema.new(@schema, name)
       else
@@ -127,6 +126,22 @@ module Heroics
     # @return [Symbol] The HTTP method.
     def method
       link_schema['method'].downcase.to_sym
+    end
+
+    # Get the Content-Type for this link.
+    #
+    # @return [String] The Content-Type value
+    def content_type
+      link_schema['encType'] || 'application/json'
+    end
+
+    def encode(body)
+      case content_type
+      when 'application/x-www-form-urlencoded'
+        URI.encode_www_form(body)
+      when 'application/json'
+        MultiJson.dump(body)
+      end
     end
 
     # Get the names of the parameters this link expects.

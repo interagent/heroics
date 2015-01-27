@@ -54,7 +54,7 @@ class ResourceSchemaTest < MiniTest::Unit::TestCase
   def test_links
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     assert_equal(
-      ['list', 'info', 'identify_resource', 'create', 'update', 'delete'],
+      ['list', 'info', 'identify_resource', 'create', 'submit', 'update', 'delete'],
       schema.resource('resource').links.map { |link| link.name })
   end
 end
@@ -223,6 +223,21 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = schema.resource('resource').link('identify_resource')
     assert_equal('identify-resource', link.pretty_name)
+  end
+
+  # LinkSchema.content_type returns the media type associated with this
+  # resource.
+  def test_content_type
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('submit')
+    assert_equal('application/x-www-form-urlencoded', link.content_type)
+  end
+
+  # The content type should default to application/json
+  def test_default_content_type
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('identify_resource')
+    assert_equal('application/json', link.content_type)
   end
 end
 

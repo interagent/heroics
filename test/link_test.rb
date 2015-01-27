@@ -71,6 +71,25 @@ class LinkTest < MiniTest::Unit::TestCase
     assert_equal(nil, link.run(body))
   end
 
+  # Link.run optionally takes an extra parameter to send in the request body.
+  # It automatically converts the specified object to the specified encoding
+  # type and includes a Content-Type header in the request
+  def test_run_without_parameters_and_with_non_json_request_body
+    body = {'Hello' => 'world!'}
+    Excon.stub(method: :post) do |request|
+      assert_equal('application/x-www-form-urlencoded', request[:headers]['Content-Type'])
+      assert_equal('Hello=world%21', request[:body])
+      Excon.stubs.pop
+      {status: 200, body: ''}
+    end
+
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('submit'))
+    assert_equal(nil, link.run(body))
+  end
+
+
   # Link.run passes custom headers to the server when they've been provided.
   def test_run_with_custom_request_headers
     Excon.stub(method: :get) do |request|
