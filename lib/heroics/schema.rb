@@ -139,7 +139,7 @@ module Heroics
       case content_type
       when 'application/x-www-form-urlencoded'
         URI.encode_www_form(body)
-      when 'application/json'
+      when /application\/.*json/
         MultiJson.dump(body)
       end
     end
