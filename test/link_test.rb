@@ -197,7 +197,7 @@ class LinkTest < MiniTest::Unit::TestCase
       assert_equal('/resource', request[:path])
       Excon.stubs.pop
       {status: 200,
-       headers: {'Content-Type' => 'application/json;charset=utf-8'},
+       headers: {'Content-Type' => 'application/vnd.api+json;charset=utf-8'},
        body: MultiJson.dump(body)}
     end
 

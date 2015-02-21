@@ -63,7 +63,7 @@ module Heroics
       content_type = response.headers['Content-Type']
       if response.status == 304
         MultiJson.load(@cache["data:#{cache_key}"])
-      elsif content_type && content_type.include?('application/json')
+      elsif content_type && content_type =~ /application\/.*json/
         etag = response.headers['ETag']
         if etag
           @cache["etag:#{cache_key}"] = etag
