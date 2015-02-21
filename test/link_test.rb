@@ -270,8 +270,9 @@ class LinkTest < MiniTest::Unit::TestCase
       {status: 200}
     end
 
+    headers = {}
     cache = Moneta.new(:Memory)
-    cache['etag:/resource:0'] = 'etag-contents'
+    cache["etag:/resource:#{headers.hash}"] = 'etag-contents'
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('list'),
@@ -306,9 +307,10 @@ class LinkTest < MiniTest::Unit::TestCase
       {status: 304, headers: {'Content-Type' => 'application/json'}}
     end
 
+    headers = {}
     cache = Moneta.new(:Memory)
-    cache['etag:/resource:0'] = 'etag-contents'
-    cache['data:/resource:0'] = MultiJson.dump(body)
+    cache["etag:/resource:#{headers.hash}"] = 'etag-contents'
+    cache["data:/resource:#{headers.hash}"] = MultiJson.dump(body)
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('list'),
