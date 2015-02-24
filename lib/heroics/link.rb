@@ -59,7 +59,7 @@ module Heroics
       connection = Excon.new(@root_url)
       response = connection.request(method: @link_schema.method, path: path,
                                     headers: headers, body: body,
-                                    expects: [200, 201, 202, 206, 304])
+                                    expects: [200, 201, 202, 204, 206, 304])
       content_type = response.headers['Content-Type']
       if response.status == 304
         MultiJson.load(@cache["data:#{cache_key}"])
