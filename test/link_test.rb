@@ -223,6 +223,20 @@ class LinkTest < MiniTest::Unit::TestCase
     assert_equal(body, link.run)
   end
 
+  # Link.run considers HTTP 204 No Content responses as successful.
+  def test_run_with_no_content_response
+    Excon.stub(method: :delete) do |request|
+      assert_equal("/resource/2013-01-01T08:00:00Z", request[:path])
+      Excon.stubs.pop
+      {status: 204, body: ''}
+    end
+
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('delete'))
+    assert_equal(nil, link.run(Time.parse('2013-01-01 00:00:00-0800')))
+  end
+
   # Link.run raises an Excon error if anything other than a 200 or 201 HTTP
   # status code was returned by the server.
   def test_run_with_failed_request
