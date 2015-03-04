@@ -167,6 +167,14 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
                  link.format_path(['44724831-bf66-4bc2-865f-e2c4c2b14c78']))
   end
 
+  # LinkSchema.format_path escapes special URL characters in parameters.
+  def test_format_path_with_illegal_literals
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('info')
+    assert_equal(['/resource/foobar%25', nil],
+                 link.format_path(['foobar%']))
+  end
+
   # LinkSchema.format_path correctly returns a parameter as a body if a path
   # doesn't have any parameters.
   def test_format_path_with_body

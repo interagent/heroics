@@ -38,6 +38,20 @@ class LinkTest < MiniTest::Unit::TestCase
     assert_equal(nil, link.run('44724831-bf66-4bc2-865f-e2c4c2b14c78'))
   end
 
+  # Link.run URL-escapes special characters in parameters.
+  def test_run_with_parameters_needing_escaping
+    Excon.stub(method: :get) do |request|
+      assert_equal('/resource/foo%23bar', request[:path])
+      Excon.stubs.pop
+      {status: 200, body: ''}
+    end
+
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('info'))
+    assert_equal(nil, link.run('foo#bar'))
+  end
+
   # Link.run converts Time parameters to UTC before sending them to the
   # server.
   def test_run_converts_time_parameters_to_utc
