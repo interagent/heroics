@@ -323,7 +323,8 @@ module Heroics
     # @param [Fixnum,String,TrueClass,FalseClass,Time] The parameter to format.
     # @return [String] The formatted parameter.
     def format_parameter(parameter)
-      parameter.instance_of?(Time) ? iso_format(parameter) : parameter.to_s
+      formatted_parameter = parameter.instance_of?(Time) ? iso_format(parameter) : parameter.to_s
+      URI.escape formatted_parameter
     end
 
     # Convert a time to an ISO 8601 combined data and time format.
