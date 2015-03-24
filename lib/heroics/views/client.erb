@@ -21,7 +21,7 @@ module <%= @module_name %>
   def self.connect(api_key, options=nil)
     options = custom_options(options)
     uri = URI.parse(options[:url])
-    uri.user = options.fetch(:user, 'user').gsub('@', '%40')
+    uri.user = URI.encode_www_form_component options.fetch(:user, 'user')
     uri.password = api_key
     client = Heroics.client_from_schema(SCHEMA, uri.to_s, options)
     Client.new(client)
