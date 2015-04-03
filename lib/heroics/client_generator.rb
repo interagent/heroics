@@ -37,13 +37,15 @@ module Heroics
                                          links)
     end
 
-    context = {module_name: module_name,
-               url: url,
-               default_headers: options.fetch(:default_headers, {}),
-               cache: options.fetch(:cache, {}),
-               description: schema.description,
-               schema: MultiJson.dump(schema.schema),
-               resources: resources}
+    {
+      module_name: module_name,
+      url: url,
+      default_headers: options.fetch(:default_headers, {}),
+      cache: options.fetch(:cache, {}),
+      description: schema.description,
+      schema: MultiJson.dump(schema.schema),
+      resources: resources
+    }
   end
 
   # A representation of a resource for use when generating source code in the
