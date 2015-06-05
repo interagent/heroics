@@ -23,6 +23,22 @@ class LinkTest < MiniTest::Unit::TestCase
     assert_equal(nil, link.run)
   end
 
+  # Link.run will pass arbitrary options defined in the excon_options hash
+  # directly to Excon when making requests.
+  def test_run_with_excon_options
+    Excon.stub(method: :get) do |request|
+      assert_equal('1', request[:headers]['Excon-Option'])
+      Excon.stubs.pop
+      {status: 200, body: ''}
+    end
+
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://username:secret@example.com',
+                             schema.resource('resource').link('list'),
+                             excon_options: {headers: {'Excon-Option' => '1'}})
+    assert_equal(nil, link.run)
+  end
+
   # Link.run injects parameters into the path in the order they were received.
   def test_run_with_parameters_and_empty_response
     Excon.stub(method: :get) do |request|
@@ -102,7 +118,6 @@ class LinkTest < MiniTest::Unit::TestCase
                              schema.resource('resource').link('submit'))
     assert_equal(nil, link.run(body))
   end
-
 
   # Link.run passes custom headers to the server when they've been provided.
   def test_run_with_custom_request_headers

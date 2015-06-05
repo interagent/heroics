@@ -167,6 +167,7 @@ class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
   def test_oauth_client_from_schema_with_options
     body = {'Hello' => 'World!'}
     Excon.stub(method: :get) do |request|
+      assert_equal('1', request[:headers]['Excon-Option'])
       assert_equal('application/vnd.heroku+json; version=3',
                    request[:headers]['Accept'])
       assert_equal(
@@ -179,7 +180,8 @@ class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
 
     oauth_token = 'c55ef0d8-40b6-4759-b1bf-4a6f94190a66'
     options = {
-      default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}}
+      default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'},
+      excon_options: {headers: {'Excon-Option' => '1'}}}
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     client = Heroics.oauth_client_from_schema(oauth_token, schema,
                                               'https://example.com', options)

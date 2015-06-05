@@ -12,11 +12,13 @@ module Heroics
     #     request made by the client.  Default is no custom headers.
     #   - cache: Optionally, a Moneta-compatible cache to store ETags.
     #     Default is no caching.
+    #   - excon_options: Optionally, the options hash to pass to Excon.
     def initialize(url, link_schema, options={})
       @root_url, @path_prefix = unpack_url(url)
       @link_schema = link_schema
       @default_headers = options[:default_headers] || {}
       @cache = options[:cache] || Moneta.new(:Null)
+      @excon_options = options[:excon_options] || {}
     end
 
     # Make a request to the server.
@@ -56,7 +58,7 @@ module Heroics
         headers = headers.merge({'If-None-Match' => etag}) if etag
       end
 
-      connection = Excon.new(@root_url)
+      connection = Excon.new(@root_url, @excon_options)
       response = connection.request(method: @link_schema.method, path: path,
                                     headers: headers, body: body,
                                     expects: [200, 201, 202, 204, 206, 304])
