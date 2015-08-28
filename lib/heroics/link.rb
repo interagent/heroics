@@ -56,7 +56,7 @@ module Heroics
         headers = headers.merge({'If-None-Match' => etag}) if etag
       end
 
-      connection = Excon.new(@root_url)
+      connection = Excon.new(@root_url, thread_safe_sockets: true)
       response = connection.request(method: @link_schema.method, path: path,
                                     headers: headers, body: body,
                                     expects: [200, 201, 202, 204, 206, 304])
