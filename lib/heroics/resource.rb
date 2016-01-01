@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Heroics
   # A resource with methods mapped to API links.
   class Resource

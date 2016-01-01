@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'helper'
 
 class LinkTest < MiniTest::Unit::TestCase

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Heroics
   # Generate a static client that uses Heroics under the hood.  This is a good
   # option if you want to ship a gem or generate API documentation using Yard.

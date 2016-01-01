@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Heroics
   class CLI
     # Instantiate a CLI for an API described by a JSON schema.
