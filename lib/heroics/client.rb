@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Heroics
   # An HTTP client with methods mapped to API resources.
   class Client

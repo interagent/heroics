@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Heroics
   # A wrapper around a bare JSON schema to make it easier to use.
   class Schema

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Heroics
   # Process a name to make it suitable for use as a Ruby method name.
   #

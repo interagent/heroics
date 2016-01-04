@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'netrc'
 
 _, token = Netrc.read['api.heroku.com']
