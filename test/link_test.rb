@@ -340,6 +340,8 @@ class LinkTest < MiniTest::Unit::TestCase
     cache = Moneta.new(:Memory)
     cache["etag:/resource:#{headers.hash}"] = 'etag-contents'
     cache["data:/resource:#{headers.hash}"] = MultiJson.dump(body)
+    cache["status:/resource:#{headers.hash}"] = 200
+    cache["headers:/resource:#{headers.hash}"] = {'Content-Type' => 'application/json'}
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('list'),
@@ -394,6 +396,49 @@ class LinkTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('list'))
+    assert_equal([1, 2], link.run.to_a)
+  end
+
+  # Ensure that caching does not prevent pagination from working correctly.
+  # See https://github.com/heroku/platform-api/issues/16
+  def test_run_with_range_response_and_cache
+    Excon.stub(method: :get) do |request|
+      Excon.stubs.shift
+      {status: 206, headers: {'Content-Type' => 'application/json',
+                              'Content-Range' => 'id 1..2; max=200',
+                              'ETag' => 'second-page'},
+       body: MultiJson.dump([2])}
+    end
+
+    Excon.stub(method: :get) do |request|
+      Excon.stubs.shift
+      {status: 206, headers: {'Content-Type' => 'application/json',
+                              'Content-Range' => 'id 0..1; max=200',
+                              'Next-Range' => '201',
+                              'ETag' => 'first-page'},
+       body: MultiJson.dump([1])}
+    end
+
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'),
+                             cache: Moneta.new(:Memory))
+    assert_equal([1, 2], link.run.to_a)
+
+    Excon.stub(method: :get) do |request|
+      assert_equal('second-page', request[:headers]['If-None-Match'])
+      assert_equal('201', request[:headers]['Range'])
+      Excon.stubs.shift
+      {status: 304, headers: {'Content-Type' => 'application/json'}}
+    end
+
+    Excon.stub(method: :get) do |request|
+      assert_equal('first-page', request[:headers]['If-None-Match'])
+      assert_equal(nil, request[:headers]['Range'])
+      Excon.stubs.shift
+      {status: 304, headers: {'Content-Type' => 'application/json'}}
+    end
+
     assert_equal([1, 2], link.run.to_a)
   end
 end

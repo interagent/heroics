@@ -51,25 +51,14 @@ module Heroics
         headers = headers.merge({'Content-Type' => @link_schema.content_type})
         body = @link_schema.encode(body)
       end
-      cache_key = "#{path}:#{headers.hash}"
-      if @link_schema.method == :get
-        etag = @cache["etag:#{cache_key}"]
-        headers = headers.merge({'If-None-Match' => etag}) if etag
-      end
 
       connection = Excon.new(@root_url, thread_safe_sockets: true)
-      response = connection.request(method: @link_schema.method, path: path,
+      response = request_with_cache(connection,
+                                    method: @link_schema.method, path: path,
                                     headers: headers, body: body,
-                                    expects: [200, 201, 202, 204, 206, 304])
+                                    expects: [200, 201, 202, 204, 206])
       content_type = response.headers['Content-Type']
-      if response.status == 304
-        MultiJson.load(@cache["data:#{cache_key}"])
-      elsif content_type && content_type =~ /application\/.*json/
-        etag = response.headers['ETag']
-        if etag
-          @cache["etag:#{cache_key}"] = etag
-          @cache["data:#{cache_key}"] = response.body
-        end
+      if content_type && content_type =~ /application\/.*json/
         body = MultiJson.load(response.body)
         if response.status == 206
           next_range = response.headers['Next-Range']
@@ -84,7 +73,8 @@ module Heroics
               # next range.
               break unless next_range
               headers = headers.merge({'Range' => next_range})
-              response = connection.request(method: @link_schema.method,
+              response = request_with_cache(connection,
+                                            method: @link_schema.method,
                                             path: path, headers: headers,
                                             expects: [200, 201, 206])
               body = MultiJson.load(response.body)
@@ -100,6 +90,31 @@ module Heroics
     end
 
     private
+
+    def request_with_cache(connection, options)
+      options[:expects] << 304
+      cache_key = "#{options[:path]}:#{options[:headers].hash}"
+      if options[:method] == :get
+        etag = @cache["etag:#{cache_key}"]
+        options[:headers] = options[:headers].merge({'If-None-Match' => etag}) if etag
+      end
+      response = connection.request(options)
+
+      if response.status == 304
+        body = @cache["data:#{cache_key}"]
+        status = @cache["status:#{cache_key}"]
+        headers = @cache["headers:#{cache_key}"]
+        CachedResponse.new(status, body, headers)
+      else
+        if etag = response.headers['ETag']
+          @cache["etag:#{cache_key}"] = etag
+          @cache["data:#{cache_key}"] = response.body
+          @cache["status:#{cache_key}"] = response.status
+          @cache["headers:#{cache_key}"] = response.headers
+        end
+        response
+      end
+    end
 
     # Unpack the URL and split it into a root URL and a path prefix, if one
     # exists.
@@ -117,5 +132,15 @@ module Heroics
       path_prefix = parts[5]
       return root_url.join(''), path_prefix
     end
+
+    class CachedResponse
+      attr_reader :status, :body, :headers
+      def initialize(status, body, headers)
+        @status = status
+        @body = body
+        @headers = headers
+      end
+    end
+
   end
 end
