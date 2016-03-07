@@ -67,7 +67,7 @@ module <%= @module_name %>
       final_options[:default_headers].merge!(options[:default_headers])
     end
     final_options[:cache] = options[:cache] if options[:cache]
-    final_options[:url] = options[:url] if options[:url]
+    final_options[:url] = options[:url] || <%= @cache %>
     final_options[:user] = options[:user] if options[:user]
     final_options
   end
@@ -75,10 +75,8 @@ module <%= @module_name %>
   # Get the default options.
   def self.default_options
     default_headers = <%= @default_headers %>
-    cache = <%= @cache %>
     {
       default_headers: default_headers,
-      cache:           cache,
       url:             "<%= @url %>"
     }
   end
