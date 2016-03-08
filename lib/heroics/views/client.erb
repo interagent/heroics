@@ -66,8 +66,8 @@ module <%= @module_name %>
     if options[:default_headers]
       final_options[:default_headers].merge!(options[:default_headers])
     end
-    final_options[:cache] = options[:cache] if options[:cache]
-    final_options[:url] = options[:url] || <%= @cache %>
+    final_options[:cache] = options[:cache] || <%= @cache %>
+    final_options[:url] = options[:url] if options[:url]
     final_options[:user] = options[:user] if options[:user]
     final_options
   end
