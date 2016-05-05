@@ -192,9 +192,30 @@ SAMPLE_SCHEMA = {
          'title'       => 'List'}
       ]
     },
+
+    'underscored_resource' => {
+      'description' => 'Underscores the importance of supporting underscored resources',
+      'id'          => 'schema/underscored_resource',
+      '$schema'     => 'http://json-schema.org/draft-04/hyper-schema',
+      'title'       => 'Another underscored resource to use in tests',
+      'type'        => ['object'],
+
+      'definitions' => {},
+
+      'properties' => {},
+
+      'links' => [
+        {'description' => 'Show all underscored resources',
+         'href'        => '/underscored_resource',
+         'method'      => 'GET',
+         'rel'         => 'instances',
+         'title'       => 'List'}
+      ]
+    },
   },
   'properties' => {
     'resource'          => { '$ref' => '#/definitions/resource' },
-    'another-resource'  => { '$ref' => '#/definitions/another-resource' }
+    'another-resource'  => { '$ref' => '#/definitions/another-resource' },
+    'underscored_resource'  => { '$ref' => '#/definitions/underscored_resource' }
   }
 }

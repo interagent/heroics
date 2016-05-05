@@ -65,6 +65,27 @@ class ClientTest < MiniTest::Unit::TestCase
     end
     assert_equal('Hello, world!', client.another_resource.link)
   end
+
+  # Client.<resource>.<link> finds the appropriate link and invokes it, even if
+  # the resource has an underscore in its name
+  def test_resource_with_underscored_name
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://username:secret@example.com',
+                             schema.resource('underscored_resource').link('list'))
+    resource = Heroics::Resource.new({'link' => link})
+    client = Heroics::Client.new({'underscored_resource' => resource},
+                                 'http://example.com')
+    Excon.stub(method: :get) do |request|
+      assert_equal('Basic dXNlcm5hbWU6c2VjcmV0',
+                   request[:headers]['Authorization'])
+      assert_equal('example.com', request[:host])
+      assert_equal(443, request[:port])
+      assert_equal('/underscored_resource', request[:path])
+      Excon.stubs.pop
+      {status: 200, body: 'Hello, world!'}
+    end
+    assert_equal('Hello, world!', client.underscored_resource.link)
+  end
 end
 
 class ClientFromSchemaTest < MiniTest::Unit::TestCase
