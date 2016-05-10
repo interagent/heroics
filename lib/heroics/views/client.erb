@@ -11,19 +11,27 @@ require 'heroics'
 require 'uri'
 
 module <%= @module_name %>
-  # Get a Client configured to use HTTP Basic authentication.
+  # Get a Client configured to use HTTP Basic or header-based authentication.
   #
   # @param api_key [String] The API key to use when connecting.
   # @param options [Hash<Symbol,String>] Optionally, custom settings
   #   to use with the client.  Allowed options are `default_headers`,
   #   `cache`, `user` and `url`.
   # @return [Client] A client configured to use the API with HTTP Basic
-  #   authentication.
+  #   or header-based authentication.
   def self.connect(api_key, options=nil)
     options = custom_options(options)
     uri = URI.parse(options[:url])
-    uri.user = URI.encode_www_form_component options.fetch(:user, 'user')
-    uri.password = api_key
+
+    if options[:user]
+      uri.user = URI.encode_www_form_component options[:user]
+    end
+
+    if api_key
+      uri.user ||= 'user'
+      uri.password = api_key
+    end
+
     client = Heroics.client_from_schema(SCHEMA, uri.to_s, options)
     Client.new(client)
   end
