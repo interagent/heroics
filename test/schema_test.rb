@@ -29,7 +29,7 @@ class SchemaTest < MiniTest::Unit::TestCase
   # Schema.resources returns a sequence of ResourceSchema children.
   def test_resources
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
-    assert_equal(['resource', 'another-resource'],
+    assert_equal(['resource', 'another-resource', 'underscored_resource'],
                  schema.resources.map(&:name))
   end
 end

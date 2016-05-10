@@ -18,10 +18,15 @@ module Heroics
     # @raise [NoMethodError] Raised if the name doesn't match a known resource.
     # @return [Resource] The resource matching the name.
     def method_missing(name)
-      name = name.to_s.gsub('_', '-')
+      name = name.to_s
       resource = @resources[name]
       if resource.nil?
-        raise NoMethodError.new("undefined method `#{name}' for #{to_s}")
+        # Try substituting underscores for dashes
+        name = name.to_s.gsub('_', '-')
+        resource = @resources[name]
+        if resource.nil?
+          raise NoMethodError.new("undefined method `#{name}' for #{to_s}")
+        end
       end
       resource
     end
