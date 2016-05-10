@@ -48,14 +48,24 @@ module Heroics
       path = "#{@path_prefix}#{path}" unless @path_prefix == '/'
       headers = @default_headers
       if body
-        headers = headers.merge({'Content-Type' => @link_schema.content_type})
-        body = @link_schema.encode(body)
+        case @link_schema.method
+        when :put, :post, :patch
+          headers = headers.merge({'Content-Type' => @link_schema.content_type})
+          body = @link_schema.encode(body)
+        when :get, :delete
+          if body.is_a?(Hash)
+            query = body
+          else
+            query = MultiJson.load(body)
+          end
+          body = nil
+        end
       end
 
       connection = Excon.new(@root_url, thread_safe_sockets: true)
       response = request_with_cache(connection,
                                     method: @link_schema.method, path: path,
-                                    headers: headers, body: body,
+                                    headers: headers, body: body, query: query,
                                     expects: [200, 201, 202, 204, 206])
       content_type = response.headers['Content-Type']
       if content_type && content_type =~ /application\/.*json/

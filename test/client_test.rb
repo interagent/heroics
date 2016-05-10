@@ -45,6 +45,23 @@ class ClientTest < MiniTest::Unit::TestCase
     assert_equal('Hello, world!', client.resource.link)
   end
 
+  # Client.<resource>.<link> finds the appropriate link and invokes it with
+  #   query params, since it is a GET resource
+  def test_resource_with_query_param
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://username:secret@example.com',
+                             schema.resource('resource').link('list'))
+    resource = Heroics::Resource.new({'link' => link})
+    client = Heroics::Client.new({'resource' => resource},
+                                 'http://example.com')
+    Excon.stub(method: :get) do |request|
+      assert_equal({:limit => '50', :page => '25'}, request[:query])
+      Excon.stubs.pop
+      {status: 200, body: 'Hello, world!'}
+    end
+    assert_equal('Hello, world!', client.resource.link(limit: '50', page: '25'))
+  end
+
   # Client converts underscores in resource method names to dashes to match
   # names specified in the schema.
   def test_resource_with_dashed_name
