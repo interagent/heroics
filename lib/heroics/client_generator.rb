@@ -80,8 +80,12 @@ module Heroics
       end
     end
 
-    # The list of parameters to render in generated source code for the method
-    # signature for the link.
+    # list of parameters for method signature, body is optional
+    def method_signature
+      @parameters.map { |info| info.name == 'body' ? "body = {}" : info.name }.join(', ')
+    end
+
+    # list of parameters to pass along from method signature to client calls
     def parameter_names
       @parameters.map { |info| info.name }.join(', ')
     end
