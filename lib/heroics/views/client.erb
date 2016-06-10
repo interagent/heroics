@@ -124,7 +124,7 @@ module <%= @module_name %>
     # @param <%= parameter.name %>: <%= parameter.description %>
     <% end %>
     <% end %>
-    def <%= link.name %>(<%= link.parameter_names %>)
+    def <%= link.name %>(<%= link.method_signature %>)
       @client.<%= resource.name %>.<%= link.name %>(<%= link.parameter_names %>)
     end
     <% end %>
