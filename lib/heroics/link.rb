@@ -17,7 +17,7 @@ module Heroics
       @root_url, @path_prefix = unpack_url(url)
       @link_schema = link_schema
       @default_headers = options[:default_headers] || {}
-      @cache = options[:cache] || Moneta.new(:Null)
+      @cache = options[:cache] || {}
     end
 
     # Make a request to the server.

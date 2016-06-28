@@ -2,7 +2,6 @@
 require 'base64'
 require 'erubis'
 require 'excon'
-require 'moneta'
 require 'multi_json'
 require 'uri'
 require 'zlib'
