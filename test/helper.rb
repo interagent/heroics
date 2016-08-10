@@ -2,6 +2,7 @@
 require 'minitest/autorun'
 require 'moneta'
 require 'time'
+require 'pry'
 
 require 'heroics'
 
