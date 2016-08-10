@@ -269,6 +269,27 @@ class LinkTest < MiniTest::Unit::TestCase
     end
   end
 
+  def test_run_with_bad_params
+    body = {'Hello' => 'world!'}
+    response_body = MultiJson.encode({
+      id: 'an_id',
+      message: 'An explanation of why your thing failed'
+    })
+    Excon.stub(method: :post) do |request|
+      assert_equal('application/json', request[:headers]['Content-Type'])
+      assert_equal(body, MultiJson.load(request[:body]))
+      Excon.stubs.pop
+      {status: 422, body: response_body}
+    end
+
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('create'))
+    assert_raises Heroics::UnprocessableEntityError do
+      link.run body
+    end
+  end
+
   # Link.run raises an ArgumentError if too few parameters are provided.
   def test_run_with_missing_parameters
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)

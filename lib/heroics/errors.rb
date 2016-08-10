@@ -4,4 +4,7 @@ module Heroics
   # correctly.
   class SchemaError < StandardError
   end
+
+  class UnprocessableEntityError < StandardError
+  end
 end
