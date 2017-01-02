@@ -21,6 +21,10 @@ class RubyNameTest < MiniTest::Unit::TestCase
   def test_ruby_name_with_spaces
     assert_equal('spaced_name', Heroics.ruby_name('spaced name'))
   end
+  
+  def test_ruby_name_with_parens
+    assert_equal('parenthesized_name', Heroics.ruby_name('Parenthesized (Name)'))
+  end
 end
 
 class PrettyNameTest < MiniTest::Unit::TestCase

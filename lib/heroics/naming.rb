@@ -3,10 +3,11 @@ module Heroics
   # Process a name to make it suitable for use as a Ruby method name.
   #
   # @param name [String] The name to process.
-  # @return [String] The new name with capitals converted to lowercase, and
-  #   dashes and spaces converted to underscores.
+  # @return [String] The new name with capitals converted to lowercase,
+  #   dashes and spaces converted to underscores, and non-identifier 
+  #   characters removed.
   def self.ruby_name(name)
-    name.downcase.gsub(/[- ]/, '_')
+    name.downcase.gsub(/[- ]/, '_').gsub(/\W/, '')
   end
 
   # Process a name to make it suitable for use as a pretty command name.
