@@ -6,8 +6,11 @@ module Heroics
   # @return [String] The new name with capitals converted to lowercase,
   #   dashes and spaces converted to underscores, and non-identifier 
   #   characters removed.
+  # @raise [SchemaError] Raised if the name contains invalid characters.
   def self.ruby_name(name)
-    name.downcase.gsub(/[- ]/, '_').gsub(/\W/, '')
+    ruby_name = name.downcase.gsub(/[- ]/, '_')
+    raise SchemaError.new("Name '#{name}' converts to invalid Ruby name '#{ruby_name}'.") if ruby_name =~ /\W/
+    ruby_name
   end
 
   # Process a name to make it suitable for use as a pretty command name.
