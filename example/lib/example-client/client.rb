@@ -74,7 +74,7 @@ module ExampleClient
     if options[:default_headers]
       final_options[:default_headers].merge!(options[:default_headers])
     end
-    final_options[:cache] = options[:cache] || {}
+    final_options[:cache] = options[:cache] || Moneta.new(:File, dir: "/Users/mgauger/.heroics/example")
     final_options[:url] = options[:url] if options[:url]
     final_options[:user] = options[:user] if options[:user]
     final_options
@@ -82,7 +82,7 @@ module ExampleClient
 
   # Get the default options.
   def self.default_options
-    default_headers = {}
+    default_headers = {"Accept"=>"application/vnd.example+json; version=1"}
     {
       default_headers: default_headers,
       url:             "https://example.com"

@@ -9,6 +9,7 @@ option_parser = OptionParser.new do |opts|
   opts.banner = <<-EOS
 Usage: heroics-generate module_name schema_filepath url
        heroics-generate configuration-file-path.rb
+# Params only allowed when using the first form:
 EOS
 
   opts.on('-h', '--help', 'Display this screen') do
@@ -29,34 +30,35 @@ EOS
 end
 
 option_parser.parse!
-if ARGV.length == 1
-  config_file = ARGV[0]
-  if File.readable?(config_file)
-    require config_file
+case ARGV.length
+  when 1
+    config_file = ARGV[0]
+    if File.readable?(config_file)
+      require config_file
+
+      puts Heroics.generate_client
+    else
+      raise "Unable to read configuration file: #{configuration}"
+    end
+  when 3
+    module_name, schema_filepath, base_url = ARGV
+
+    Heroics.default_configuration do |config|
+      config.module_name = module_name
+      config.schema_filepath = schema_filepath
+
+      config.base_url = base_url
+
+      if options[:cache_path]
+        config.cache_path = options[:cache_path]
+      end
+
+      if options[:headers]
+        config.headers = options[:headers]
+      end
+    end
 
     puts Heroics.generate_client
   else
-    raise "Unable to read configuration file: #{configuration}"
-  end
-elsif ARGV.length == 3
-  module_name, schema_filepath, base_url = ARGV
-
-  Heroics.default_configuration do |config|
-    config.module_name = module_name
-    config.schema_filepath = schema_filepath
-
-    config.base_url = base_url
-
-    if options[:cache_path]
-      config.cache_path = options[:cache_path]
-    end
-
-    if options[:headers]
-      config.headers = options[:headers]
-    end
-  end
-
-  puts Heroics.generate_client
-else
-  puts option_parser
+    puts option_parser
 end
