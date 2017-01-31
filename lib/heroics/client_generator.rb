@@ -19,7 +19,21 @@ module Heroics
     eruby.evaluate(context)
   end
 
+  def self.generate_client_with_configuration
+    filename = File.dirname(__FILE__) + '/views/client.erb'
+    eruby = Erubis::Eruby.new(File.read(filename))
+    context = build_context_with_configuration
+    eruby.evaluate(context)
+  end
+
   private
+
+  def self.build_context_with_configuration
+    build_context(Heroics::Configuration.defaults.module_name,
+                  Heroics::Configuration.defaults.schema,
+                  Heroics::Configuration.defaults.base_url,
+                  Heroics::Configuration.defaults.options)
+  end
 
   # Process the schema to build up the context needed to render the source
   # template.

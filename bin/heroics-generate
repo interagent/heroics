@@ -6,7 +6,10 @@ require 'open-uri'
 
 options = {headers: {}, cache_path: nil}
 option_parser = OptionParser.new do |opts|
-  opts.banner = 'Usage: heroics-generate module_name schema_filepath url'
+  opts.banner = <<-EOS
+Usage: heroics-generate module_name schema_filepath url
+       heroics-generate configuration-file-path.rb
+EOS
 
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
@@ -26,7 +29,16 @@ option_parser = OptionParser.new do |opts|
 end
 
 option_parser.parse!
-if ARGV.length != 3
+if ARGV.length == 1
+  config_file = ARGV[0]
+  if File.readable?(config_file)
+    require config_file
+
+    puts Heroics.generate_client_with_configuration
+  else
+    raise "Unable to read configuration file: #{configuration}"
+  end
+elsif ARGV.length != 3
   puts option_parser
 else
   module_name, schema_filepath, url = ARGV
