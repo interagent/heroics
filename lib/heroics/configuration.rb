@@ -6,5 +6,9 @@ module Heroics
     def self.defaults
       @defaults ||= Configuration.new
     end
+
+    def initialize
+      yield self if block_given?
+    end
   end
 end
