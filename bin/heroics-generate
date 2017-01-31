@@ -34,7 +34,7 @@ if ARGV.length == 1
   if File.readable?(config_file)
     require config_file
 
-    puts Heroics.generate_client_with_configuration
+    puts Heroics.generate_client
   else
     raise "Unable to read configuration file: #{configuration}"
   end
@@ -43,12 +43,12 @@ elsif ARGV.length == 3
 
   Heroics.default_configuration do |config|
     config.module_name = module_name
-    config.schema = schema_filepath
+    config.schema_filepath = schema_filepath
 
     config.base_url = base_url
 
     if options[:cache_path]
-      config.cache = "Moneta.new(:File, dir: \"#{options[:cache_path]}\")"
+      config.cache_path = options[:cache_path]
     end
 
     if options[:headers]
@@ -56,7 +56,7 @@ elsif ARGV.length == 3
     end
   end
 
-  puts Heroics.generate_client_with_configuration
+  puts Heroics.generate_client
 else
   puts option_parser
 end

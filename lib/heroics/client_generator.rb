@@ -19,7 +19,7 @@ module Heroics
     eruby.evaluate(context)
   end
 
-  def self.generate_client_with_configuration
+  def self.generate_client
     filename = File.dirname(__FILE__) + '/views/client.erb'
     eruby = Erubis::Eruby.new(File.read(filename))
     context = build_context_with_configuration

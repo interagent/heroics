@@ -16,7 +16,11 @@ module Heroics
       yield self if block_given?
     end
 
-    def schema=(schema_filepath)
+    def schema=(schema)
+      @schema = schema
+    end
+
+    def schema_filepath=(schema_filepath)
       @schema = Heroics::Schema.new(MultiJson.decode(open(schema_filepath).read))
     end
 
@@ -33,6 +37,7 @@ module Heroics
     end
 
     def headers=(headers)
+      raise "Must provide a hash of headers" unless headers.is_a?(Hash)
       @options[:default_headers] = headers
     end
   end
