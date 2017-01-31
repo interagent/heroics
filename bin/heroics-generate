@@ -38,15 +38,25 @@ if ARGV.length == 1
   else
     raise "Unable to read configuration file: #{configuration}"
   end
-elsif ARGV.length != 3
-  puts option_parser
-else
-  module_name, schema_filepath, url = ARGV
-  schema = Heroics::Schema.new(MultiJson.decode(open(schema_filepath).read))
-  cache = 'Moneta.new(:Memory)'
-  if options[:cache_path]
-    cache = "Moneta.new(:File, dir: \"#{options[:cache_path]}\")"
+elsif ARGV.length == 3
+  module_name, schema_filepath, base_url = ARGV
+
+  Heroics.default_configuration do |config|
+    config.module_name = module_name
+    config.schema = schema_filepath
+
+    config.base_url = base_url
+
+    if options[:cache_path]
+      config.cache = "Moneta.new(:File, dir: \"#{options[:cache_path]}\")"
+    end
+
+    if options[:headers]
+      config.headers = options[:headers]
+    end
   end
-  options = {default_headers: options[:headers], cache: cache}
-  puts Heroics.generate_client(module_name, schema, url, options)
+
+  puts Heroics.generate_client_with_configuration
+else
+  puts option_parser
 end

@@ -11,6 +11,7 @@ module Heroics
 
     def initialize
       @options = {}
+      @options[:cache] = 'Moneta.new(:Memory)'
 
       yield self if block_given?
     end
@@ -28,11 +29,11 @@ module Heroics
     end
 
     def cache_path=(cache_path)
-      @options[:cache_path] = cache_path
+      @options[:cache] = "Moneta.new(:File, dir: \"#{cache_path}\")"
     end
 
     def headers=(headers)
-      @options[:headers] = headers
+      @options[:default_headers] = headers
     end
   end
 end
