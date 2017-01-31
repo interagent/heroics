@@ -1,0 +1,245 @@
+{
+  "description":"Sample schema for use in tests.",
+  "definitions":{
+    "resource":{
+      "description":"A sample resource to use in tests.",
+      "id":"schema/resource",
+      "$schema":"http://json-schema.org/draft-04/hyper-schema",
+      "title":"Sample resource title",
+      "type":[
+        "object"
+      ],
+      "definitions":{
+        "date_field":{
+          "description":"A sample date field",
+          "example":"2013-10-19 22:10:29Z",
+          "format":"date-time",
+          "readOnly":true,
+          "type":[
+            "string"
+          ]
+        },
+        "string_field":{
+          "description":"A sample string field",
+          "example":"Sample text.",
+          "readOnly":true,
+          "type":[
+            "string"
+          ]
+        },
+        "boolean_field":{
+          "description":"A sample boolean field",
+          "example":true,
+          "type":[
+            "boolean"
+          ]
+        },
+        "uuid_field":{
+          "description":"A sample UUID field",
+          "example":"44724831-bf66-4bc2-865f-e2c4c2b14c78",
+          "format":"uuid",
+          "readOnly":true,
+          "type":[
+            "string"
+          ]
+        },
+        "email_field":{
+          "description":"A sample email address field",
+          "example":"username@example.com",
+          "format":"email",
+          "readOnly":true,
+          "type":[
+            "string"
+          ]
+        },
+        "identity":{
+          "oneOf":[
+            {
+              "$ref":"#/definitions/resource/definitions/uuid_field"
+            },
+            {
+              "$ref":"#/definitions/resource/definitions/email_field"
+            }
+          ]
+        }
+      },
+      "properties":{
+        "date_field":{
+          "$ref":"#/definitions/resource/definitions/date_field"
+        },
+        "string_field":{
+          "$ref":"#/definitions/resource/definitions/string_field"
+        },
+        "boolean_field":{
+          "$ref":"#/definitions/resource/definitions/boolean_field"
+        },
+        "uuid_field":{
+          "$ref":"#/definitions/resource/definitions/uuid_field"
+        },
+        "email_field":{
+          "$ref":"#/definitions/resource/definitions/email_field"
+        }
+      },
+      "links":[
+        {
+          "description":"Show all sample resources",
+          "href":"/resource",
+          "method":"GET",
+          "rel":"instances",
+          "title":"List"
+        },
+        {
+          "description":"Show a sample resource",
+          "href":"/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}",
+          "method":"GET",
+          "rel":"self",
+          "title":"Info"
+        },
+        {
+          "description":"Show a sample resource",
+          "href":"/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fidentity)}",
+          "method":"GET",
+          "rel":"self",
+          "title":"Identify resource"
+        },
+        {
+          "description":"Create a sample resource",
+          "href":"/resource",
+          "method":"POST",
+          "rel":"create",
+          "title":"Create",
+          "schema":{
+            "properties":{
+              "date_field":{
+                "$ref":"#/definitions/resource/definitions/date_field"
+              },
+              "string_field":{
+                "$ref":"#/definitions/resource/definitions/string_field"
+              },
+              "boolean_field":{
+                "$ref":"#/definitions/resource/definitions/boolean_field"
+              },
+              "uuid_field":{
+                "$ref":"#/definitions/resource/definitions/uuid_field"
+              },
+              "email_field":{
+                "$ref":"#/definitions/resource/definitions/email_field"
+              }
+            }
+          }
+        },
+        {
+          "description":"Submit a sample resource as form data",
+          "encType":"application/x-www-form-urlencoded",
+          "href":"/resource",
+          "method":"POST",
+          "rel":"submit",
+          "title":"Submit",
+          "schema":{
+            "properties":{
+              "date_field":{
+                "$ref":"#/definitions/resource/definitions/date_field"
+              },
+              "string_field":{
+                "$ref":"#/definitions/resource/definitions/string_field"
+              },
+              "boolean_field":{
+                "$ref":"#/definitions/resource/definitions/boolean_field"
+              },
+              "uuid_field":{
+                "$ref":"#/definitions/resource/definitions/uuid_field"
+              },
+              "email_field":{
+                "$ref":"#/definitions/resource/definitions/email_field"
+              }
+            }
+          }
+        },
+        {
+          "description":"Update a sample resource",
+          "href":"/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fuuid_field)}",
+          "method":"PATCH",
+          "rel":"update",
+          "title":"Update",
+          "schema":{
+            "properties":{
+              "date_field":{
+                "$ref":"#/definitions/resource/definitions/date_field"
+              },
+              "string_field":{
+                "$ref":"#/definitions/resource/definitions/string_field"
+              },
+              "boolean_field":{
+                "$ref":"#/definitions/resource/definitions/boolean_field"
+              },
+              "uuid_field":{
+                "$ref":"#/definitions/resource/definitions/uuid_field"
+              },
+              "email_field":{
+                "$ref":"#/definitions/resource/definitions/email_field"
+              }
+            }
+          }
+        },
+        {
+          "description":"Delete an existing sample resource at specific time",
+          "href":"/resource/{(%23%2Fdefinitions%2Fresource%2Fdefinitions%2Fdate_field)}",
+          "method":"DELETE",
+          "rel":"destroy",
+          "title":"Delete"
+        }
+      ]
+    },
+    "another-resource":{
+      "description":"Another sample resource to use in tests.",
+      "id":"schema/another-resource",
+      "$schema":"http://json-schema.org/draft-04/hyper-schema",
+      "title":"Another sample resource title",
+      "type":[
+        "object"
+      ],
+      "definitions":{},
+      "properties":{},
+      "links":[
+        {
+          "description":"Show all sample resources",
+          "href":"/another-resource",
+          "method":"GET",
+          "rel":"instances",
+          "title":"List"
+        }
+      ]
+    },
+    "underscored_resource":{
+      "description":"Underscores the importance of supporting underscored resources",
+      "id":"schema/underscored_resource",
+      "$schema":"http://json-schema.org/draft-04/hyper-schema",
+      "title":"Another underscored resource to use in tests",
+      "type":[
+        "object"
+      ],
+      "definitions":{},
+      "properties":{},
+      "links":[
+        {
+          "description":"Show all underscored resources",
+          "href":"/underscored_resource",
+          "method":"GET",
+          "rel":"instances",
+          "title":"List"
+        }
+      ]
+    }
+  },
+  "properties":{
+    "resource":{
+      "$ref":"#/definitions/resource"
+    },
+    "another-resource":{
+      "$ref":"#/definitions/another-resource"
+    },
+    "underscored_resource":{
+      "$ref":"#/definitions/underscored_resource"
+    }
+  }
+}
