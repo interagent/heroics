@@ -52,7 +52,13 @@ JSON schema.  When you have a JSON schema prepared you can generate a client
 for your API:
 
 ```
-bin/heroics-generate MyApp schema.json https://api.myapp.com > client.rb
+heroics-generate MyApp schema.json https://api.myapp.com > client.rb
+```
+
+If you are using a configuration file, per above, just pass the path to it:
+
+```
+heroics-generate my-config-file.rb > client.rb
 ```
 
 ### Passing custom headers
