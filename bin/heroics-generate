@@ -32,12 +32,12 @@ end
 option_parser.parse!
 
 case ARGV.length
-when 1
+when 1 # Configuration file passed
   config_file = ARGV[0]
   require config_file
 
   puts Heroics.generate_client
-when 3
+when 3 # Traditional module name, schema and base URL params passed
   module_name, schema_filepath, base_url = ARGV
 
   Heroics.default_configuration do |config|
@@ -56,6 +56,6 @@ when 3
   end
 
   puts Heroics.generate_client
-else
+else # incorrect or no CLI params, show help
   puts option_parser
 end
