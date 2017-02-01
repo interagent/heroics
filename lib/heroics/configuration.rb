@@ -12,6 +12,7 @@ module Heroics
     def initialize
       @options = {}
       @options[:cache] = 'Moneta.new(:Memory)'
+      @options[:default_headers] = {}
 
       yield self if block_given?
     end
