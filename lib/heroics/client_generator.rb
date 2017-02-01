@@ -2,42 +2,21 @@
 module Heroics
   # Generate a static client that uses Heroics under the hood.  This is a good
   # option if you want to ship a gem or generate API documentation using Yard.
-  #
-  # @param module_name [String] The name of the module, as rendered in a Ruby
-  #   source file, to use for the generated client.
-  # @param schema [Schema] The schema instance to generate the client from.
-  # @param url [String] The URL for the API service.
-  # @param options [Hash] Configuration for links.  Possible keys include:
-  #   - default_headers: Optionally, a set of headers to include in every
-  #     request made by the client.  Default is no custom headers.
-  #   - cache: Optionally, a Moneta-compatible cache to store ETags.  Default
-  #     is no caching.
-  def self.generate_client(module_name, schema, url, options)
-    filename = File.dirname(__FILE__) + '/views/client.erb'
-    eruby = Erubis::Eruby.new(File.read(filename))
-    context = build_context(module_name, schema, url, options)
-    eruby.evaluate(context)
-  end
-
   def self.generate_client
     filename = File.dirname(__FILE__) + '/views/client.erb'
     eruby = Erubis::Eruby.new(File.read(filename))
-    context = build_context_with_configuration
+    context = build_context(Heroics::Configuration.defaults.module_name,
+      Heroics::Configuration.defaults.schema,
+      Heroics::Configuration.defaults.base_url,
+      Heroics::Configuration.defaults.options)
     eruby.evaluate(context)
   end
 
   private
 
-  def self.build_context_with_configuration
-    build_context(Heroics::Configuration.defaults.module_name,
-                  Heroics::Configuration.defaults.schema,
-                  Heroics::Configuration.defaults.base_url,
-                  Heroics::Configuration.defaults.options)
-  end
-
   # Process the schema to build up the context needed to render the source
   # template.
-  def self.build_context(module_name, schema, url, options)
+  def self.build_context(module_name, schema, base_url, options)
     resources = []
     schema.resources.each do |resource_schema|
       links = []
@@ -54,7 +33,7 @@ module Heroics
 
     {
       module_name: module_name,
-      url: url,
+      url: base_url,
       default_headers: options.fetch(:default_headers, {}),
       cache: options.fetch(:cache, {}),
       description: schema.description,
