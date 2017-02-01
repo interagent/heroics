@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'heroics'
 
 Heroics.default_configuration do |config|
