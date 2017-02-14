@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+require 'yard'
+
+desc 'Generate API documentation'
+YARD::Rake::YardocTask.new
+
+desc 'Build a new client'
+task :build do
+  sh 'bundle exec heroics-generate ./example-client-configuration.rb > lib/example-client/client.rb'
+end

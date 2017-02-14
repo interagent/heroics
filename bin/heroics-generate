@@ -6,7 +6,11 @@ require 'open-uri'
 
 options = {headers: {}, cache_path: nil}
 option_parser = OptionParser.new do |opts|
-  opts.banner = 'Usage: heroics-generate module_name schema_filepath url'
+  opts.banner = <<-EOS
+Usage: heroics-generate module_name schema_filepath url
+       heroics-generate configuration-file-path.rb
+# Params only allowed when using the first form:
+EOS
 
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
@@ -26,15 +30,32 @@ option_parser = OptionParser.new do |opts|
 end
 
 option_parser.parse!
-if ARGV.length != 3
-  puts option_parser
-else
-  module_name, schema_filepath, url = ARGV
-  schema = Heroics::Schema.new(MultiJson.decode(open(schema_filepath).read))
-  cache = 'Moneta.new(:Memory)'
-  if options[:cache_path]
-    cache = "Moneta.new(:File, dir: \"#{options[:cache_path]}\")"
+
+case ARGV.length
+when 1 # Configuration file passed
+  config_file = ARGV[0]
+  require config_file
+
+  puts Heroics.generate_client
+when 3 # Traditional module name, schema and base URL params passed
+  module_name, schema_filepath, base_url = ARGV
+
+  Heroics.default_configuration do |config|
+    config.module_name = module_name
+    config.schema_filepath = schema_filepath
+
+    config.base_url = base_url
+
+    if options[:cache_path]
+      config.cache_path = options[:cache_path]
+    end
+
+    if options[:headers]
+      config.headers = options[:headers]
+    end
   end
-  options = {default_headers: options[:headers], cache: cache}
-  puts Heroics.generate_client(module_name, schema, url, options)
+
+  puts Heroics.generate_client
+else # incorrect or no CLI params, show help
+  puts option_parser
 end

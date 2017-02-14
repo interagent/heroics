@@ -19,6 +19,31 @@ Or install it yourself as:
 
 ## Usage
 
+### Configuration File
+
+If you don't want to pass config to the CLI, you can provide a Ruby config file to the `heroics-generate` script as a single parameter.
+
+The form of this configuration file is shown below.
+
+```ruby
+require 'heroics'
+
+Heroics.default_configuration do |config|
+  config.base_url = 'https://example.com'
+  config.module_name = 'ExampleClient'
+  config.schema_filepath = 'schema.json'
+
+  config.headers = { 'Accept' => 'application/vnd.example+json; version=1' }
+  config.cache_path = "#{Dir.home}/.heroics/example"
+end
+```
+
+#### Optional configuration
+
+`config.headers` and `config.cache_path` are optional, but all other config shown above is required.
+
+For further details on config file usage, see the `example/` directory in this repo.
+
 ### Generating a client
 
 Heroics generates an HTTP client from a JSON schema that describes your API.
@@ -27,7 +52,13 @@ JSON schema.  When you have a JSON schema prepared you can generate a client
 for your API:
 
 ```
-bin/heroics-generate MyApp schema.json https://api.myapp.com > client.rb
+heroics-generate MyApp schema.json https://api.myapp.com > client.rb
+```
+
+If you are using a configuration file, per above, just pass the path to it:
+
+```
+heroics-generate my-config-file.rb > client.rb
 ```
 
 ### Passing custom headers

@@ -19,16 +19,28 @@ class GenerateClientTest  < MiniTest::Unit::TestCase
        body: MultiJson.dump(SAMPLE_SCHEMA)}
     end
 
+    default_headers =  {'Accept' => 'application/vnd.example+json; version=3'}
+
     netrc = Netrc.read
     username, token = netrc['example.com']
     schema_url = "https://example.com/schema"
     options = {
-        default_headers: {'Accept' => 'application/vnd.example+json; version=3'},
-        cache: 'Moneta.new(:File, dir: "#{Dir.home}/.heroics/example")'
+      default_headers: default_headers
     }
+
     schema = Heroics.download_schema(schema_url, options)
-    client_source = Heroics.generate_client("ExampleAPI", schema,
-                                            "api.example.com", options)
+
+    Heroics.default_configuration do |config|
+      config.base_url = 'api.example.com'
+      config.module_name = 'ExampleAPI'
+      config.schema = schema
+
+      config.cache_path = "#{Dir.home}/.heroics/example"
+      config.headers = default_headers
+    end
+
+    client_source = Heroics.generate_client
+
     # Ensure the generated code is syntactically valid.
     eval(client_source)
   end
