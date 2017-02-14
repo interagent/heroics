@@ -2,6 +2,11 @@
 require 'helper'
 
 class RubyNameTest < MiniTest::Unit::TestCase
+  # Given default replacement patterns on Heroics::Configuration:
+  def setup
+    Heroics.default_configuration
+  end
+
   # ruby_name is a no-op when an empty string is provided.
   def test_ruby_name_with_empty_name
     assert_equal('', Heroics.ruby_name(''))

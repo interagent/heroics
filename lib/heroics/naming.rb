@@ -6,7 +6,11 @@ module Heroics
   # @return [String] The new name with capitals converted to lowercase, and
   #   dashes and spaces converted to underscores.
   def self.ruby_name(name)
-    name.downcase.gsub(/[- ]/, '_')
+    patterns = Heroics::Configuration.defaults.ruby_name_replacement_patterns
+
+    patterns.reduce(name.downcase) do |memo, (regex, replacement)|
+      memo.gsub(regex, replacement)
+    end
   end
 
   # Process a name to make it suitable for use as a pretty command name.
