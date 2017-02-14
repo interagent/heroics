@@ -26,6 +26,13 @@ class RubyNameTest < MiniTest::Unit::TestCase
   def test_ruby_name_with_spaces
     assert_equal('spaced_name', Heroics.ruby_name('spaced name'))
   end
+
+  def test_ruby_name_with_invalid_chars
+    error = assert_raises Heroics::SchemaError do
+      Heroics.ruby_name('Name (Parenthetical)')
+    end
+    assert_equal("Name 'Name (Parenthetical)' converts to invalid Ruby name 'name_(parenthetical)'.", error.message)
+  end
 end
 
 class PrettyNameTest < MiniTest::Unit::TestCase
