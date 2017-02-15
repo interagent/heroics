@@ -40,7 +40,14 @@ end
 
 #### Optional configuration
 
-`config.headers` and `config.cache_path` are optional, but all other config shown above is required.
+`base_url`, `module_name`, and `schema_filepath` are required for a proper configuration.
+
+The following keys are optional:
+
+* `headers`
+* `cache_path`
+* `ruby_name_replacements` a hash of replacement patterns for converting endpoint paths to Ruby method names, such as:
+> { /[\s-]+/ => '_' }
 
 For further details on config file usage, see the `example/` directory in this repo.
 

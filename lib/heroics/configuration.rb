@@ -3,16 +3,27 @@
 module Heroics
   # Attempts to load configuration, provides defaults, and provide helpers to access that data
   class Configuration
-    attr_reader :base_url, :cache_path, :module_name, :schema, :options
+    attr_reader :base_url,
+      :cache_path,
+      :module_name,
+      :schema,
+      :ruby_name_replacement_patterns,
+      :options
 
     def self.defaults
       @defaults ||= Configuration.new
+    end
+
+    def self.restore_defaults
+      @defaults = Configuration.new
     end
 
     def initialize
       @options = {}
       @options[:cache] = 'Moneta.new(:Memory)'
       @options[:default_headers] = {}
+
+      @ruby_name_replacement_patterns = { /[\s-]+/ => '_' }
 
       yield self if block_given?
     end
@@ -40,6 +51,11 @@ module Heroics
     def headers=(headers)
       raise "Must provide a hash of headers" unless headers.is_a?(Hash)
       @options[:default_headers] = headers
+    end
+
+    def ruby_name_replacement_patterns=(patterns)
+      raise "Must provide a hash of replacements" unless patterns.is_a?(Hash)
+      @ruby_name_replacement_patterns = patterns
     end
   end
 end

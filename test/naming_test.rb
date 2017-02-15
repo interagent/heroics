@@ -2,6 +2,11 @@
 require 'helper'
 
 class RubyNameTest < MiniTest::Unit::TestCase
+  # Given default replacement patterns on Heroics::Configuration:
+  def setup
+    Heroics.default_configuration
+  end
+
   # ruby_name is a no-op when an empty string is provided.
   def test_ruby_name_with_empty_name
     assert_equal('', Heroics.ruby_name(''))
@@ -20,6 +25,13 @@ class RubyNameTest < MiniTest::Unit::TestCase
   # ruby_name converts spaces in a name to underscores.
   def test_ruby_name_with_spaces
     assert_equal('spaced_name', Heroics.ruby_name('spaced name'))
+  end
+
+  def test_ruby_name_with_invalid_chars
+    error = assert_raises Heroics::SchemaError do
+      Heroics.ruby_name('Name (Parenthetical)')
+    end
+    assert_equal("Name 'Name (Parenthetical)' converts to invalid Ruby name 'name_(parenthetical)'.", error.message)
   end
 end
 
