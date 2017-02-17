@@ -355,8 +355,8 @@ module Heroics
     attr_reader :resource_name, :description
 
     def initialize(resource_name, name, description)
-      @resource_name = resource_name
-      @name = name
+      @resource_name = Heroics.ruby_name(resource_name)
+      @name = Heroics.ruby_name(name)
       @description = description
     end
 

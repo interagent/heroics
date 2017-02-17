@@ -21,12 +21,12 @@ module Heroics
     schema.resources.each do |resource_schema|
       links = []
       resource_schema.links.each do |link_schema|
-        links << GeneratorLink.new(link_schema.name.gsub('-', '_'),
+        links << GeneratorLink.new(link_schema.name,
                                    link_schema.description,
                                    link_schema.parameter_details,
                                    link_schema.needs_request_body?)
       end
-      resources << GeneratorResource.new(resource_schema.name.gsub('-', '_'),
+      resources << GeneratorResource.new(resource_schema.name,
                                          resource_schema.description,
                                          links)
     end
@@ -48,7 +48,7 @@ module Heroics
     attr_reader :name, :description, :links
 
     def initialize(name, description, links)
-      @name = name
+      @name = Heroics.ruby_name(name)
       @description = description
       @links = links
     end
@@ -65,7 +65,7 @@ module Heroics
     attr_reader :name, :description, :parameters, :takes_body
 
     def initialize(name, description, parameters, takes_body)
-      @name = name
+      @name = Heroics.ruby_name(name)
       @description = description
       @parameters = parameters
       if takes_body
@@ -75,12 +75,12 @@ module Heroics
 
     # list of parameters for method signature, body is optional
     def method_signature
-      @parameters.map { |info| info.name == 'body' ? "body = {}" : info.name }.join(', ')
+      @parameters.map { |info| info.name == 'body' ? "body = {}" : Heroics.ruby_name(info.name) }.join(', ')
     end
 
     # list of parameters to pass along from method signature to client calls
     def parameter_names
-      @parameters.map { |info| info.name }.join(', ')
+      @parameters.map { |info| Heroics.ruby_name(info.name) }.join(', ')
     end
   end
 
