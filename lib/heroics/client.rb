@@ -8,7 +8,8 @@ module Heroics
     #   to resources.
     # @param url [String] The URL used by this client.
     def initialize(resources, url)
-      @resources = resources
+      # Transform resource keys via the ruby_name replacement semantics
+      @resources = Hash[resources.map{ |k, v| [Heroics.ruby_name(k), v] }]
       @url = url
     end
 
@@ -21,8 +22,9 @@ module Heroics
       name = name.to_s
       resource = @resources[name]
       if resource.nil?
-        # Try substituting underscores for dashes
-        name = name.to_s.gsub('_', '-')
+        # Find the name using the same ruby_name replacement semantics as when
+        # we set up the @resources hash
+        name = Heroics.ruby_name(name)
         resource = @resources[name]
         if resource.nil?
           raise NoMethodError.new("undefined method `#{name}' for #{to_s}")
