@@ -196,6 +196,24 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
                                    {'new' => 'resource'}]))
   end
 
+  # LinkSchema.format_path only attempts to format path parameters. The body (if
+  # supplied), is *not* passed to LinkSchema#format_parameter
+  def test_format_path_only_formats_path_parameters
+    param = '44724831-bf66-4bc2-865f-e2c4c2b14c78'
+    body = { 'new' => 'resource' }
+    formatted_values = []
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = schema.resource('resource').link('update')
+    link.singleton_class.send(:alias_method, :orig_format_parameter, :format_parameter)
+    link.define_singleton_method(:format_parameter) do |value|
+      formatted_values.push(value)
+      orig_format_parameter(value)
+    end
+
+    assert_equal(["/resource/#{param}", body], link.format_path([param, body]))
+    assert_equal([param], formatted_values)
+  end
+
   # LinkSchema.format_path raises an ArgumentError if too few parameters are
   # provided
   def test_format_path_with_too_few_parameters
