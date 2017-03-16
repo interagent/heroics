@@ -91,7 +91,9 @@ module <%= @module_name %>
 
   private_class_method :default_options, :custom_options
 
-  # <%= @description %>
+  <% @description.each_line do |desc| %>
+    <%= "# #{desc}" %>
+  <% end %>
   class Client
     def initialize(client)
       @client = client
@@ -110,14 +112,18 @@ module <%= @module_name %>
   private
   <% for resource in @resources %>
 
-  # <%= resource.description %>
+  <% resource.description.each_line do |desc| %>
+    <%= "# #{desc}" %>
+  <% end %>
   class <%= resource.class_name %>
     def initialize(client)
       @client = client
     end
     <% for link in resource.links %>
 
-    # <%= link.description %>
+    <% link.description.each_line do |desc| %>
+      <%= "# #{desc}" %>
+    <% end %>
     <% unless link.parameters.empty? %>
     #
     <% for parameter in link.parameters %>

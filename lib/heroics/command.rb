@@ -22,7 +22,7 @@ module Heroics
 
     # The command description.
     def description
-      @link_schema.description
+      @link_schema.description.lines.first.chomp
     end
 
     # Write usage information to the output stream.

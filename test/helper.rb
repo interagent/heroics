@@ -25,7 +25,7 @@ end
 
 # A simple JSON schema for testing purposes.
 SAMPLE_SCHEMA = {
-  'description' => 'Sample schema for use in tests.',
+  'description' => "Sample schema for use in tests\nThis description has two lines",
   'definitions' => {
     'resource' => {
       'description' => 'A sample resource to use in tests.',
@@ -93,7 +93,7 @@ SAMPLE_SCHEMA = {
       },
 
       'links' => [
-        {'description' => 'Show all sample resources',
+        {'description' => "Show all sample resources\nThis is another documentation line",
          'href'        => '/resource',
          'method'      => 'GET',
          'rel'         => 'instances',

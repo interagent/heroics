@@ -7,7 +7,8 @@ class SchemaTest < MiniTest::Unit::TestCase
   def test_to_s
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     assert_equal(
-      '#<Heroics::Schema description="Sample schema for use in tests.">',
+      '#<Heroics::Schema description="Sample schema for use in tests
+This description has two lines">',
       schema.to_s)
   end
 
@@ -77,7 +78,7 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
   # LinkSchema.description returns the link description.
   def test_description
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
-    assert_equal('Show all sample resources',
+    assert_equal("Show all sample resources\nThis is another documentation line",
                  schema.resource('resource').link('list').description)
   end
 
