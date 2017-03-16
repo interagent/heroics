@@ -204,7 +204,7 @@ module Heroics
                                 "(#{parameters.size} for #{parameter_size})")
       end
 
-      (0..parameter_size).each do |i|
+      (0...parameter_size).each do |i|
         path = path.sub(PARAMETER_REGEX, format_parameter(parameters[i]))
       end
       body = parameters.slice(parameter_size)
