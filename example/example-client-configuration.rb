@@ -7,5 +7,7 @@ Heroics.default_configuration do |config|
   config.schema_filepath = 'schema.json'
 
   config.headers = { 'Accept' => 'application/vnd.example+json; version=1' }
-  config.cache_path = "#{Dir.home}/.heroics/example"
+  # Note: Don't use doublequotes below -- we want to interpolate at runtime,
+  # not when the client is generated
+  config.cache_path = '#{Dir.home}/.heroics/example'
 end
