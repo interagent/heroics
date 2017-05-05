@@ -58,6 +58,17 @@ class ResourceSchemaTest < MiniTest::Unit::TestCase
       ['list', 'info', 'identify_resource', 'create', 'submit', 'update', 'delete'],
       schema.resource('resource').links.map { |link| link.name })
   end
+
+  def test_duplicate_links
+    duplicate_links_schema = Marshal.load(Marshal.dump(SAMPLE_SCHEMA))
+    link = duplicate_links_schema['definitions']['resource']['links'].first
+    duplicate_links_schema['definitions']['resource']['links'] = [link, link]
+
+    error = assert_raises Heroics::SchemaError do
+      Heroics::Schema.new(duplicate_links_schema)
+    end
+    assert_equal("Duplicate link names 'list'.", error.message)
+  end
 end
 
 class LinkSchemaTest < MiniTest::Unit::TestCase
