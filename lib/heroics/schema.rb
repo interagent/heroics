@@ -66,7 +66,7 @@ module Heroics
         .map(&:first)
       if !duplicate_names.empty?
         raise SchemaError.new("Duplicate link names " +
-                              "'#{duplicate_names.join(', ')}'.")
+                              "'#{duplicate_names.join("', '")}'.")
       end
 
       @links = Hash[link_schema.each_with_index.map do |link, link_index|
