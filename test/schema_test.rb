@@ -67,7 +67,7 @@ class ResourceSchemaTest < MiniTest::Unit::TestCase
     error = assert_raises Heroics::SchemaError do
       Heroics::Schema.new(duplicate_links_schema)
     end
-    assert_equal("Duplicate link names 'list'.", error.message)
+    assert_equal("Duplicate 'resource' link names: 'list'.", error.message)
   end
 end
 

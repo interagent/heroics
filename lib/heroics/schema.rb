@@ -65,7 +65,7 @@ module Heroics
         .select { |k, v| v.size > 1 }
         .map(&:first)
       if !duplicate_names.empty?
-        raise SchemaError.new("Duplicate link names " +
+        raise SchemaError.new("Duplicate '#{name}' link names: " +
                               "'#{duplicate_names.join("', '")}'.")
       end
 
