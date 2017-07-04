@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler', '~> 1.3'
   spec.add_development_dependency 'minitest', '4.7.5'
-  spec.add_development_dependency 'moneta'
   spec.add_development_dependency 'netrc'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'turn'
@@ -32,4 +31,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'erubis', '~> 2.0'
   spec.add_dependency 'excon'
   spec.add_dependency 'multi_json', '>= 1.9.2'
+  spec.add_dependency 'moneta'
 end
