@@ -334,7 +334,7 @@ module Heroics
     # @return [String] The formatted parameter.
     def format_parameter(parameter)
       formatted_parameter = parameter.instance_of?(Time) ? iso_format(parameter) : parameter.to_s
-      URI.escape formatted_parameter
+      WEBrick::HTTPUtils.escape formatted_parameter
     end
 
     # Convert a time to an ISO 8601 combined data and time format.
