@@ -18,7 +18,7 @@ module Heroics
       @link_schema = link_schema
       @default_headers = options[:default_headers] || {}
       @cache = options[:cache] || {}
-      @rate_throttle = Heroics::Configuration.defaults.options[:rate_throttle]
+      @rate_throttle = options[:rate_throttle] || Heroics::Configuration.defaults.options[:rate_throttle]
     end
 
     # Make a request to the server.

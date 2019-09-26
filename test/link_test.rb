@@ -441,4 +441,34 @@ class LinkTest < MiniTest::Unit::TestCase
 
     assert_equal([1, 2], link.run.to_a)
   end
+
+  class FakeRateThrottle
+    attr_reader :call_count
+
+    def initialize
+      @call_count = 0
+    end
+
+    def call
+      @call_count += 1
+      yield
+    end
+  end
+
+  def test_run_with_rate_throttle
+    Excon.stub(method: :get) do |request|
+      assert_equal('/resource', request[:path])
+      Excon.stubs.pop
+      {status: 200, headers: {'Content-Type' => 'application/text'},
+       body: "Hello, world!\r\n"}
+    end
+    rate_throttle = FakeRateThrottle.new
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'),
+                             { rate_throttle: rate_throttle })
+
+    assert_equal("Hello, world!\r\n", link.run)
+    assert_equal(1, rate_throttle.call_count)
+  end
 end
