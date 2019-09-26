@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Heroics
-
   module NullRateLimit
     def self.call
       yield
@@ -68,7 +67,5 @@ module Heroics
     def rate_throttle=(rate_throttle)
       @options[:rate_throttle] = rate_throttle
     end
-
-
   end
 end
