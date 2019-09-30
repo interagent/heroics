@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 module Heroics
+  module NullRateLimit
+    def self.call
+      yield
+    end
+  end
+
   # Attempts to load configuration, provides defaults, and provide helpers to access that data
   class Configuration
     attr_reader :base_url,
@@ -22,7 +28,7 @@ module Heroics
       @options = {}
       @options[:cache] = 'Moneta.new(:Memory)'
       @options[:default_headers] = {}
-
+      @options[:rate_throttle] = NullRateLimit
       @ruby_name_replacement_patterns = { /[\s-]+/ => '_' }
 
       yield self if block_given?
@@ -56,6 +62,10 @@ module Heroics
     def ruby_name_replacement_patterns=(patterns)
       raise "Must provide a hash of replacements" unless patterns.is_a?(Hash)
       @ruby_name_replacement_patterns = patterns
+    end
+
+    def rate_throttle=(rate_throttle)
+      @options[:rate_throttle] = rate_throttle
     end
   end
 end

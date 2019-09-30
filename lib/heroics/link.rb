@@ -18,6 +18,7 @@ module Heroics
       @link_schema = link_schema
       @default_headers = options[:default_headers] || {}
       @cache = options[:cache] || {}
+      @rate_throttle = options[:rate_throttle] || Heroics::Configuration.defaults.options[:rate_throttle]
     end
 
     # Make a request to the server.
@@ -108,7 +109,10 @@ module Heroics
         etag = @cache["etag:#{cache_key}"]
         options[:headers] = options[:headers].merge({'If-None-Match' => etag}) if etag
       end
-      response = connection.request(options)
+
+      response = @rate_throttle.call do
+        connection.request(options)
+      end
 
       if response.status == 304
         body = @cache["data:#{cache_key}"]

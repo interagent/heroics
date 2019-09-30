@@ -29,6 +29,18 @@ class ConfigurationTest < MiniTest::Unit::TestCase
     Heroics::Configuration.restore_defaults
   end
 
+  def test_configuring_rate_throttle
+    new_rate_throttle = lambda {}
+    Heroics.default_configuration do |c|
+      c.rate_throttle = new_rate_throttle
+    end
+
+    assert(Heroics::Configuration.defaults.options[:rate_throttle].is_a?(Proc))
+    assert_equal(Heroics::Configuration.defaults.options[:rate_throttle], new_rate_throttle)
+
+    Heroics::Configuration.restore_defaults
+  end
+
   def test_restore_defaults_class_method
     patterns = { /\W+/ => '-' }
     Heroics.default_configuration do |c|
