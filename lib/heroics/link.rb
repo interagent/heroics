@@ -19,6 +19,7 @@ module Heroics
       @default_headers = options[:default_headers] || {}
       @cache = options[:cache] || {}
       @rate_throttle = options[:rate_throttle] || Heroics::Configuration.defaults.options[:rate_throttle]
+      @status_codes = options[:status_codes] || Heroics::Configuration.defaults.options[:status_codes]
     end
 
     # Make a request to the server.
@@ -104,6 +105,9 @@ module Heroics
 
     def request_with_cache(connection, options)
       options[:expects] << 304
+      @status_codes.each do |code|
+        options[:expects] << code
+      end
       cache_key = "#{options[:path]}:#{options[:headers].hash}"
       if options[:method] == :get
         etag = @cache["etag:#{cache_key}"]
