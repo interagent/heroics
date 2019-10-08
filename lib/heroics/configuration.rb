@@ -29,6 +29,7 @@ module Heroics
       @options[:cache] = 'Moneta.new(:Memory)'
       @options[:default_headers] = {}
       @options[:rate_throttle] = NullRateLimit
+      @options[:status_codes] = []
       @ruby_name_replacement_patterns = { /[\s-]+/ => '_' }
 
       yield self if block_given?
@@ -66,6 +67,10 @@ module Heroics
 
     def rate_throttle=(rate_throttle)
       @options[:rate_throttle] = rate_throttle
+    end
+
+    def acceptable_status_codes=(status_codes)
+      @options[:status_codes] = status_codes
     end
   end
 end

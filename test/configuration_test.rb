@@ -41,6 +41,17 @@ class ConfigurationTest < MiniTest::Unit::TestCase
     Heroics::Configuration.restore_defaults
   end
 
+  def test_configuring_status_codes
+    Heroics.default_configuration do |c|
+      c.acceptable_status_codes = [429]
+    end
+
+    assert(Heroics::Configuration.defaults.options[:status_codes].is_a?(Array))
+    assert_equal(Heroics::Configuration.defaults.options[:status_codes], [429])
+
+    Heroics::Configuration.restore_defaults
+  end
+
   def test_restore_defaults_class_method
     patterns = { /\W+/ => '-' }
     Heroics.default_configuration do |c|

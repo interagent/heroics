@@ -471,4 +471,19 @@ class LinkTest < MiniTest::Unit::TestCase
     assert_equal("Hello, world!\r\n", link.run)
     assert_equal(1, rate_throttle.call_count)
   end
+
+  def test_run_with_different_status_code
+    Excon.stub(method: :get) do |request|
+      assert_equal('/resource', request[:path])
+      Excon.stubs.pop
+      {status: 429, headers: {'Content-Type' => 'application/text'},
+       body: "Hello, world!\r\n"}
+    end
+    schema = Heroics::Schema.new(SAMPLE_SCHEMA)
+    link = Heroics::Link.new('https://example.com',
+                             schema.resource('resource').link('list'),
+                             { status_codes: [429] })
+
+    assert_equal("Hello, world!\r\n", link.run)
+  end
 end
