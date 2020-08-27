@@ -244,7 +244,7 @@ module Heroics
                            [value['$ref'], key]
                          end]
       parameters.map do |parameter|
-        definition_name = URI.unescape(parameter[2..-3])
+        definition_name = ::URI::DEFAULT_PARSER.unescape(parameter[2..-3])
         if definitions.has_key?(definition_name)
           definitions[definition_name]
         else
@@ -273,7 +273,7 @@ module Heroics
     def resolve_parameter_details(parameters)
       parameters.map do |parameter|
         # URI decode parameters and strip the leading '{(' and trailing ')}'.
-        parameter = URI.unescape(parameter[2..-3])
+        parameter = ::URI::DEFAULT_PARSER.unescape(parameter[2..-3])
 
         # Split the path into components and discard the leading '#' that
         # represents the root of the schema.
