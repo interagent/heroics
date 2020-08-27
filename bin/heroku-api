@@ -2,6 +2,7 @@
 
 require 'heroics'
 require 'netrc'
+require 'moneta'
 
 netrc = Netrc.read
 username, token = netrc['api.heroku.com']
