@@ -257,7 +257,7 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
 
   # LinkSchema.pretty_name returns the link name in a pretty form, with
   # underscores converted to dashes.
-  def test_pretty_resource_name
+  def test_pretty_name
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = schema.resource('resource').link('identify_resource')
     assert_equal('identify-resource', link.pretty_name)

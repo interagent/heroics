@@ -21,8 +21,6 @@ class GenerateClientTest  < MiniTest::Unit::TestCase
 
     default_headers =  {'Accept' => 'application/vnd.example+json; version=3'}
 
-    netrc = Netrc.read
-    username, token = netrc['example.com']
     schema_url = "https://example.com/schema"
     options = {
       default_headers: default_headers
