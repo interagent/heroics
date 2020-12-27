@@ -31,4 +31,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'excon'
   spec.add_dependency 'multi_json', '>= 1.9.2'
   spec.add_dependency 'moneta'
+  spec.add_dependency 'webrick'
 end
