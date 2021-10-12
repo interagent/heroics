@@ -4,12 +4,12 @@ module Heroics
   # option if you want to ship a gem or generate API documentation using Yard.
   def self.generate_client
     filename = File.dirname(__FILE__) + '/views/client.erb'
-    eruby = Erubis::Eruby.new(File.read(filename))
+    eruby = ERB.new(File.read(filename))
     context = build_context(Heroics::Configuration.defaults.module_name,
       Heroics::Configuration.defaults.schema,
       Heroics::Configuration.defaults.base_url,
       Heroics::Configuration.defaults.options)
-    eruby.evaluate(context)
+    eruby.result_with_hash(context)
   end
 
   private

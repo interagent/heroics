@@ -14,6 +14,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'A Ruby client generator for HTTP APIs described with a JSON schema'
   spec.homepage      = 'https://github.com/interagent/heroics'
   spec.license       = 'MIT'
+  spec.required_ruby_version = '>= 2.5.0'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features|example)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
@@ -27,7 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'yard'
   spec.add_development_dependency 'pry'
 
-  spec.add_dependency 'erubis', '~> 2.0'
   spec.add_dependency 'excon'
   spec.add_dependency 'multi_json', '>= 1.9.2'
   spec.add_dependency 'moneta'
