@@ -32,4 +32,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'multi_json', '>= 1.9.2'
   spec.add_dependency 'moneta'
   spec.add_dependency 'webrick'
+  spec.add_dependency 'base64'
 end
