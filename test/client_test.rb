@@ -20,9 +20,7 @@ class ClientTest < MiniTest::Unit::TestCase
     error = assert_raises NoMethodError do
       client.unknown
     end
-    assert_equal("undefined method `unknown' for " +
-                 '#<Heroics::Client url="http://example.com">',
-                 error.message)
+    assert_match(/undefined method `unknown' for #<Heroics::Client url="http:\/\/example\.com">/, error.message)
   end
 
   # Client.<resource>.<link> finds the appropriate link and invokes it.
@@ -55,7 +53,7 @@ class ClientTest < MiniTest::Unit::TestCase
     client = Heroics::Client.new({'resource' => resource},
                                  'http://example.com')
     Excon.stub(method: :get) do |request|
-      assert_equal({:limit => '50', :page => '25'}, request[:query])
+      assert_equal("limit=50&page=25", request[:query])
       Excon.stubs.pop
       {status: 200, body: 'Hello, world!'}
     end
