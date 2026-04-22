@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'helper'
 
-class VersionTest < MiniTest::Unit::TestCase
+class VersionTest < Minitest::Test
   # Heroics::VERSION defines the version for the project in MAJOR.MINOR.PATCH
   # format.
   def test_version

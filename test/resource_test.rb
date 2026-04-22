@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'helper'
 
-class ResourceTest < MiniTest::Unit::TestCase
+class ResourceTest < Minitest::Test
   include ExconHelper
 
   # Resource.<link> raises a NoMethodError when a method is invoked without a

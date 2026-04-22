@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'helper'
 
-class LinkTest < MiniTest::Unit::TestCase
+class LinkTest < Minitest::Test
   include ExconHelper
 
   # Link.run invokes a request against the service identified by the URL.  The
@@ -21,7 +21,7 @@ class LinkTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://username:secret@example.com',
                              schema.resource('resource').link('list'))
-    assert_equal(nil, link.run)
+    assert_nil(link.run)
   end
 
   # Link.run injects parameters into the path in the order they were received.
@@ -36,7 +36,7 @@ class LinkTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('info'))
-    assert_equal(nil, link.run('44724831-bf66-4bc2-865f-e2c4c2b14c78'))
+    assert_nil(link.run('44724831-bf66-4bc2-865f-e2c4c2b14c78'))
   end
 
   # Link.run URL-escapes special characters in parameters.
@@ -50,7 +50,7 @@ class LinkTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('info'))
-    assert_equal(nil, link.run('foo#bar'))
+    assert_nil(link.run('foo#bar'))
   end
 
   # Link.run converts Time parameters to UTC before sending them to the
@@ -65,7 +65,7 @@ class LinkTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('delete'))
-    assert_equal(nil, link.run(Time.parse('2013-01-01 00:00:00-0800')))
+    assert_nil(link.run(Time.parse('2013-01-01 00:00:00-0800')))
   end
 
   # Link.run optionally takes an extra parameter to send in the request body.
@@ -83,7 +83,7 @@ class LinkTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('create'))
-    assert_equal(nil, link.run(body))
+    assert_nil(link.run(body))
   end
 
   # Link.run optionally takes an extra parameter to send in the request body.
@@ -101,7 +101,7 @@ class LinkTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('submit'))
-    assert_equal(nil, link.run(body))
+    assert_nil(link.run(body))
   end
 
 
@@ -118,7 +118,7 @@ class LinkTest < MiniTest::Unit::TestCase
     link = Heroics::Link.new(
       'https://example.com', schema.resource('resource').link('list'),
       {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
-    assert_equal(nil, link.run())
+    assert_nil(link.run())
   end
 
   # Link.run passes custom headers to the server when they've been provided.
@@ -138,7 +138,7 @@ class LinkTest < MiniTest::Unit::TestCase
     link = Heroics::Link.new(
       'https://example.com', schema.resource('resource').link('create'),
       default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'})
-    assert_equal(nil, link.run(body))
+    assert_nil(link.run(body))
   end
 
   # Link.run doesn't mutate the default headers.
@@ -157,18 +157,18 @@ class LinkTest < MiniTest::Unit::TestCase
     link = Heroics::Link.new(
       'https://example.com', schema.resource('resource').link('create'),
       {default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'}})
-    assert_equal(nil, link.run(body))
+    assert_nil(link.run(body))
 
     # The second time we use the link, without providing a request body, the
     # Content-Type set during the first run is not present, as expected.
     Excon.stub(method: :post) do |request|
-      assert_equal(nil, request[:headers]['Content-Type'])
+      assert_nil(request[:headers]['Content-Type'])
       assert_equal('application/vnd.heroku+json; version=3',
                    request[:headers]['Accept'])
       Excon.stubs.pop
       {status: 200}
     end
-    assert_equal(nil, link.run)
+    assert_nil(link.run)
   end
 
   # Link.run returns text responses sent by the server without processing them
@@ -249,7 +249,7 @@ class LinkTest < MiniTest::Unit::TestCase
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = Heroics::Link.new('https://example.com',
                              schema.resource('resource').link('delete'))
-    assert_equal(nil, link.run(Time.parse('2013-01-01 00:00:00-0800')))
+    assert_nil(link.run(Time.parse('2013-01-01 00:00:00-0800')))
   end
 
   # Link.run raises an Excon error if anything other than a 200 or 201 HTTP
@@ -312,7 +312,7 @@ class LinkTest < MiniTest::Unit::TestCase
   # Link.run will not pas ETags from the cache for non-GET requests.
   def test_run_ignores_etags_for_non_get_requests
     Excon.stub(method: :post) do |request|
-      assert_equal(nil, request[:headers]['If-None-Match'])
+      assert_nil(request[:headers]['If-None-Match'])
       Excon.stubs.pop
       {status: 201}
     end
@@ -434,7 +434,7 @@ class LinkTest < MiniTest::Unit::TestCase
 
     Excon.stub(method: :get) do |request|
       assert_equal('first-page', request[:headers]['If-None-Match'])
-      assert_equal(nil, request[:headers]['Range'])
+      assert_nil(request[:headers]['Range'])
       Excon.stubs.shift
       {status: 304, headers: {'Content-Type' => 'application/json'}}
     end

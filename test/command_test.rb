@@ -2,7 +2,7 @@
 require 'helper'
 require 'stringio'
 
-class CommandTest < MiniTest::Unit::TestCase
+class CommandTest < Minitest::Test
   include ExconHelper
 
   # Command.name returns the name of the command, which is made up by joining

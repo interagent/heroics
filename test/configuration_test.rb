@@ -2,7 +2,7 @@
 require 'heroics'
 require 'heroics/configuration'
 
-class ConfigurationTest < MiniTest::Unit::TestCase
+class ConfigurationTest < Minitest::Test
   def test_yields_itself_on_new_if_block_provided
     yielded_object = nil
     config = Heroics::Configuration.new { |c| yielded_object = c }
@@ -65,5 +65,5 @@ class ConfigurationTest < MiniTest::Unit::TestCase
     refute_equal(Heroics::Configuration.defaults.ruby_name_replacement_patterns, patterns)
   end
 
-  MiniTest::Unit.after_tests { |b| Heroics.default_configuration }
+  Minitest.after_run { Heroics.default_configuration }
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'helper'
 
-class ClientTest < MiniTest::Unit::TestCase
+class ClientTest < Minitest::Test
   include ExconHelper
 
   # Client.to_s returns a simple human-readable description of the client
@@ -103,7 +103,7 @@ class ClientTest < MiniTest::Unit::TestCase
   end
 end
 
-class ClientFromSchemaTest < MiniTest::Unit::TestCase
+class ClientFromSchemaTest < Minitest::Test
   include ExconHelper
 
   # client_from_schema returns a Client generated from the specified schema.
@@ -176,7 +176,7 @@ class ClientFromSchemaTest < MiniTest::Unit::TestCase
   end
 end
 
-class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
+class OAuthClientFromSchemaTest < Minitest::Test
   include ExconHelper
 
   # oauth_client_from_schema injects an Authorization header, built from the
@@ -224,7 +224,7 @@ class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
   end
 end
 
-class TokenClientFromSchemaTest < MiniTest::Unit::TestCase
+class TokenClientFromSchemaTest < Minitest::Test
   include ExconHelper
 
   # token_client_from_schema injects an Authorization header, built from the

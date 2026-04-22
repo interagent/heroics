@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'helper'
 
-class SchemaTest < MiniTest::Unit::TestCase
+class SchemaTest < Minitest::Test
   # Schema.to_s returns a simple human-readable description of the schema
   # instance with the description embedded in it.
   def test_to_s
@@ -34,7 +34,7 @@ class SchemaTest < MiniTest::Unit::TestCase
   end
 end
 
-class ResourceSchemaTest < MiniTest::Unit::TestCase
+class ResourceSchemaTest < Minitest::Test
   # ResourceSchema.link returns a LinkSchema for the named link.
   def test_link
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -71,7 +71,7 @@ class ResourceSchemaTest < MiniTest::Unit::TestCase
   end
 end
 
-class LinkSchemaTest < MiniTest::Unit::TestCase
+class LinkSchemaTest < Minitest::Test
   # LinkSchema.name returns the sanitized link name.
   def test_name
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -155,7 +155,7 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
   def test_example_body_without_body
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     link = schema.resource('resource').link('info')
-    assert_equal(nil, link.example_body)
+    assert_nil(link.example_body)
   end
 
   # LinkSchema.body returns a sample body generated from the properties and
@@ -279,7 +279,7 @@ class LinkSchemaTest < MiniTest::Unit::TestCase
   end
 end
 
-class DownloadSchemaTest < MiniTest::Unit::TestCase
+class DownloadSchemaTest < Minitest::Test
   include ExconHelper
 
   # download_schema makes a request to fetch the schema, decodes the

@@ -2,7 +2,7 @@
 
 require 'heroics'
 
-class HeroicsTest < MiniTest::Unit::TestCase
+class HeroicsTest < Minitest::Test
   def test_default_configuration
     assert_equal(Heroics.default_configuration.class, Heroics::Configuration)
   end

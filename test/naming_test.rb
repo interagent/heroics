@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'helper'
 
-class RubyNameTest < MiniTest::Unit::TestCase
+class RubyNameTest < Minitest::Test
   # Given default replacement patterns on Heroics::Configuration:
   def setup
     Heroics.default_configuration
@@ -35,7 +35,7 @@ class RubyNameTest < MiniTest::Unit::TestCase
   end
 end
 
-class PrettyNameTest < MiniTest::Unit::TestCase
+class PrettyNameTest < Minitest::Test
   # pretty_name is a no-op when an empty string is provided.
   def test_pretty_name_with_empty_name
     assert_equal('', Heroics.pretty_name(''))

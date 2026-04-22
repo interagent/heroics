@@ -3,7 +3,7 @@ require 'helper'
 require 'netrc'
 require 'stringio'
 
-class GenerateClientTest  < MiniTest::Unit::TestCase
+class GenerateClientTest  < Minitest::Test
   include ExconHelper
 
   # generate_client takes a module, schema, API URL and options and returns a

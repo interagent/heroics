@@ -2,7 +2,7 @@
 require 'helper'
 require 'stringio'
 
-class CLITest < MiniTest::Unit::TestCase
+class CLITest < Minitest::Test
   include ExconHelper
 
   # CLI.run displays usage information when no arguments are provided.
@@ -165,7 +165,7 @@ USAGE
   end
 end
 
-class CLIFromSchemaTest < MiniTest::Unit::TestCase
+class CLIFromSchemaTest < Minitest::Test
   include ExconHelper
 
   # cli_from_schema returns a CLI generated from the specified schema.
