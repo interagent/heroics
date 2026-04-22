@@ -40,7 +40,7 @@ module Heroics
     end
 
     def schema_filepath=(schema_filepath)
-      @schema = Heroics::Schema.new(MultiJson.decode(open(schema_filepath).read))
+      @schema = Heroics::Schema.new(JSON.parse(open(schema_filepath).read))
     end
 
     def module_name=(module_name)

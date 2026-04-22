@@ -131,11 +131,11 @@ USAGE
       assert_equal("/another-resource", request[:path])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(result)}
+       body: JSON.generate(result)}
     end
 
     cli.run('another-resource:list')
-    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
+    assert_equal(JSON.pretty_generate(result) + "\n", output.string)
   end
 
   # CLI.run runs the command matching the specified name and passes parameters
@@ -154,14 +154,14 @@ USAGE
     Excon.stub(method: :patch) do |request|
       assert_equal("/resource/#{uuid}", request[:path])
       assert_equal('application/json', request[:headers]['Content-Type'])
-      assert_equal(body, MultiJson.load(request[:body]))
+      assert_equal(body, JSON.parse(request[:body]))
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(result)}
+       body: JSON.generate(result)}
     end
 
     cli.run('resource:update', uuid, body)
-    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
+    assert_equal(JSON.pretty_generate(result) + "\n", output.string)
   end
 end
 
@@ -176,17 +176,17 @@ class CLIFromSchemaTest < MiniTest::Unit::TestCase
     Excon.stub(method: :patch) do |request|
       assert_equal("/resource/#{uuid}", request[:path])
       assert_equal('application/json', request[:headers]['Content-Type'])
-      assert_equal(body, MultiJson.load(request[:body]))
+      assert_equal(body, JSON.parse(request[:body]))
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(result)}
+       body: JSON.generate(result)}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
     output = StringIO.new
     cli = Heroics.cli_from_schema('cli', output, schema, 'https://example.com')
     cli.run('resource:update', uuid, body)
-    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
+    assert_equal(JSON.pretty_generate(result) + "\n", output.string)
   end
 
   # cli_from_schema returns a CLI that can make requests to APIs mounted under
@@ -198,10 +198,10 @@ class CLIFromSchemaTest < MiniTest::Unit::TestCase
     Excon.stub(method: :patch) do |request|
       assert_equal("/api/resource/#{uuid}", request[:path])
       assert_equal('application/json', request[:headers]['Content-Type'])
-      assert_equal(body, MultiJson.load(request[:body]))
+      assert_equal(body, JSON.parse(request[:body]))
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(result)}
+       body: JSON.generate(result)}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -209,7 +209,7 @@ class CLIFromSchemaTest < MiniTest::Unit::TestCase
     cli = Heroics.cli_from_schema('cli', output, schema,
                                   'https://example.com/api')
     cli.run('resource:update', uuid, body)
-    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
+    assert_equal(JSON.pretty_generate(result) + "\n", output.string)
   end
 
   # cli_from_schema optionally accepts custom headers to pass with every
@@ -223,7 +223,7 @@ class CLIFromSchemaTest < MiniTest::Unit::TestCase
                    request[:headers]['Accept'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(result)}
+       body: JSON.generate(result)}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -232,6 +232,6 @@ class CLIFromSchemaTest < MiniTest::Unit::TestCase
       'cli', output, schema, 'https://example.com',
       default_headers: {'Accept' => 'application/vnd.heroku+json; version=3'})
     cli.run('resource:update', uuid, body)
-    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
+    assert_equal(JSON.pretty_generate(result) + "\n", output.string)
   end
 end

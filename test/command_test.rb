@@ -40,11 +40,11 @@ class CommandTest < MiniTest::Unit::TestCase
       assert_equal('/resource', request[:path])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     command.run
-    assert_equal(MultiJson.dump(body, pretty: true) + "\n", output.string)
+    assert_equal(JSON.pretty_generate(body) + "\n", output.string)
   end
 
   # Command.run calls the correct method on the client and passes link
@@ -62,11 +62,11 @@ class CommandTest < MiniTest::Unit::TestCase
       assert_equal("/resource/#{uuid}", request[:path])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     command.run(uuid)
-    assert_equal(MultiJson.dump(body, pretty: true) + "\n", output.string)
+    assert_equal(JSON.pretty_generate(body) + "\n", output.string)
   end
 
   # Command.run calls the correct method on the client and passes a request
@@ -82,7 +82,7 @@ class CommandTest < MiniTest::Unit::TestCase
     Excon.stub(method: :post) do |request|
       assert_equal('/resource', request[:path])
       assert_equal('application/json', request[:headers]['Content-Type'])
-      assert_equal(body, MultiJson.load(request[:body]))
+      assert_equal(body, JSON.parse(request[:body]))
       Excon.stubs.pop
       {status: 201}
     end
@@ -104,7 +104,7 @@ class CommandTest < MiniTest::Unit::TestCase
       Excon.stubs.shift
       {status: 206, headers: {'Content-Type' => 'application/json',
                               'Content-Range' => 'id 1..2; max=200'},
-       body: MultiJson.dump([2])}
+       body: JSON.generate([2])}
     end
 
     Excon.stub(method: :get) do |request|
@@ -112,11 +112,11 @@ class CommandTest < MiniTest::Unit::TestCase
       {status: 206, headers: {'Content-Type' => 'application/json',
                               'Content-Range' => 'id 0..1; max=200',
                               'Next-Range' => '201'},
-       body: MultiJson.dump([1])}
+       body: JSON.generate([1])}
     end
 
     command.run
-    assert_equal(MultiJson.dump([1, 2], pretty: true) + "\n", output.string)
+    assert_equal(JSON.pretty_generate([1, 2]) + "\n", output.string)
   end
 
   # Command.run calls the correct method on the client and passes parameters
@@ -134,14 +134,14 @@ class CommandTest < MiniTest::Unit::TestCase
     Excon.stub(method: :patch) do |request|
       assert_equal("/resource/#{uuid}", request[:path])
       assert_equal('application/json', request[:headers]['Content-Type'])
-      assert_equal(body, MultiJson.load(request[:body]))
+      assert_equal(body, JSON.parse(request[:body]))
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(result)}
+       body: JSON.generate(result)}
     end
 
     command.run(uuid, body)
-    assert_equal(MultiJson.dump(result, pretty: true) + "\n", output.string)
+    assert_equal(JSON.pretty_generate(result) + "\n", output.string)
   end
 
   # Command.run raises an ArgumentError if too few parameters are provided.

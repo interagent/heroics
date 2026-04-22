@@ -150,7 +150,7 @@ module Heroics
       when 'application/x-www-form-urlencoded'
         URI.encode_www_form(body)
       when /application\/.*json/
-        MultiJson.dump(body)
+        JSON.generate(body)
       end
     end
 
@@ -356,7 +356,7 @@ module Heroics
   def self.download_schema(url, options={})
     default_headers = options.fetch(:default_headers, {})
     response = Excon.get(url, headers: default_headers, expects: [200, 201])
-    Schema.new(MultiJson.load(response.body))
+    Schema.new(JSON.parse(response.body))
   end
 
   # A representation of a parameter.

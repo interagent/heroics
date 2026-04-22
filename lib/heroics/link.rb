@@ -58,7 +58,7 @@ module Heroics
           if body.is_a?(Hash)
             query = body
           else
-            query = MultiJson.load(body)
+            query = JSON.parse(body)
           end
           body = nil
         end
@@ -71,7 +71,7 @@ module Heroics
                                     expects: [200, 201, 202, 204, 206])
       content_type = response.headers['Content-Type']
       if content_type && content_type =~ /application\/.*json/
-        body = MultiJson.load(response.body)
+        body = JSON.parse(response.body)
         if response.status == 206
           next_range = response.headers['Next-Range']
           Enumerator.new do |yielder|
@@ -89,7 +89,7 @@ module Heroics
                                             method: @link_schema.method,
                                             path: path, headers: headers,
                                             expects: [200, 201, 206])
-              body = MultiJson.load(response.body)
+              body = JSON.parse(response.body)
               next_range = response.headers['Next-Range']
             end
           end

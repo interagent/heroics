@@ -38,7 +38,7 @@ Description:
   #{description}
 USAGE
       if example_body
-        example_body = MultiJson.dump(example_body, pretty: true)
+        example_body = JSON.pretty_generate(example_body)
         example_body = example_body.lines.map do |line|
           "  #{line}"
         end.join
@@ -60,7 +60,7 @@ USAGE
       result = @client.send(resource_name).send(name, *parameters)
       result = result.to_a if result.instance_of?(Enumerator)
       if result && !result.instance_of?(String)
-        result = MultiJson.dump(result, pretty: true)
+        result = JSON.pretty_generate(result)
       end
       @output.puts(result) unless result.nil?
     end

@@ -292,7 +292,7 @@ class DownloadSchemaTest < MiniTest::Unit::TestCase
                    request[:headers]['Accept'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(SAMPLE_SCHEMA)}
+       body: JSON.generate(SAMPLE_SCHEMA)}
     end
 
     schema = Heroics::download_schema(

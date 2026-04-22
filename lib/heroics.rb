@@ -2,7 +2,7 @@
 require 'base64'
 require 'erubis'
 require 'excon'
-require 'multi_json'
+require 'json'
 require 'uri'
 require 'webrick'
 require 'zlib'

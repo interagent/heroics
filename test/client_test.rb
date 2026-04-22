@@ -115,7 +115,7 @@ class ClientFromSchemaTest < MiniTest::Unit::TestCase
       assert_equal('/resource', request[:path])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
     assert_equal(body, client.resource.create)
   end
@@ -130,7 +130,7 @@ class ClientFromSchemaTest < MiniTest::Unit::TestCase
       assert_equal('/api/resource', request[:path])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
     assert_equal(body, client.resource.create)
   end
@@ -159,7 +159,7 @@ class ClientFromSchemaTest < MiniTest::Unit::TestCase
       Excon.stubs.pop
       {status: 201, headers: {'Content-Type' => 'application/json',
                               'ETag' => 'etag-contents'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -189,7 +189,7 @@ class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
         request[:headers]['Authorization'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     oauth_token = 'c55ef0d8-40b6-4759-b1bf-4a6f94190a66'
@@ -211,7 +211,7 @@ class OAuthClientFromSchemaTest < MiniTest::Unit::TestCase
         request[:headers]['Authorization'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     oauth_token = 'c55ef0d8-40b6-4759-b1bf-4a6f94190a66'
@@ -237,7 +237,7 @@ class TokenClientFromSchemaTest < MiniTest::Unit::TestCase
         request[:headers]['Authorization'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     token = 'c55ef0d8-40b6-4759-b1bf-4a6f94190a66'
@@ -259,7 +259,7 @@ class TokenClientFromSchemaTest < MiniTest::Unit::TestCase
         request[:headers]['Authorization'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     token = 'c55ef0d8-40b6-4759-b1bf-4a6f94190a66'

@@ -75,7 +75,7 @@ class LinkTest < MiniTest::Unit::TestCase
     body = {'Hello' => 'world!'}
     Excon.stub(method: :post) do |request|
       assert_equal('application/json', request[:headers]['Content-Type'])
-      assert_equal(body, MultiJson.load(request[:body]))
+      assert_equal(body, JSON.parse(request[:body]))
       Excon.stubs.pop
       {status: 200, body: ''}
     end
@@ -129,7 +129,7 @@ class LinkTest < MiniTest::Unit::TestCase
       assert_equal('application/json', request[:headers]['Content-Type'])
       assert_equal('application/vnd.heroku+json; version=3',
                    request[:headers]['Accept'])
-      assert_equal(body, MultiJson.load(request[:body]))
+      assert_equal(body, JSON.parse(request[:body]))
       Excon.stubs.pop
       {status: 200}
     end
@@ -148,7 +148,7 @@ class LinkTest < MiniTest::Unit::TestCase
       assert_equal('application/json', request[:headers]['Content-Type'])
       assert_equal('application/vnd.heroku+json; version=3',
                    request[:headers]['Accept'])
-      assert_equal(body, MultiJson.load(request[:body]))
+      assert_equal(body, JSON.parse(request[:body]))
       Excon.stubs.pop
       {status: 200}
     end
@@ -195,7 +195,7 @@ class LinkTest < MiniTest::Unit::TestCase
       assert_equal('/resource', request[:path])
       Excon.stubs.pop
       {status: 201, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -213,7 +213,7 @@ class LinkTest < MiniTest::Unit::TestCase
       Excon.stubs.pop
       {status: 200,
        headers: {'Content-Type' => 'application/vnd.api+json;charset=utf-8'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -229,7 +229,7 @@ class LinkTest < MiniTest::Unit::TestCase
       assert_equal('/resource', request[:path])
       Excon.stubs.pop
       {status: 202, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -339,7 +339,7 @@ class LinkTest < MiniTest::Unit::TestCase
     headers = {}
     cache = Moneta.new(:Memory)
     cache["etag:/resource:#{headers.hash}"] = 'etag-contents'
-    cache["data:/resource:#{headers.hash}"] = MultiJson.dump(body)
+    cache["data:/resource:#{headers.hash}"] = JSON.generate(body)
     cache["status:/resource:#{headers.hash}"] = 200
     cache["headers:/resource:#{headers.hash}"] = {'Content-Type' => 'application/json'}
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -357,7 +357,7 @@ class LinkTest < MiniTest::Unit::TestCase
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json',
                               'ETag' => 'etag-contents'},
-       body: MultiJson.dump(body)}
+       body: JSON.generate(body)}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -382,7 +382,7 @@ class LinkTest < MiniTest::Unit::TestCase
       Excon.stubs.shift
       {status: 206, headers: {'Content-Type' => 'application/json',
                               'Content-Range' => 'id 1..2; max=200'},
-       body: MultiJson.dump([2])}
+       body: JSON.generate([2])}
     end
 
     Excon.stub(method: :get) do |request|
@@ -390,7 +390,7 @@ class LinkTest < MiniTest::Unit::TestCase
       {status: 206, headers: {'Content-Type' => 'application/json',
                               'Content-Range' => 'id 0..1; max=200',
                               'Next-Range' => '201'},
-       body: MultiJson.dump([1])}
+       body: JSON.generate([1])}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)
@@ -407,7 +407,7 @@ class LinkTest < MiniTest::Unit::TestCase
       {status: 206, headers: {'Content-Type' => 'application/json',
                               'Content-Range' => 'id 1..2; max=200',
                               'ETag' => 'second-page'},
-       body: MultiJson.dump([2])}
+       body: JSON.generate([2])}
     end
 
     Excon.stub(method: :get) do |request|
@@ -416,7 +416,7 @@ class LinkTest < MiniTest::Unit::TestCase
                               'Content-Range' => 'id 0..1; max=200',
                               'Next-Range' => '201',
                               'ETag' => 'first-page'},
-       body: MultiJson.dump([1])}
+       body: JSON.generate([1])}
     end
 
     schema = Heroics::Schema.new(SAMPLE_SCHEMA)

@@ -16,7 +16,7 @@ class GenerateClientTest  < MiniTest::Unit::TestCase
                    request[:headers]['Accept'])
       Excon.stubs.pop
       {status: 200, headers: {'Content-Type' => 'application/json'},
-       body: MultiJson.dump(SAMPLE_SCHEMA)}
+       body: JSON.generate(SAMPLE_SCHEMA)}
     end
 
     default_headers =  {'Accept' => 'application/vnd.example+json; version=3'}
