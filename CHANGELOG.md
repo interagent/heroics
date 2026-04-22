@@ -1,4 +1,8 @@
-## 0.1.3
+## HEAD (unreleased)
+
+- Migrate from TravisCI to GitHub Actions
+
+- ## 0.1.3
 
 - Fix `base64` deprecation warning for Ruby 3.4 (https://github.com/interagent/heroics/pull/107)
 
