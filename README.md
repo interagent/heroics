@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/interagent/heroics.png?branch=master)](https://travis-ci.org/interagent/heroics)
+[![CI](https://github.com/interagent/heroics/actions/workflows/ci.yml/badge.svg)](https://github.com/interagent/heroics/actions/workflows/ci.yml)
 # Heroics
 
 Ruby HTTP client generator for APIs represented with JSON schema.
