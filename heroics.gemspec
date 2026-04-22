@@ -28,7 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'yard'
 
   spec.add_dependency 'base64'
-  spec.add_dependency 'erubis', '~> 2.0'
   spec.add_dependency 'excon'
   spec.add_dependency 'json'
   spec.add_dependency 'moneta'

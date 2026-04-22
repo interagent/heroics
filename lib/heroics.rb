@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 require 'base64'
-require 'erubis'
+require 'erb'
 require 'excon'
 require 'json'
 require 'uri'
