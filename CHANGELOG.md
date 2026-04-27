@@ -1,5 +1,7 @@
 ## HEAD (unreleased)
 
+## 0.1.4
+
 - Migrate from TravisCI to GitHub Actions
 - removed erubis dependency
 - removed MultiJson dependency
